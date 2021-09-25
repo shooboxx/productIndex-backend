@@ -9,6 +9,7 @@ const bodyParser = require('body-parser')
 const passport = require('passport')
 const flash = require('express-flash')
 const session = require('express-session')
+const methodOverride = require('method-override')
 
 const users : any = []
 
@@ -28,7 +29,7 @@ app.use(session({
 }))
 app.use(passport.initialize())
 app.use(passport.session())
-
+app.use(methodOverride('_method'))
 app.use(express.json())
 app.use(product);
 app.use(store)
