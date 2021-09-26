@@ -8,7 +8,7 @@ const addUser = (user: typeof User) => {
     return users[users.length - 1]
 }
 
-const findUser = (emailAddress : string) => {
+const findUser = (userId, emailAddress : string) => {
     for (let i = 0; i< users.length; i++) {
         if (users[i].emailAddress == emailAddress) {
             return users[i]

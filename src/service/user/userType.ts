@@ -13,3 +13,16 @@ export interface User {
     active: boolean,
     deletedDate?: Date
 }
+export interface UserLogin {
+    id: number,
+    emailAddress: string,
+    password: string,
+
+}
+
+// Super details about a user
+// interface UserDetail {
+//     user: User,
+//     business: Business[]
+//     activities: Activity[]
+// }

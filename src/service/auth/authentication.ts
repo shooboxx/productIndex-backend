@@ -6,7 +6,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken')
 const userService = require('../user/userService')
 let refreshTokens : any = []
-
+const {adminOnlyAccess, hasAccessLevel} = require('./authorization')
 
 router.post('/auth/token', (req, res) => {
     const refreshToken = req.body.token
@@ -19,19 +19,23 @@ router.post('/auth/token', (req, res) => {
     })
 })
 
-router.post('/auth/login', async (req, res) => {
-    const user = userService.getUser(req.body.emailAddress)
-    if (user == null) res.sendStatus(404)
-    await bcrypt.compare(req.body.password, user.password, (err, resp) => {
-        if (err) res.sendStatus(404)
-        if (resp){
-            const accessToken = generateAccessToken({userID: user.id})
-            const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET)
-            refreshTokens.push(refreshToken) 
-            return res.json({accessToken: accessToken, refreshToken: refreshToken})
-        }
-        return res.json({"error": "Username or password is incorrect"})
-    } ) 
+router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
+    try{
+        const user = userService.getUser(req.body.emailAddress)
+        await bcrypt.compare(req.body.password, user.password, (err, resp) => {
+            if (err) res.sendStatus(404)
+            if (resp){
+                const accessToken = generateAccessToken({userID: user.id})
+                const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET)
+                refreshTokens.push(refreshToken) 
+                return res.json({accessToken: accessToken, refreshToken: refreshToken})
+            }
+            return res.json({"error": "Email address or password is incorrect"})
+        } ) 
+    }
+    catch {
+        return res.json({"error": "Email address or password is incorrect"}) 
+    }
 })
 
 router.delete('/auth/logout', authenticateToken, (req: any, res: any) => {
@@ -64,7 +68,7 @@ router.post('/auth/register', async (req: any, res: any) => {
 
 });
 
-router.get('/auth/forget-password', (req: any, res: any) => {
+router.get('/auth/forget-password', checkNotAuthenticated, (req: any, res: any) => {
 
     return res.send(JSON.stringify('Logged in'))
     // productService.get
@@ -72,7 +76,7 @@ router.get('/auth/forget-password', (req: any, res: any) => {
 router.get('/auth/reset-password', (req: any, res: any) => {
 
     return res.send(JSON.stringify('Logged in'))
-    // productService.get
+    // productService.get 
 });
 
 function authenticateToken (req, res, next) {
@@ -83,8 +87,21 @@ function authenticateToken (req, res, next) {
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
         if (err) return res.sendStatus(403)
         req.user = user
-        next()
+        return next()
     })
+}
+function checkNotAuthenticated (req, res, next) {
+    const authHeader = req.headers['authorization']
+    const token = authHeader && authHeader.split(' ')[1]
+    if (token == null) return next()
+    try {
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+    }
+    catch {
+        return next()
+    }
+    
+    return res.status(403).json({"error": "user already logged in"})
 }
 
 function generateAccessToken(user){
