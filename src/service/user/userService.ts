@@ -1,3 +1,4 @@
+import e from "express"
 import { User, UserLogin } from "./userType"
 
 const userRepo = require('./userRepo')
@@ -9,7 +10,9 @@ const getUser = (emailAddress : string) : UserLogin =>  {
     return {
         id: user.id,
         emailAddress: user.emailAddress,
-        password: user.password
+        password: user.password,
+        passwordResetToken: user.passwordResetToken,
+        passwordResetExpiresIn: user.passwordResetExpiresIn
     }
 }
 // Returns user without password (for internal use)
@@ -36,6 +39,7 @@ const createUser = (user : User) => {
     
 }
 const updateUser = (user: User) => {
+
     
 }
 
@@ -47,4 +51,25 @@ const deactivateUser = (userId) => {
 
 }
 
-module.exports = {getUser, getUserById, createUser}
+const updateUserLogin = (updatedUser : UserLogin) => {
+    try {
+        const user = getUserById(updatedUser.id)
+        const userLogin = getUser(user.emailAddress)
+        
+        // ensures that if data is null, do not override
+        const uUser : UserLogin = {
+            id: updatedUser.id,
+            emailAddress: updatedUser.emailAddress || userLogin.emailAddress,
+            password: updatedUser.password || userLogin.password,
+            passwordResetToken: updatedUser.passwordResetToken || userLogin.passwordResetToken,
+            passwordResetExpiresIn: updatedUser.passwordResetExpiresIn || userLogin.passwordResetExpiresIn
+        }
+         return userRepo.updateUserLogin(uUser)
+    } 
+    catch (err) {
+        throw err
+    }
+    
+    
+}
+module.exports = { getUser, getUserById, createUser, updateUserLogin }

@@ -11,12 +11,14 @@ export interface User {
     insertDate: number,
     updateDate?: number,
     active: boolean,
-    deletedDate?: Date
+    deletedDate?: number
 }
 export interface UserLogin {
     id: number,
     emailAddress: string,
     password: string,
+    passwordResetToken: string,
+    passwordResetExpiresIn: number
 
 }
 

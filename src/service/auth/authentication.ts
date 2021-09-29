@@ -1,3 +1,4 @@
+import { UserLogin } from "../user/userType";
 
 export {};
 const bcrypt = require('bcrypt')
@@ -7,6 +8,7 @@ const jwt = require('jsonwebtoken')
 const userService = require('../user/userService')
 let refreshTokens : any = []
 const {adminOnlyAccess, hasAccessLevel} = require('./authorization')
+const crypto = require('crypto')
 
 router.post('/auth/token', (req, res) => {
     const refreshToken = req.body.token
@@ -68,16 +70,58 @@ router.post('/auth/register', async (req: any, res: any) => {
 
 });
 
-router.get('/auth/forget-password', checkNotAuthenticated, (req: any, res: any) => {
+router.post('/auth/forget-password', checkNotAuthenticated, async (req: any, res: any) => {
 
-    return res.send(JSON.stringify('Logged in'))
-    // productService.get
-});
-router.get('/auth/reset-password', (req: any, res: any) => {
+    let resetToken 
+    try {
+        const user = userService.getUser(req.body.emailAddress)
+        resetToken = await createUserPasswordResetToken(user.id)
+        return res.json({reset_token: resetToken})
+    }
+    catch(err) {
+        console.log(err)
+    }
 
-    return res.send(JSON.stringify('Logged in'))
-    // productService.get 
 });
+
+router.post('/auth/reset-password', async (req: any, res: any) => {
+    try {
+        const user = userService.getUser(req.body.emailAddress)
+        console.log(req.body.resetToken, user.passwordResetToken)
+        await bcrypt.compare(req.body.resetToken, user.passwordResetToken, (err, resp) => {
+            if (resp) {
+                if (user.passwordResetExpiresIn < Date.now()) {
+                    return res.status(200).send("Token expired")
+                }
+                return res.status(200).send('works')
+                
+            }
+            if (err) {
+                return res.sendStatus(400)
+            }
+            
+        })
+    }
+    catch (e){
+        return res.status(400).send(e) 
+    }
+});
+
+
+async function createUserPasswordResetToken (userId)  {
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedResetToken =  await bcrypt.hash(resetToken, 10)
+    const userResetTokenExpiry = Date.now() * 10 * 60 * 1000;
+    const user : UserLogin = {
+        id: userId,
+        emailAddress: '',
+        password: '',
+        passwordResetToken: hashedResetToken,
+        passwordResetExpiresIn: userResetTokenExpiry
+    }
+    userService.updateUserLogin(user);
+    return resetToken
+}
 
 function authenticateToken (req, res, next) {
     const authHeader = req.headers['authorization']
