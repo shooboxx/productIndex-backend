@@ -84,22 +84,30 @@ router.post('/auth/forget-password', checkNotAuthenticated, async (req: any, res
 
 });
 
-router.post('/auth/reset-password', async (req: any, res: any) => {
+router.post('/auth/reset-password/:resetToken', async (req: any, res: any) => {
     try {
         const user = userService.getUser(req.body.emailAddress)
-        console.log(req.body.resetToken, user.passwordResetToken)
-        await bcrypt.compare(req.body.resetToken, user.passwordResetToken, (err, resp) => {
+        await bcrypt.compare(req.params.resetToken, user.passwordResetToken, (err, resp) => {
             if (resp) {
                 if (user.passwordResetExpiresIn < Date.now()) {
                     return res.status(200).send("Token expired")
                 }
+                // CONSIDER: Finding users by the reset token instead of email.. or find a way to add email to query param
+                // check to see if new password matches old password
+                // -- if same as old password, prompt user that they cannot use a password that they've used previously
+                // check to see if new password and verify new password is the same.
+                // -- if it doesn't, tell user that password is not the same
+                // -- if it does, then allow user to update password. Call the updateUserLogin func
+                // -- destroy active sessions and remember me cookies
+                // 
+                
                 return res.status(200).send('works')
                 
             }
             if (err) {
                 return res.sendStatus(400)
             }
-            
+            return res.sendStatus(400).json({error: 'Invalid token'})
         })
     }
     catch (e){
