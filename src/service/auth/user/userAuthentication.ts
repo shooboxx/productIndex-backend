@@ -1,4 +1,4 @@
-import { UserLogin } from "../user/userType";
+import { UserLogin } from "../../user/userType";
 
 export {};
 const bcrypt = require('bcrypt')
@@ -7,44 +7,10 @@ const router = express.Router();
 const jwt = require('jsonwebtoken')
 const userService = require('../user/userService')
 let refreshTokens : any = []
-const {adminOnlyAccess, hasAccessLevel} = require('./authorization')
+const {adminOnlyAccess, hasAccessLevel} = require('./userAuthorization')
 const crypto = require('crypto')
 
-router.post('/auth/token', (req, res) => {
-    const refreshToken = req.body.token
-    if (refreshToken == null) return res.sendStatus(401)
-    if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403)
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user)=> {
-        if (err) return res.sendStatus(403)
-        const accessToken = generateAccessToken({name: user.name})
-        return res.json(accessToken)
-    })
-})
 
-router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
-    try{
-        const user = userService.getUser(req.body.emailAddress)
-        await bcrypt.compare(req.body.password, user.password, (err, resp) => {
-            if (err) res.sendStatus(404)
-            if (resp){
-                const accessToken = generateAccessToken({userID: user.id})
-                const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET)
-                refreshTokens.push(refreshToken) 
-                return res.json({accessToken: accessToken, refreshToken: refreshToken})
-            }
-            return res.json({"error": "Email address or password is incorrect"})
-        } ) 
-    }
-    catch {
-        return res.json({"error": "Email address or password is incorrect"}) 
-    }
-})
-
-router.delete('/auth/logout', authenticateToken, (req: any, res: any) => {
-
-    refreshTokens = refreshTokens.filter(token => token !== req.body.token)
-    res.sendStatus(204)
-});
 router.post('/auth/register', async (req: any, res: any) => {
     try {
         const hashedPass = await bcrypt.hash(req.body.password, 10)
@@ -70,11 +36,37 @@ router.post('/auth/register', async (req: any, res: any) => {
 
 });
 
+router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
+    try{
+        const user = userService.getUserLoginByEmail(req.body.emailAddress)
+        await bcrypt.compare(req.body.password, user.password, (err, resp) => {
+            if (err) res.sendStatus(404)
+            if (resp){
+                const accessToken = generateAccessToken({userID: user.id})
+                const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET)
+                refreshTokens.push(refreshToken) 
+                return res.json({accessToken: accessToken, refreshToken: refreshToken})
+            }
+            return res.json({"error": "Email address or password is incorrect"})
+        } ) 
+    }
+    catch {
+        return res.json({"error": "Email address or password is incorrect"}) 
+    }
+})
+
+router.delete('/auth/logout', authenticateToken, (req: any, res: any) => {
+
+    refreshTokens = refreshTokens.filter(token => token !== req.body.token)
+    res.sendStatus(204)
+});
+
+
 router.post('/auth/forget-password', checkNotAuthenticated, async (req: any, res: any) => {
 
     let resetToken 
     try {
-        const user = userService.getUser(req.body.emailAddress)
+        const user = userService.getUserLoginByEmail(req.body.emailAddress)
         resetToken = await createUserPasswordResetToken(user.id)
         return res.json({reset_token: resetToken})
     }
@@ -86,19 +78,20 @@ router.post('/auth/forget-password', checkNotAuthenticated, async (req: any, res
 
 router.post('/auth/reset-password/:resetToken', async (req: any, res: any) => {
     try {
-        const user = userService.getUser(req.body.emailAddress)
+        const user = userService.getUserLoginByEmail(req.body.emailAddress)
         await bcrypt.compare(req.params.resetToken, user.passwordResetToken, (err, resp) => {
             if (resp) {
                 if (user.passwordResetExpiresIn < Date.now()) {
                     return res.status(200).send("Token expired")
                 }
-                // CONSIDER: Finding users by the reset token instead of email.. or find a way to add email to query param
+                // Find users by the reset token instead of email
                 // check to see if new password matches old password
                 // -- if same as old password, prompt user that they cannot use a password that they've used previously
                 // check to see if new password and verify new password is the same.
                 // -- if it doesn't, tell user that password is not the same
                 // -- if it does, then allow user to update password. Call the updateUserLogin func
                 // -- destroy active sessions and remember me cookies
+                // delete reset token and tokenexpiry
                 // 
                 
                 return res.status(200).send('works')
@@ -115,6 +108,16 @@ router.post('/auth/reset-password/:resetToken', async (req: any, res: any) => {
     }
 });
 
+router.post('/auth/token', (req, res) => {
+    const refreshToken = req.body.token
+    if (refreshToken == null) return res.sendStatus(401)
+    if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403)
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user)=> {
+        if (err) return res.sendStatus(403)
+        const accessToken = generateAccessToken({name: user.name})
+        return res.json(accessToken)
+    })
+})
 
 async function createUserPasswordResetToken (userId)  {
     const resetToken = crypto.randomBytes(32).toString('hex');

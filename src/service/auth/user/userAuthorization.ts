@@ -1,10 +1,10 @@
 // Define roles and create middlewares that control authorization within the application
 
-import { Role } from "./authTypes"
+import { UserRole } from "./authTypes"
 const jwt = require('jsonwebtoken')
 
 
-const roles : Role[] = []
+const roles : UserRole[] = []
 
 function adminOnlyAccess (req, res, next) {
     const authHeader = req.headers['authorization']
@@ -39,7 +39,7 @@ function hasAccessLevel(accessLevel) {
         })
     }
 }
-const getRoleByID = (roleID) : Role => {
+const getRoleByID = (roleID) : UserRole => {
     for (let i = 0; i< roles.length; i++ ) {
         if (roles[i].id == roleID) {
             return roles[i]
@@ -48,7 +48,7 @@ const getRoleByID = (roleID) : Role => {
     throw Error("Role not found with that ID")
 }
 
-const getUserRole = (userID) : Role => {
+const getUserRole = (userID) : UserRole => {
     // const user = getUserById(userID)
     // return getRoleByID(user.id)
    return {

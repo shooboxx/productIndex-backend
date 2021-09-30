@@ -1,4 +1,4 @@
-export interface Role {
+export interface UserRole {
     id: number,
     roleName: string,
     accessLevel: number,

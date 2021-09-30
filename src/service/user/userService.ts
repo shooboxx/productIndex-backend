@@ -1,10 +1,9 @@
-import e from "express"
 import { User, UserLogin } from "./userType"
 
 const userRepo = require('./userRepo')
 
 // Returns id, email and password
-const getUser = (emailAddress : string) : UserLogin =>  {
+const getUserLoginByEmail = (emailAddress : string) : UserLogin =>  {
     const user = userRepo.findUser(null, emailAddress) || null
     if (user == null ) throw Error('User not found with that email')
     return {
@@ -24,10 +23,25 @@ const getUserById = (userId : number) : User => {
     }
     return user
 }
+const getUserLoginByResetToken = (resetToken : string) : UserLogin => {
+
+    return {
+        id: 0,
+        emailAddress: '',
+        password: '',
+        passwordResetToken: '',
+        passwordResetExpiresIn: 0
+    }
+}
+
+// Returns full info about a user. For admin purposes only
+const getUserMasterDetail = () => {
+
+}
 
 const createUser = (user : User) => {
     try {
-        getUser(user.emailAddress)
+        getUserLoginByEmail(user.emailAddress)
     }
     catch(e) {
         const newUser = userRepo.addUser(user)
@@ -38,23 +52,15 @@ const createUser = (user : User) => {
 
     
 }
-const updateUser = (user: User) => {
+const updateUserProfile = (user: User) => {
 
     
-}
-
-const deleteUser = (userId : number) => {
-
-}
-
-const deactivateUser = (userId) => {
-
 }
 
 const updateUserLogin = (updatedUser : UserLogin) => {
     try {
         const user = getUserById(updatedUser.id)
-        const userLogin = getUser(user.emailAddress)
+        const userLogin = getUserLoginByEmail(user.emailAddress)
         
         // ensures that if data is null, do not override
         const uUser : UserLogin = {
@@ -69,7 +75,13 @@ const updateUserLogin = (updatedUser : UserLogin) => {
     catch (err) {
         throw err
     }
-    
-    
 }
-module.exports = { getUser, getUserById, createUser, updateUserLogin }
+
+const deleteUser = (userId : number) => {
+
+}
+
+const deactivateUser = (userId) => {
+
+}
+module.exports = { getUserLoginByEmail, getUserById, createUser, updateUserLogin, getUserLoginByResetToken }

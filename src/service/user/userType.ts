@@ -17,8 +17,8 @@ export interface UserLogin {
     id: number,
     emailAddress: string,
     password: string,
-    passwordResetToken: string,
-    passwordResetExpiresIn: number
+    passwordResetToken?: string,
+    passwordResetExpiresIn?: number
 
 }
 

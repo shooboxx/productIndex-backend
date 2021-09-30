@@ -16,7 +16,7 @@ const users : any = []
 
 let product = require('./service/product/productController')
 let store = require('./service/store/businessStoreController')
-let auth = require('./service/auth/authentication')
+let auth = require('./service/auth/userAuthentication')
 
 // Setup server port
 var port = process.env.PORT || 8080;
