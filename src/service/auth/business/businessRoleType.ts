@@ -1,18 +1,17 @@
+import { Business } from "../../business/businessType";
+
 export interface UserBusinessRole {
-    id: number,
-    roleId: number,
-    businessId: number,
     userId: number,
-    insertDate: number,
-    updateDate: number
+    business: Business,
+    role: BusinessRole
 }
 
 // maybe consider letting permission data live under a role
 export interface BusinessRole {
     id: number,
+    key: number,
     name: string,
-    description?: string,
-    permissionsID: number,
+    permissions: BusinessPermissions
     insertDate: number,
     updateDate: number
 }
@@ -26,25 +25,3 @@ export interface BusinessPermissions {
     insertDate: number,
     updateDate: number
 }
-
-// Something to considered here.
-
-// export interface BusinessRole {
-//     id: number,
-//     businessId: number,
-//     name: string,
-//     description?: string,
-//     reviewAccess: true,
-//     manageBusinessAccess: true,
-//     allowTransactions: true,
-//     updateDate: number,
-//     insertDate: number
-// }
-
-// export interface UserBusinessRole {
-//     id: number,
-//     businessroleId: number,
-//     userId: number,
-//     insertDate: number,
-//     updateDate: number
-// }

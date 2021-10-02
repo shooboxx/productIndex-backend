@@ -4,8 +4,11 @@ const userRepo = require('./userRepo')
 
 // Returns id, email and password
 const getUserLoginByEmail = (emailAddress : string) : UserLogin =>  {
+    if (!emailAddress) {
+        throw Error('Email address is required')
+    }
     const user = userRepo.findUser(null, emailAddress) || null
-    if (user == null ) throw Error('User not found with that email')
+    if (!user) throw Error('User not found with that email')
     return {
         id: user.id,
         emailAddress: user.emailAddress,
@@ -16,13 +19,17 @@ const getUserLoginByEmail = (emailAddress : string) : UserLogin =>  {
 }
 // Returns user without password (for internal use)
 const getUserById = (userId : number) : User => {
+    if (!userId) {
+        throw Error('User is is required')
+    }
     const user = userRepo.findUser(userId, null) || null;
 
-    if (user == null) {
+    if (!user) {
         throw Error('User not found with that Id')
     }
     return user
 }
+
 const getUserLoginByResetToken = (resetToken : string) : UserLogin => {
 
     return {
@@ -84,4 +91,5 @@ const deleteUser = (userId : number) => {
 const deactivateUser = (userId) => {
 
 }
+
 module.exports = { getUserLoginByEmail, getUserById, createUser, updateUserLogin, getUserLoginByResetToken }

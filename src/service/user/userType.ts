@@ -8,10 +8,15 @@ export interface User {
     dob: string,
     gender?: string,
     profilePicture?: string,
-    insertDate: number,
-    updateDate?: number,
+    country?: string,
+    city?: string,
+    primaryPhone?: string,
+    address?: string,
+    isVerified: boolean,
     active: boolean,
     deletedDate?: number
+    insertDate: number,
+    updateDate?: number,
 }
 export interface UserLogin {
     id: number,
