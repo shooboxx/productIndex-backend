@@ -101,7 +101,7 @@ const updateBusiness = (userId : number, businessId: number, updatedBusiness : B
 const isBusinessActive = (businessId : number) : Boolean => {
     try {
         const business = getBusinessById(businessId)
-        return business.active
+        return business.active || false
     }
     catch (e) {
         throw e
