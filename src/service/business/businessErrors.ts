@@ -1,5 +1,5 @@
 export const BusinessErrors = {
-    BusinessIdRequired: '',
+    BusinessIdRequired: 'Business Id required',
     NoBusinessFound: 'No businesses found',
     FailedUpdate: 'Failed to update business. Try again'
 }

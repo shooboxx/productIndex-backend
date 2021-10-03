@@ -2,18 +2,18 @@ import { Business } from "../../business/businessType";
 
 export interface UserBusinessRole {
     userId: number,
-    business: Business,
-    role: BusinessRole
+    businessRole: BusinessRole
 }
 
 // maybe consider letting permission data live under a role
 export interface BusinessRole {
-    id: number,
-    key: number,
+    id?: number,
+    businessId: number,
+    key?: string,
     name: string,
     permissions: BusinessPermissions
-    insertDate: number,
-    updateDate: number
+    insertDate?: number,
+    updateDate?: number
 }
 
 export interface BusinessPermissions {

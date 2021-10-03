@@ -16,7 +16,7 @@ const getUserBusinesses = (userId : number) : UserBusinessRole[] => {
     
 }
 const getBusinessById = (businessId : number) : Business => {
-    if (!businessId) throw Error('Business Id required')
+    if (!businessId) throw Error(BusinessErrors.BusinessIdRequired)
     try {
         const business = businessRepo.findBusiness(businessId, null)
         if (business.id == 0) {
@@ -41,8 +41,7 @@ const createBusiness = (userId : number, newBusiness : Business) : UserBusinessR
     
         return {
             userId: userId,
-            business: business,
-            role: role
+            businessRole: role
         }
     }
     catch (e) {
@@ -55,7 +54,7 @@ const deleteBusiness = (userId : number, businessId : number) => {
     try {
         const businesses = getUserBusinesses(userId)
         for (let i = 0; i <= businesses.length; i++) {
-            if (businesses[i].business.id == businessId ) {
+            if (businesses[i].businessRole.businessId == businessId ) {
                 return businessRepo.removeBusiness(businessId)
             }
         }
@@ -71,7 +70,7 @@ const setBusinessActiveStatus = (userId : number, businessId : number, status : 
     try {
         const businesses = getUserBusinesses(userId)
         for (let i = 0; i <= businesses.length; i++) {
-            if (businesses[i].business.id == businessId ) {
+            if (businesses[i].businessRole.businessId== businessId ) {
                 return businessRepo.setBusinessActiveStatus(businessId, status)
             }
         }
@@ -87,7 +86,7 @@ const updateBusiness = (userId : number, businessId: number, updatedBusiness : B
     try {
         const businesses = getUserBusinesses(userId)
         for (let i = 0; i <= businesses.length; i++) {
-            if (businesses[i].business.id == businessId ) {
+            if (businesses[i].businessRole.businessId == businessId ) {
                 return businessRepo.updateBusiness(businessId, updatedBusiness)
             }
         }

@@ -15,8 +15,3 @@ export interface Business {
     updateDate?: number,
     insertDate: number
 }
-
-export interface UserRole {
-    userId : number,
-    role: BusinessRole
-}
