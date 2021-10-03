@@ -3,7 +3,7 @@ import { BusinessStore } from '../store/storeTypes';
 import { Review } from '../review/reviewType';
 
 export interface Business {
-    id: number,
+    id?: number,
     name: string,
     description?: string,
     category: string,
@@ -11,7 +11,7 @@ export interface Business {
     stores?: BusinessStore[],
     reviews?: Review[],
     roles?: BusinessRole[],
-    active: boolean,
+    active?: boolean,
     updateDate?: number,
-    insertDate: number
+    insertDate?: number
 }
