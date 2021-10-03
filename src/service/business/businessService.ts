@@ -2,7 +2,7 @@ import { Business } from "./businessType";
 import { UserBusinessRole } from '../auth/business/businessRoleType';
 import { BusinessErrors } from './businessErrors'
 
-const userService = require('../user/userService');
+const userService = require('../../user/userService');
 const businessRepo = require('./businessRepo')
 
 const getUserBusinesses = (userId : number) : UserBusinessRole[] => {

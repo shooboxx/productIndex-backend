@@ -16,7 +16,7 @@ const users : any = []
 
 let product = require('./service/product/productController')
 let store = require('./service/store/businessStoreController')
-let auth = require('./service/auth/userAuthentication')
+let userAuth = require('./service/auth/user/userAuthentication')
 
 // Setup server port
 var port = process.env.PORT || 8080;
@@ -33,7 +33,7 @@ app.use(methodOverride('_method'))
 app.use(express.json())
 app.use(product);
 app.use(store)
-app.use(auth)
+app.use(userAuth)
 
 // Send message for default URL
 app.get('/', (req: any, res: any) => res.send('Hello World with Express'));
