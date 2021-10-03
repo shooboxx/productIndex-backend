@@ -1,29 +1,29 @@
 export interface User {
     id: number,
-    roleId: number,
-    firstName: string,
-    lastName: string,
-    emailAddress: string,
+    role_id: number,
+    first_name: string,
+    last_name: string,
+    email_address: string,
     password: string,
     dob: string,
     gender?: string,
-    profilePicture?: string,
+    profile_picture_url?: string,
     country?: string,
     city?: string,
-    primaryPhone?: string,
+    primary_phone?: string,
     address?: string,
-    isVerified: boolean,
+    is_verified: boolean,
     active: boolean,
-    deletedDate?: number
-    insertDate: number,
-    updateDate?: number,
+    deleted_date?: number
+    insert_date: number,
+    update_date?: number,
 }
 export interface UserLogin {
     id: number,
-    emailAddress: string,
+    email_address: string,
     password: string,
-    passwordResetToken?: string,
-    passwordResetExpiresIn?: number
+    password_reset_token?: string,
+    password_reset_expires_in?: number
 
 }
 

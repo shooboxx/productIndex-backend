@@ -14,7 +14,7 @@ function adminOnlyAccess (req, res, next) {
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
         if (err) return res.sendStatus(403)
         const userRole = getUserRole(user.userID)
-        if (userRole.accessLevel == 0) {
+        if (userRole.access_level == 0) {
             return next();
         }
         return res.sendStatus(401)
@@ -31,7 +31,7 @@ function hasAccessLevel(accessLevel) {
         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
             if (err) return res.sendStatus(403)
             const userRole = getUserRole(user.userID)
-            if (userRole.accessLevel == accessLevel) {
+            if (userRole.access_level == accessLevel) {
                 return next();
             }
             return res.sendStatus(401)
@@ -53,10 +53,10 @@ const getUserRole = (userID) : UserRole => {
     // return getRoleByID(user.id)
    return {
        id: 1,
-       roleName: "User",
-       accessLevel: 5,
-       insertDate: 0,
-       updateDate: 0
+       role_name: "User",
+       access_level: 5,
+       insert_date: 0,
+       update_date: 0
    } 
 }
 const setUserRole = (userID, roleID) => {

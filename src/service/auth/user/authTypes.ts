@@ -1,9 +1,9 @@
 export interface UserRole {
     id: number,
-    roleName: string,
-    accessLevel: number,
-    updateDate: number,
-    insertDate: number
+    role_name: string,
+    access_level: number,
+    update_date: number,
+    insert_date: number
 }
 
 // ROLES {

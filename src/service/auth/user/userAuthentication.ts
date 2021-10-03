@@ -22,7 +22,7 @@ router.post('/auth/register', async (req: any, res: any) => {
             emailAddress: req.body.email,
             password: hashedPass,
             dob: '',
-            insertDate: Date.now(),
+            insert_date: Date.now(),
             active: true
 
         }
@@ -125,10 +125,10 @@ async function createUserPasswordResetToken (userId)  {
     const userResetTokenExpiry = Date.now() * 10 * 60 * 1000;
     const user : UserLogin = {
         id: userId,
-        emailAddress: '',
+        email_address: '',
         password: '',
-        passwordResetToken: hashedResetToken,
-        passwordResetExpiresIn: userResetTokenExpiry
+        password_reset_token: hashedResetToken,
+        password_reset_expires_in: userResetTokenExpiry
     }
     userService.updateUserLogin(user);
     return resetToken

@@ -18,7 +18,7 @@ const findBusinessById = (businessId : number) : Business => {
         name: '',
         category: '',
         active: false,
-        insertDate: 0
+        insert_date: 0
     }
 }
 

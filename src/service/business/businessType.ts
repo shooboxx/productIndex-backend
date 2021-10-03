@@ -7,11 +7,11 @@ export interface Business {
     name: string,
     description?: string,
     category: string,
-    profilePictureURL?: string,
+    profile_picture_url?: string,
     stores?: BusinessStore[],
     reviews?: Review[],
     roles?: BusinessRole[],
     active?: boolean,
-    updateDate?: number,
-    insertDate?: number
+    update_date?: number,
+    insert_date?: number
 }

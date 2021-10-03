@@ -9,7 +9,7 @@ const businessAuthRepo = require('../business/businessAuthRepo')
 function isPermitted(permission) {
     return function (req, res, next) {
         const userRole = getUserBusinessRole(req.userId, req.params.businessId)
-        if (userRole.businessRole.permissions[permission]) {
+        if (userRole.business_role.permissions[permission]) {
             next()
         }
         return res.sendStatus(403)
@@ -67,11 +67,11 @@ const createBusinessRole = (businessId : number, role : BusinessRole) : Business
         }
 
         const newRole : BusinessRole = {
-            businessId: businessId,
+            business_id: businessId,
             key: role.name.trim().toUpperCase(),
             name: role.name,
             permissions: role.permissions,
-            insertDate: Date.now(),
+            insert_date: Date.now(),
         }
         return businessAuthRepo.createBusinessRole(businessId, newRole)
         
@@ -89,12 +89,12 @@ const updateBusinessRole = (role) : BusinessRole => {
         if (bizRoles[i].id == role.id) {
             const updatedRole : BusinessRole = {
                 id: bizRoles[i].id,
-                businessId: bizRoles[i].businessId,
+                business_id: bizRoles[i].business_id,
                 key: role.name.trim().toUpperCase() || bizRoles[i].key,
                 name: role.name || bizRoles[i].name,
                 permissions: role.permissions || bizRoles[i].permissions,
-                insertDate: bizRoles[i].insertDate,
-                updateDate: Date.now()
+                insert_date: bizRoles[i].insert_date,
+                update_date: Date.now()
             }
             return businessAuthRepo.updateBusinessRole(updatedRole)
         }

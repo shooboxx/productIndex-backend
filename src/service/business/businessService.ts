@@ -2,7 +2,7 @@ import { Business } from "./businessType";
 import { UserBusinessRole } from '../auth/business/businessRoleType';
 import { BusinessErrors } from './businessErrors'
 
-const userService = require('../../user/userService');
+const userService = require('../user/userService');
 const businessRepo = require('./businessRepo')
 
 const getUserBusinesses = (userId : number) : UserBusinessRole[] => {
@@ -41,7 +41,7 @@ const createBusiness = (userId : number, newBusiness : Business) : UserBusinessR
     
         return {
             userId: userId,
-            businessRole: role
+            business_role: role
         }
     }
     catch (e) {
@@ -54,7 +54,7 @@ const deleteBusiness = (userId : number, businessId : number) => {
     try {
         const businesses = getUserBusinesses(userId)
         for (let i = 0; i <= businesses.length; i++) {
-            if (businesses[i].businessRole.businessId == businessId ) {
+            if (businesses[i].business_role.business_id == businessId ) {
                 return businessRepo.removeBusiness(businessId)
             }
         }
@@ -70,7 +70,7 @@ const setBusinessActiveStatus = (userId : number, businessId : number, status : 
     try {
         const businesses = getUserBusinesses(userId)
         for (let i = 0; i <= businesses.length; i++) {
-            if (businesses[i].businessRole.businessId== businessId ) {
+            if (businesses[i].business_role.business_id== businessId ) {
                 return businessRepo.setBusinessActiveStatus(businessId, status)
             }
         }
@@ -86,7 +86,7 @@ const updateBusiness = (userId : number, businessId: number, updatedBusiness : B
     try {
         const businesses = getUserBusinesses(userId)
         for (let i = 0; i <= businesses.length; i++) {
-            if (businesses[i].businessRole.businessId == businessId ) {
+            if (businesses[i].business_role.business_id == businessId ) {
                 return businessRepo.updateBusiness(businessId, updatedBusiness)
             }
         }

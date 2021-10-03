@@ -11,10 +11,10 @@ const getUserLoginByEmail = (emailAddress : string) : UserLogin =>  {
     if (!user) throw Error('User not found with that email')
     return {
         id: user.id,
-        emailAddress: user.emailAddress,
+        email_address: user.email_address,
         password: user.password,
-        passwordResetToken: user.passwordResetToken,
-        passwordResetExpiresIn: user.passwordResetExpiresIn
+        password_reset_token: user.password_reset_token,
+        password_reset_expires_in: user.password_reset_expires_in
     }
 }
 // Returns user without password (for internal use)
@@ -34,10 +34,10 @@ const getUserLoginByResetToken = (resetToken : string) : UserLogin => {
 
     return {
         id: 0,
-        emailAddress: '',
+        email_address: '',
         password: '',
-        passwordResetToken: '',
-        passwordResetExpiresIn: 0
+        password_reset_token: '',
+        password_reset_expires_in: 0
     }
 }
 
@@ -48,7 +48,7 @@ const getUserMasterDetail = () => {
 
 const createUser = (user : User) => {
     try {
-        getUserLoginByEmail(user.emailAddress)
+        getUserLoginByEmail(user.email_address)
     }
     catch(e) {
         const newUser = userRepo.addUser(user)
@@ -67,15 +67,15 @@ const updateUserProfile = (user: User) => {
 const updateUserLogin = (updatedUser : UserLogin) => {
     try {
         const user = getUserById(updatedUser.id)
-        const userLogin = getUserLoginByEmail(user.emailAddress)
+        const userLogin = getUserLoginByEmail(user.email_address)
         
         // ensures that if data is null, do not override
         const uUser : UserLogin = {
             id: updatedUser.id,
-            emailAddress: updatedUser.emailAddress || userLogin.emailAddress,
+            email_address: updatedUser.email_address || userLogin.email_address,
             password: updatedUser.password || userLogin.password,
-            passwordResetToken: updatedUser.passwordResetToken || userLogin.passwordResetToken,
-            passwordResetExpiresIn: updatedUser.passwordResetExpiresIn || userLogin.passwordResetExpiresIn
+            password_reset_token: updatedUser.password_reset_token || userLogin.password_reset_token,
+            password_reset_expires_in: updatedUser.password_reset_expires_in || userLogin.password_reset_expires_in
         }
          return userRepo.updateUserLogin(uUser)
     } 
