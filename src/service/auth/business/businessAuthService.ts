@@ -102,7 +102,7 @@ const updateBusinessRole = (role) : BusinessRole => {
     throw Error('Role not found')
 }
 
-const deleteBusinessRoleByKey = (businessId : number, key) => {
+const deleteBusinessRoleByKey = (businessId : number, key : string) => {
 
 }
 
