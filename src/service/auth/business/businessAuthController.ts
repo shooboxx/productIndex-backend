@@ -1,5 +1,5 @@
 const router = express.Router();
-const businessAuthService = require('./businessAuthService')
+const businessAuthService = require('../business/businessAuthService')
 
 router.get('/business/:businessId/roles', async (req: any, res: any) => {
     try {

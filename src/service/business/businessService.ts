@@ -1,7 +1,8 @@
 import { Business } from "./businessType";
-import { UserBusinessRole } from '../auth/business/businessRoleType';
+import { BusinessRole, UserBusinessRole } from '../auth/business/businessRoleType';
 import { BusinessErrors } from './businessErrors'
 
+const businessAuthService = require('../auth/business/businessAuthService')
 const userService = require('../user/userService');
 const businessRepo = require('./businessRepo')
 
@@ -18,7 +19,7 @@ const getUserBusinesses = (userId : number) : UserBusinessRole[] => {
 const getBusinessById = (businessId : number) : Business => {
     if (!businessId) throw Error(BusinessErrors.BusinessIdRequired)
     try {
-        const business = businessRepo.findBusiness(businessId, null)
+        const business = businessRepo.findBusinessById(businessId)
         if (business.id == 0) {
             throw Error(BusinessErrors.NoBusinessFound)
         }
@@ -30,14 +31,13 @@ const getBusinessById = (businessId : number) : Business => {
 
 }
 
-const getBusinessMasterDetail = () => {
-
-}
-
 const createBusiness = (userId : number, newBusiness : Business) : UserBusinessRole => {
     try {
-        const business = businessRepo.createBusiness(userId, newBusiness)
-        const role = businessRepo.createBusinessRole(business.id, userId, 'OWNER')
+        if(!newBusiness.category) throw new Error('Business category is required')
+        if(!newBusiness.name) throw new Error('Business name is required')
+
+        const business : Business = businessRepo.createBusiness(userId, newBusiness)
+        const role : BusinessRole = businessAuthService.createOwnerBusinessRole(business.id)
     
         return {
             userId: userId,
@@ -79,9 +79,8 @@ const setBusinessActiveStatus = (userId : number, businessId : number, status : 
     catch (e) {
         throw e
     }
-        
-
 }
+
 const updateBusiness = (userId : number, businessId: number, updatedBusiness : Business) : Business => {
     try {
         const businesses = getUserBusinesses(userId)
@@ -106,6 +105,10 @@ const isBusinessActive = (businessId : number) : Boolean => {
     catch (e) {
         throw e
     }
+
+}
+
+const getBusinessMasterDetail = () => {
 
 }
 

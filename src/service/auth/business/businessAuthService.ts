@@ -9,7 +9,7 @@ const businessAuthRepo = require('../business/businessAuthRepo')
 function isPermitted(permission) {
     return function (req, res, next) {
         const userRole = getUserBusinessRole(req.userId, req.params.businessId)
-        if (userRole.business_role.permissions[permission]) {
+        if (userRole.business_role[permission]) {
             next()
         }
         return res.sendStatus(403)
@@ -80,7 +80,13 @@ const createBusinessRole = (businessId : number, role : BusinessRole) : Business
         throw e
     }
 }
-
+const createOwnerBusinessRole = (businessId) : BusinessRole => {
+    const ownerRole : BusinessRole = {
+        business_id: businessId,
+        name: 'OWNER',
+    }
+    return createBusinessRole(businessId, ownerRole)
+}
 // Cannot update owner role
 const updateBusinessRole = (role) : BusinessRole => {
     businessService.getBusinessById(role.businessId)
@@ -109,7 +115,6 @@ const deleteBusinessRoleByKey = (businessId : number, key : string) => {
 const createRoleForBusiness = () => {
 
 }
-
 const addBusinessRoleToUser = (userId : number, businessRoleId : number) : UserBusinessRole => {
     try {
         if (!businessRoleId) throw Error('businessRoleId is required')

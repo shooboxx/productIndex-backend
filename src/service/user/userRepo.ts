@@ -1,17 +1,16 @@
 export {}
-const {User} = require('./userType')
+import { User } from './userType'
 const users : any = []
 import { UserLogin } from './userType'
 
-const addUser = (user: typeof User) => {
-    console.log(user)
+const addUser = (user: User) => {
     users.push(user)
     return users[users.length - 1]
 }
 
-const findUser = (userId, emailAddress : string) => {
+const findUser = (userId : number, emailAddress : string) => {
     for (let i = 0; i< users.length; i++) {
-        if (users[i].emailAddress == emailAddress || users[i].id == userId) {
+        if (users[i].email_address == emailAddress || users[i].id == userId) {
             return users[i]
         }
     }
@@ -20,12 +19,12 @@ const findUser = (userId, emailAddress : string) => {
 const updateUserLogin = (user: UserLogin) => {
     for (let i = 0; i< users.length; i++) {
         if (users[i].id == user.id) {
-            users[i].emailAddress = user.emailAddress;
+            users[i].email_address = user.email_address;
             users[i].password = user.password
-            users[i].passwordResetExpiresIn = user.passwordResetExpiresIn
-            users[i].passwordResetToken = user.passwordResetToken
+            users[i].password_reset_expires_in = user.password_reset_expires_in
+            users[i].password_reset_token = user.password_reset_token
             return users[i]
         }
     }
 }
-module.exports = {addUser, findUser, updateUserLogin}
+module.exports = { addUser, findUser, updateUserLogin }

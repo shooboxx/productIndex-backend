@@ -9,7 +9,7 @@ const findUserBusinesses = (userId) => {
 
 const findBusinessById = (businessId : number) : Business => {
     for (let i = 0; i <= businesses.length; i++) {
-        if(businesses[i].id === businessId) {
+        if (businesses[i].id === businessId) {
             return businesses[i]
         }
     }
@@ -20,10 +20,6 @@ const findBusinessById = (businessId : number) : Business => {
         active: false,
         insert_date: 0
     }
-}
-
-const findBusinessMasterDetail = () => {
-
 }
 
 const createBusiness = (newBusiness : Business) : Business => {
@@ -57,6 +53,9 @@ const updateBusiness = (businessId, updatedBusiness : Business) => {
             return businesses[i] = updatedBusiness
         }
     }
+}
+const findBusinessMasterDetail = () => {
+
 }
 
 module.exports = {findBusinessById, findUserBusinesses, createBusiness, removeBusiness, setBusinessActiveStatus, updateBusiness}

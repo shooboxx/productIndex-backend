@@ -11,7 +11,7 @@ export interface BusinessRole {
     business_id: number,
     key?: string,
     name: string,
-    permissions: BusinessPermissions
+    permissions?: BusinessPermissions
     insert_date?: number,
     update_date?: number
 }

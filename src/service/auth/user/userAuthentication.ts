@@ -1,4 +1,5 @@
-import { UserLogin } from "../../user/userType";
+import { UserLogin, User } from "../../user/userType";
+
 
 export {};
 const bcrypt = require('bcrypt')
@@ -10,48 +11,49 @@ let refreshTokens : any = []
 const {adminOnlyAccess, hasAccessLevel} = require('./userAuthorization')
 const crypto = require('crypto')
 
-
+// Created user : Tested : Working
 router.post('/auth/register', async (req: any, res: any) => {
     try {
         const hashedPass = await bcrypt.hash(req.body.password, 10)
-        const user = {
-            id: 0,
-            roleId: getRoleID('user'),
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            emailAddress: req.body.email,
+        const user : User = {
+            id: 1,
+            role_id: getRoleID('user'),
+            first_name: req.body.first_name,
+            last_name: req.body.last_name,
+            email_address: req.body.email_address,
             password: hashedPass,
             dob: '',
             insert_date: Date.now(),
-            active: true
+            active: true,
+            is_verified: false
 
         }
         const newUser = userService.createUser(user)
     return res.send(JSON.stringify(newUser))
     }
     catch(err : any)  {
-        console.log()
         return res.status(400).json({error: err.message})
     }
 
 });
-
+// Sign in : Tested : Worked
 router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
     try{
-        const user = userService.getUserLoginByEmail(req.body.emailAddress)
+        const user = userService.getUserLoginByEmail(req.body.email_address)
+        console.log('This ran')
         await bcrypt.compare(req.body.password, user.password, (err, resp) => {
             if (err) res.sendStatus(404)
             if (resp){
                 const accessToken = generateAccessToken({userID: user.id})
                 const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET)
                 refreshTokens.push(refreshToken) 
-                return res.json({accessToken: accessToken, refreshToken: refreshToken})
+                return res.json({access_token: accessToken, refresh_token: refreshToken})
             }
             return res.json({"error": "Email address or password is incorrect"})
         } ) 
     }
-    catch {
-        return res.json({"error": "Email address or password is incorrect"}) 
+    catch(e : any) { 
+        return res.status(200).json({"error": e.message}) 
     }
 })
 
@@ -61,17 +63,17 @@ router.delete('/auth/logout', authenticateToken, (req: any, res: any) => {
     res.sendStatus(204)
 });
 
-
+// Forget password : Tested : Works :TODO = Send email with token to user
 router.post('/auth/forget-password', checkNotAuthenticated, async (req: any, res: any) => {
 
     let resetToken 
     try {
-        const user = userService.getUserLoginByEmail(req.body.emailAddress)
+        const user = userService.getUserLoginByEmail(req.body.email_address)
         resetToken = await createUserPasswordResetToken(user.id)
         return res.json({reset_token: resetToken})
     }
-    catch(err) {
-        console.log(err)
+    catch(err : any) {
+        res.status(200).json({"error": err.message})
     }
 
 });
@@ -81,7 +83,7 @@ router.post('/auth/reset-password/:resetToken', async (req: any, res: any) => {
         const user = userService.getUserLoginByEmail(req.body.emailAddress)
         await bcrypt.compare(req.params.resetToken, user.passwordResetToken, (err, resp) => {
             if (resp) {
-                if (user.passwordResetExpiresIn < Date.now()) {
+                if (user.password_reset_expires_in < Date.now()) {
                     return res.status(200).send("Token expired")
                 }
                 // Find users by the reset token instead of email

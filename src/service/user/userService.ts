@@ -4,9 +4,7 @@ const userRepo = require('./userRepo')
 
 // Returns id, email and password
 const getUserLoginByEmail = (emailAddress : string) : UserLogin =>  {
-    if (!emailAddress) {
-        throw Error('Email address is required')
-    }
+    if (!emailAddress) throw new Error('Email address is required')
     const user = userRepo.findUser(null, emailAddress) || null
     if (!user) throw Error('User not found with that email')
     return {
@@ -19,8 +17,9 @@ const getUserLoginByEmail = (emailAddress : string) : UserLogin =>  {
 }
 // Returns user without password (for internal use)
 const getUserById = (userId : number) : User => {
+    console.log(userId)
     if (!userId) {
-        throw Error('User is is required')
+        throw Error('User is required')
     }
     const user = userRepo.findUser(userId, null) || null;
 
@@ -47,15 +46,20 @@ const getUserMasterDetail = () => {
 }
 
 const createUser = (user : User) => {
+    if (!user.email_address) {throw new Error('Email address is required')}
+    if (!user.password) throw new Error('Password is required')
+
     try {
+        console.log(user.email_address)
+
         getUserLoginByEmail(user.email_address)
     }
     catch(e) {
         const newUser = userRepo.addUser(user)
-        return newUser.emailAddress
+        return newUser.email_address
         
     }
-    throw new Error(`User already exist with that email address`, )
+    throw new Error(`User already exist with that email address`)
 
     
 }
