@@ -17,7 +17,6 @@ const getUserLoginByEmail = (emailAddress : string) : UserLogin =>  {
 }
 // Returns user without password (for internal use)
 const getUserById = (userId : number) : User => {
-    console.log(userId)
     if (!userId) {
         throw Error('User is required')
     }
