@@ -1,8 +1,9 @@
 export interface BusinessStore {
-    id: number,
+    id?: number,
     business_id : number,
     unique_name: string,
-    email_address: string,
+    store_hours: StoreHours,
+    email_address?: string,
     phone_1?: string,
     phone_2?: string,
     phone_3?: string,
@@ -11,7 +12,36 @@ export interface BusinessStore {
     country: string,
     city: string,
     postal_code: string,
-    is_primary: Boolean,
-    temp_or_perm_closure: string // either TEMP or PERM
+    is_primary?: Boolean,
+    temp_or_perm_closure?: string // either TEMP or PERM
     reopen_date?: number
+}
+
+
+export interface StoreHours {
+    business_id: number,
+    monday_open: string,
+    monday_closed: string,
+    tuesday_open: string,
+    tuesday_closed: string,
+    wednesday_open: string,
+    wednesday_closed: string,
+    thursday_open: string,
+    thursday_closed: string,
+    friday_open: string,
+    friday_closed: string,
+    saturday_open: string,
+    saturday_closed: string,
+    sunday_open: string,
+    sunday_closed: string,
+    update_date: number,
+    insert_date: number
+}
+export interface StoreHours2 {
+    business_id: number,
+    day: string,
+    open: string,
+    closed: string,
+    update_date: number,
+    insert_date: number
 }
