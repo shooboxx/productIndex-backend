@@ -37,11 +37,3 @@ export interface StoreHours {
     update_date: number,
     insert_date: number
 }
-export interface StoreHours2 {
-    business_id: number,
-    day: string,
-    open: string,
-    closed: string,
-    update_date: number,
-    insert_date: number
-}
