@@ -1,6 +1,6 @@
 import { BusinessRole } from "../auth/business/businessRoleType";
 import { BusinessStore } from '../store/storeTypes';
-import { Review } from '../review/reviewType';
+import { Review } from '../reviews/reviewType';
 
 export interface Business {
     id?: number,

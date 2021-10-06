@@ -1,6 +1,10 @@
 const express = require('express');
 const businessService = require('./businessService')
 const router = express.Router();
+const businessStoreService = require('../store/businessStoreService')
+const reviewService = require('../reviews/reviewService')
+
+import { BusinessStore } from '../store/storeTypes'
 
 import { Business } from './businessType';
 
@@ -50,4 +54,32 @@ router.put('/business/:businessId', async (req: any, res: any) => {
     }
 })
 
+// OTHER SERVICES
+
+//Get stores for business
+router.get('/business/:businessId/stores', (req, res) => {
+    try {
+        const businessId = req.params.businessId 
+        const stores : BusinessStore[] = businessStoreService.getStoresByBusinessId(businessId)
+
+        res.status(200).json({stores})
+    }
+    catch (e : any) {
+        res.status(200).json({"error": e.message})
+    }
+
+})
+
+// Get reviews for business
+router.get('/business/:businessId/reviews', (req, res) => {
+    try {
+        const bizId = req.params.businessId
+        return res.status(200).json(reviewService.getReviewsByBusinessId(bizId))
+    }
+    catch (e : any) {
+        res.status(200).json({"error": e.message})
+    }
+
+
+})
 module.exports = router

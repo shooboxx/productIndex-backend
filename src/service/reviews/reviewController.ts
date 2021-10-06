@@ -7,7 +7,7 @@ const reviewService = require('./reviewService')
 import { Review } from './reviewType'
 
 
-router.get('business/:businessId/reviews', (req, res) => {
+router.get('/business/:businessId/reviews', (req, res) => {
     try {
         const bizId = req.params.businessId
         return res.status(200).json(reviewService.getReviewsByBusinessId(bizId))
@@ -19,8 +19,7 @@ router.get('business/:businessId/reviews', (req, res) => {
 
 })
 
-
-router.post('business/:businessId/review', (req, res) => {
+router.post('/business/:businessId/review', (req, res) => {
     try {
         const bizId = req.params.businessId
         const newReview : Review = {
@@ -39,7 +38,7 @@ router.post('business/:businessId/review', (req, res) => {
 
 })
 
-router.put('business/:businessId/review', (req, res) => {
+router.put('/business/:businessId/review', (req, res) => {
     try {
         const bizId = req.params.businessId
 
@@ -57,7 +56,7 @@ router.put('business/:businessId/review', (req, res) => {
     }
 })
 
-router.delete('business/:businessId/review', (req, res) => {
+router.delete('/business/:businessId/review', (req, res) => {
     try {
         const bizId = req.params.businessId
         

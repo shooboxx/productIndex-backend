@@ -20,7 +20,7 @@ router.get('/business/:businessId/stores', (req, res) => {
     }
 
 })
-router.get('/business/:businessId/store/:storeId', (req, res) => {
+router.get('/store/:storeId', (req, res) => {
     try {
         const storeId = req.params.storeId
         const store : BusinessStore = businessStoreService.getStoreById(storeId)
@@ -32,14 +32,14 @@ router.get('/business/:businessId/store/:storeId', (req, res) => {
     }
 
 })
-router.put('/business/:businessId/store/:storeId', (req, res) => {
+router.put('/store/:storeId', (req, res) => {
     try {
-        const businessId = req.params.businessId 
+
         const storeId = req.params.storeId
 
         const store : BusinessStore = {
             id: storeId,
-            business_id: parseInt(businessId),
+            business_id: parseInt(req.body.business_id),
             unique_name: req.body.unique_name,
             email_address: req.body.email_address,
             store_hours: req.body.store_hours,
@@ -65,14 +65,13 @@ router.put('/business/:businessId/store/:storeId', (req, res) => {
     }
 
 })
-router.post('/business/:businessId/store', (req, res) => {
+router.post('/stores', (req, res) => {
     try {
-        const businessId = req.params.businessId 
         const storeId = req.params.storeId
 
         const store : BusinessStore = {
             id: storeId,
-            business_id: parseInt(businessId),
+            business_id: req.body.business_id,
             unique_name: req.body.unique_name,
             email_address: req.body.email_address,
             store_hours: req.body.store_hours,
@@ -96,9 +95,8 @@ router.post('/business/:businessId/store', (req, res) => {
     }
 
 })
-router.delete('/business/:businessId/store/:storeId', (req, res) => {
+router.delete('/store/:storeId', (req, res) => {
     try {
-        const businessId = req.params.businessId 
         const storeId = req.params.storeId
 
         const store : BusinessStore = businessStoreService.getStoreById(storeId)
