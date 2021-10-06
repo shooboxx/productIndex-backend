@@ -30,7 +30,7 @@ const createBusiness = (newBusiness : Business) : Business => {
 }
 const removeBusiness = (businessId) => {
     for (let i = 0; i <= businesses.length; i++) {
-        if (businesses[i] == businessId ) {
+        if (businesses[i].id == businessId ) {
             businesses.splice(i, 1)
             return -1
         }
