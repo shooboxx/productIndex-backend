@@ -8,18 +8,7 @@ import { BusinessStore } from './storeTypes'
 const businessService = require('../business/businessService')
 const businessStoreService = require('../store/businessStoreService')
 
-router.get('/business/:businessId/stores', (req, res) => {
-    try {
-        const businessId = req.params.businessId 
-        const stores : BusinessStore[] = businessStoreService.getStoresByBusinessId(businessId)
 
-        res.status(200).json({stores})
-    }
-    catch (e : any) {
-        res.status(200).json({"error": e.message})
-    }
-
-})
 router.get('/store/:storeId', (req, res) => {
     try {
         const storeId = req.params.storeId

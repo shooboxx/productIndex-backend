@@ -7,17 +7,7 @@ const reviewService = require('./reviewService')
 import { Review } from './reviewType'
 
 
-router.get('/business/:businessId/reviews', (req, res) => {
-    try {
-        const bizId = req.params.businessId
-        return res.status(200).json(reviewService.getReviewsByBusinessId(bizId))
-    }
-    catch (e : any) {
-        res.status(200).json({"error": e.message})
-    }
 
-
-})
 
 router.post('/business/:businessId/review', (req, res) => {
     try {
