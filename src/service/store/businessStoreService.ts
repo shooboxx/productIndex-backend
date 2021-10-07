@@ -48,8 +48,9 @@ const updateStore = (store : BusinessStore) : BusinessStore => {
     const updatedStore : BusinessStore = {
         business_id: currStore.business_id,
         unique_name: store.unique_name || currStore.unique_name,
+        inventory: store.inventory || currStore.inventory,
         email_address: store.email_address || currStore.email_address,
-        store_hours: store.store_hours || currStore.store_hours,
+        business_days: store.business_days || currStore.business_days,
         phone_1: store.phone_1 || currStore.phone_1,
         phone_2: store.phone_2 || currStore.phone_2,
         phone_3: store.phone_3 || currStore.phone_3,

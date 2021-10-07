@@ -1,7 +1,8 @@
-
+import { BusinessItem } from "./businessInventoryType";
+import { Product } from '../product/productType'
 export {};
-
-const s = require('./businessInventoryService') 
+const productService = require('../product/productService')
+const inventoryService = require('./businessInventoryService') 
 const express = require('express');
 const router = express.Router();
 
@@ -9,38 +10,88 @@ const router = express.Router();
 const NoItemsErr = 'No items available at this store'
 const NoItemsFoundErr = 'No items were found that matches that search'
 
-router.get('/items', (req: any, res: any) => {
-    const {store_id} = req.params
-    const data = s.getAllInventories(store_id);
 
-    if (data.length == 0) {
-        return res.status(404).json({
-            "status": "failed",
-            "results": 0,
-            "error": NoItemsErr
-        })
+router.get('/store/:storeId/inventory', (req, res) => {
+    try {
+        const storeId = req.params.storeId 
+        const inventory_items = inventoryService.getStoreInventory(storeId)
+        return res.status(200).json({inventory_items})
     }
-    return res.status(200).json({
-        "status": "success",
-        "results": data.length,
-        "data": data 
-    })
-    // productService.get
-});
-router.get('/item/:inventory_id', (req: any, res: any) => {
-        const {inventory_id, store_id} = req.params
-    return res.send(s.getInventory( inventory_id, store_id))
-    // productService.get
+    catch (e : any) {
+        return res.status(200).json({"error": e.message})
+    }
+
 });
 
-router.post('/item', (req: any, res: any) => {
 
-    return res.send(JSON.stringify(s.createInventory(req.body)))
-    // return res.send(s.addInventory({
-    //     id,
-    //     product: {
-
-    //     }
-    // }))
+router.get('/inventory/:itemId', (req, res) => {
+    try {
+        const itemId = req.params.itemId
+        const item = inventoryService.getInventoryItem(itemId)
+        return res.status(200).json({item})
+    }
+    catch (e : any) {
+        return res.status(200).json({"error": e.message})
+    }
 });
+
+
+router.put('/inventory/:itemId', (req, res) => {
+    try {
+        const itemId = req.params.itemId
+        const product : Product = productService.getProductByID(req.body.product_id);
+
+        const item : BusinessItem = {
+            id: itemId,
+            business_id: req.body.business_id,
+            product_key: req.body.product_key,
+            product: product,
+            tag: req.body.tag,
+            description: req.body.description,
+            update_date: Date.now()
+        }
+
+        const updatedItem = inventoryService.updateInventoryItem(item)
+        return res.status(200).json({updatedItem})
+    }
+    catch (e : any) {
+        return res.status(200).json({"error": e.message})
+    }
+});
+
+
+router.post('/inventory', (req, res) => {
+    try {
+        const itemId = req.params.itemId
+        const product : Product = productService.getProductByID(req.body.product_id)
+        const item : BusinessItem = {
+            id: itemId,
+            business_id: req.body.business_id,
+            product_key: req.body.product_key,
+            product: product,
+            tag: req.body.tag,
+            description: req.body.description,
+            update_date: Date.now()
+        }
+
+        const newItem = inventoryService.updateInventoryItem(item)
+        return res.status(200).json({newItem})
+    }
+    catch (e : any) {
+        return res.status(200).json({"error": e.message})
+    }
+});
+
+router.delete('/inventory/:itemId', (req, res) => {
+    try {
+        const itemId = req.params.itemId
+        inventoryService.deleteItem(itemId)
+    }
+    catch (e: any) {
+        return res.status(200).json({"error": e.message})
+    }
+})
+
+
+
 module.exports = router
