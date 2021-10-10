@@ -27,7 +27,7 @@ router.get('/store/:storeId/inventory', (req, res) => {
 router.get('/inventory/:itemId', (req, res) => {
     try {
         const itemId = req.params.itemId
-        const item = inventoryService.getInventoryItem(itemId)
+        const item = inventoryService.getInventoryItemById(itemId)
         return res.status(200).json({item})
     }
     catch (e : any) {
@@ -85,7 +85,7 @@ router.post('/inventory', (req, res) => {
 router.delete('/inventory/:itemId', (req, res) => {
     try {
         const itemId = req.params.itemId
-        inventoryService.deleteItem(itemId)
+        inventoryService.deleteInventoryItem(itemId)
     }
     catch (e: any) {
         return res.status(200).json({"error": e.message})

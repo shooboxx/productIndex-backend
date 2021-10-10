@@ -1,6 +1,7 @@
 import { BusinessRole } from "../auth/business/businessRoleType";
 import { BusinessStore } from '../store/storeTypes';
 import { Review } from '../reviews/reviewType';
+import {BusinessItem} from '../inventory/businessInventoryType'
 
 export interface Business {
     id?: number,
@@ -11,6 +12,7 @@ export interface Business {
     stores?: BusinessStore[],
     reviews?: Review[],
     roles?: BusinessRole[],
+    items?: BusinessItem[],
     active?: boolean,
     update_date?: number,
     insert_date?: number

@@ -17,7 +17,10 @@ const getStoresByBusinessId = (businessId : number) : BusinessStore[] => {
 const getStoreById = (storeId : number) : BusinessStore => {
    try {
        if (!storeId) throw new Error('Store id is required')
-        return businessStoreRepo.findStoreById(storeId)
+        const store : BusinessStore = businessStoreRepo.findStoreById(storeId)
+        if (!store) throw new Error('No store found with that Id')
+
+        return store
    } 
    catch (e) {
         throw e

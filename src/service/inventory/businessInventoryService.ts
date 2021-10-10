@@ -1,71 +1,98 @@
-import { BusinessInventory } from './businessInventoryType';
-const product = require('./../product/productService')
-const r = require('./businessInventoryRepo')
+import { BusinessItem, InventoryItem } from './businessInventoryType';
 
-const getAllInventories = (business_store_id : number) : BusinessInventory[] => {
+const inventoryRepo = require('./businessInventoryRepo')
+const storeService = require('../store/businessStoreService')
 
-    let inventories = r.findInventories(business_store_id)
-    let inventoryList: BusinessInventory[] = []
-
-    for (let i = 0; i < inventories.length; i++) {
-
-        inventoryList.push({
-            id: inventories[i].id,
-            product: product.getProductByID(inventories[i].product_id),
-            product_key: inventories[i].product_key,
-            price: inventories[i].price,
-            description: inventories[i].description,
-            quantity: inventories[i].quantity,
-            tags: inventories[i].product_tags
-        })
-    }
-    return inventoryList
+const getBusinessItems = (bId : number) : BusinessItem[] => {
+    // not yet implemented
+    return {} as BusinessItem[]
+}
+const getBusinessItemById = (bItemId : number) : BusinessItem => {
+    // not yet implemented
+    return {} as BusinessItem
+}
+const updateBusinessItem = (bItem : number) : BusinessItem => {
+    // not yet implemented
+    return {} as BusinessItem
+}
+const createBusinessItem = (bItem : number) : BusinessItem => {
+    // not yet implemented
+    return {} as BusinessItem
+}
+const deleteBusinessItem = (bItemId : number) => {
+    // not yet implemented
+    return {} as BusinessItem
 }
 
-const getInventory = (business_store_id : number, inventory_id : number) : BusinessInventory => {
-    const data = r.findInventory( business_store_id, inventory_id)
-    return {
-        id: data.id,
-        product: product.getProductByID(data.product_id),
-        product_key: data.product_key,
-        price: data.price,
-        description: data.description,
-        quantity: data.quantity,
-        tags: data.product_tags
+
+const getAllStoreItems = (storeId : number) : InventoryItem[] =>  {
+    try {
+        storeService.getStoreById(storeId)
+        const items : InventoryItem[] = inventoryRepo.findAllStoreItems(storeId)
+        if (!items) throw new Error('No items found for this store') 
+        return items
     }
-}
-
-const createInventory = (data : any) => {
-    // check to see if product exists.. if it does, returns id
-    // check to see if inventory item exist, if it does, returns error
-
-
-
-    const newProduct = product.createProduct(data)
-    const newInventory = r.addInventory(data)
-    let err = ''
-    if (!newProduct) {
-        err += 'Failed to add product.'
+    catch (e) {
+        throw e
     }
-    if (!newInventory) {
-        err +=' Failed to add inventory.'
+
+};
+
+const getInventoryItemById = (itemId : number) : InventoryItem =>  {
+    try {
+        const item : InventoryItem = inventoryRepo.findInventoryItemById(itemId)
+        if (!item) throw new Error('No item found with that id') 
+        return item
     }
-    if (err !== '') {
-        return {
-            'status': 'failed', 
-            'error': err
+    catch (e) {
+        throw e
+    }
+
+};
+
+const updateInventoryItem = (item : InventoryItem) : InventoryItem => {
+    try {
+        const currItem : InventoryItem = getInventoryItemById(item.id)
+
+        currItem.store_id = item.store_id || currItem.store_id
+        currItem.price = item.price || currItem.price
+        currItem.quantity = item.quantity || currItem.quantity
+        currItem.update_date = item.update_date || currItem.quantity
+        
+        return currItem
+    }
+    catch (e) {
+        throw e
+    }
+};
+
+const createInventoryItem = (item : InventoryItem) : InventoryItem => {
+    try {
+        const bizItem = getBusinessItemById(item.item.id)
+        
+        if (!bizItem) {
+            return inventoryRepo.addInventoryItem(item)
         }
+        throw new Error('Item already exist in inventory')
     }
-    return data
-}
+    catch (e) {
+        throw e
+    }
+};
 
-const updateInventory = () => {
+const deleteInventoryItem = (itemId : number) => {
+    try {
+        const exist = getInventoryItemById(itemId)
 
-    return
-}
-const deleteProduct = () => {
+        if (exist) {
+            return inventoryRepo.deleteInventoryItem(itemId)
+        }
+        throw new Error('Inventory item with that id does not exist')
+    }
+    catch (e) {
+        throw e
+    }
+};
 
-    return
-}
 
-module.exports = { getAllInventories, getInventory, createInventory}
+module.exports = { getAllStoreItems, getInventoryItemById, updateInventoryItem, createInventoryItem, deleteInventoryItem }
