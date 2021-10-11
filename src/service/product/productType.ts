@@ -3,7 +3,7 @@ export interface Product {
    name: string,
    type: string,
    image_url?: string,
-   createdBy?: number,
+   created_by?: number,
    insert_date?: number,
    update_date?: number
 

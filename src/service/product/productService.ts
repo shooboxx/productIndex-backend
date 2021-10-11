@@ -1,70 +1,57 @@
 import { Product } from './productType'
-const r = require('./productRepo')
+const productRepo = require('./productRepo')
+const businessService = require('../business/businessService')
 
-function getAllProducts() : Product[] {
-    let productList: Product[] = []
-    const product = {
-        id: 0, 
-        business_id: 0,
-        product_key: 0,
-        product_name: 'Testing',
-        Image_url: 'URL',
-        product_type: 'URL',
-        description: 'string',
-        tag: 'No Tags',
-        owner: 1
+const getBusinessProducts = (bId : number): Product[] => {
+    try {
+        businessService.getBusinessById(bId)
+        const products : Product[] = productRepo.findBusinessProducts(bId)
+        if (!products) throw new Error('No products found for this business')
+        return products
     }
-
-    productList.push(product)
-    return productList
+    catch (e) {
+        throw e
+    }
 }
 
-const getProductByID = (id : number) : Product => {
+const getProductById = (pId : number) : Product => {
 
-    const product = r.findProductById(id)
+    const product : Product =  productRepo.findProductById(pId)
     
     if (!product) {
-        return {} as Product
+        throw new Error('No product found with that id')
     } 
+    return product
 
-    return  {
-        id: product.id, 
-        owner: product.owner,
-        product_name: product.product_name,
-        image_url: product.image_url,
-        product_type: product.product_type,
-        tag: product.tags,
-    }
 }
-const getProductsByName = (productName : string) : Product[] => {
-    // Returns products that share the same name. Should reduce query count by uppercasing, trimming and returning unique values
-    // This will use use for sharing products within inventories
+// const searchProducts = (productName : string, productType) : Product[] => {
+//     // Returns products that share the same name. Should reduce query count by uppercasing, trimming and returning unique values
+//     // This will use use for sharing products within inventories
 
-    const products = r.findProductByName(productName);
-    const productList : Product[] = []
+//     const products = productRepo.findProductByName(productName, productType);
+//     const productList : Product[] = []
     
-    if (!products) {
-        return []
-    }
-    for (let i = 0; i < products ; i++) {
-        productList.push( {
-            id: products[i].id, 
-            owner: products[i].owner,
-            product_name: products[i].product_name,
-            image_url: products[i].image_url,
-            product_type: products[i].product_type,
-            tag: products[i].tags,
-        })
-    }
-    return productList 
-}
-const updateProduct = () => {
-    //updates the items. Only the owner of the product (business_id) can update an item
-    // items can be shared accross businesses and business stores
+//     if (!products) {
+//         return []
+//     }
+//     for (let i = 0; i < products ; i++) {
+//         productList.push( {
+//             id: products[i].id, 
+//             owner: products[i].owner,
+//             product_name: products[i].product_name,
+//             image_url: products[i].image_url,
+//             product_type: products[i].product_type,
+//             tag: products[i].tags,
+//         })
+//     }
+//     return productList 
+// }
+
+const updateProduct = (product : Product) => { 
 
     return
 }
-const createProduct = () => {
+const createProduct = (product : Product) => {
     // returns product_id
 
     return ''
@@ -74,4 +61,4 @@ const deleteProduct = () => {
     return
 }
 
-module.exports = { getAllProducts, getProductByID, getProductsByName, updateProduct, createProduct, deleteProduct}
+module.exports = { getBusinessProducts, getProductById }
