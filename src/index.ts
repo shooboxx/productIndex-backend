@@ -2,6 +2,7 @@ if (process.env.NODE_ENV !== 'production') {
      require('dotenv').config()
 }
 
+const AppError = require('./utils/appError.js')
 const express = require('express')
 // Initialize the app
 const app = express();
@@ -37,8 +38,24 @@ app.use(store)
 app.use(userAuth)
 app.use(business)
 
+
+
 // Send message for default URL
 app.get('/', (req: any, res: any) => res.send('Hello World with Express'));
+
+app.all('*', (req, res, next) => {
+
+     next(new AppError(`Can't find ${req.originalUrl} on this server.`, 404));
+})
+
+app.use((err, req, res, next) => {
+     err.statusCode = err.statusCode || 500;
+     err.status = err.status || 'error'
+     res.status(err.statusCode).json({
+          status: err.status,
+          message: err.message
+     })
+})
 // Launch app to listen to specified port
 app.listen(port, function () {
      console.log("Running RestHub on port " + port);
