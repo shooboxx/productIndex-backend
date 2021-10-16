@@ -2,6 +2,7 @@ if (process.env.NODE_ENV !== 'production') {
      require('dotenv').config()
 }
 
+let morgan = require('morgan')
 const AppError = require('./utils/appError.js')
 const express = require('express')
 // Initialize the app
@@ -22,6 +23,8 @@ let business = require('./service/business/businessController')
 
 // Setup server port
 var port = process.env.PORT || 8080;
+
+app.use(morgan('tiny'));
 
 app.use(flash())
 app.use(session({
