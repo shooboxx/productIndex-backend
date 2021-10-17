@@ -20,6 +20,7 @@ let product = require('./service/product/productController')
 let store = require('./service/store/businessStoreController')
 let userAuth = require('./service/auth/user/userAuthentication')
 let business = require('./service/business/businessController')
+let review = require('./service/reviews/reviewController')
 
 // Setup server port
 var port = process.env.PORT || 8080;
@@ -40,6 +41,7 @@ app.use(product);
 app.use(store)
 app.use(userAuth)
 app.use(business)
+app.use(review)
 
 
 

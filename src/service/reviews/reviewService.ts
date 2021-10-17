@@ -1,11 +1,16 @@
 const businessService = require('../business/businessService');
 const userService = require('../user/userService')
-const reviewsRepo = require('./reviewRepo')
+let reviewsRepo = require('./reviewRepo')
+const { exist } = require('../../utils/utils.js')
+
+if (process.env.NODE_ENV == 'test') {
+   reviewsRepo  = require('./mockReviewRepo')
+}
+
 import { Review } from './reviewType'
 
 const getReviewsByBusinessId = (businessId : number) : Review[]=> {
     try {
-        businessService.getBusinessById(businessId)
         const reviews = reviewsRepo.findReviewsByBusinessId(businessId)
 
         if (reviews.length === 0) throw new Error('No reviews for this business')
@@ -16,18 +21,24 @@ const getReviewsByBusinessId = (businessId : number) : Review[]=> {
     }
     
 }
+const getReview = (userId : number, business_id : number) : Review => {
+    try {
+        const review = reviewsRepo.findReview(userId, business_id)
+        if (!exist(review)) throw new Error('User has not left a review for this business')
+        return review
+    }
+    catch (e) {
+        throw e
+    }
+}
 
 const createReview = (newReview : Review) : Review=> {
     try {
-        businessService.getBusinessById(newReview.business_id)
+        // businessService.getBusinessById(newReview.business_id)
         const found = reviewsRepo.findReview(newReview.user_id, newReview.business_id)
 
-        if (found) throw new Error('You cannot review a business more than once. Please update preview review instead')
-        if (newReview.star_rating < 1 && newReview.star_rating > 6 ) throw new Error('Star rating value must be between 1 and 5');
-        if (!newReview.star_rating) throw new Error('Star rating is required')
-        if (!newReview.review_comment) throw new Error('Review comment is required')
-        if (newReview.review_comment.length < 12) throw new Error('Review comment must be at least 12 characters')
-        if (!newReview.user_id) throw new Error('user_id is required')
+        if (exist(found)) throw new Error('You cannot review a business more than once. Please update preview review instead')
+        _validReview(newReview)
 
         const review = reviewsRepo.createReview(newReview)
 
@@ -41,21 +52,16 @@ const createReview = (newReview : Review) : Review=> {
 
 const updateReview = (updatedReview : Review) : Review => {
     try {
-        businessService.getBusinessById(updatedReview.business_id)
-        const currReview : Review = reviewsRepo.findReview(updatedReview.user_id, updatedReview.business_id)
-
-        if (updatedReview.star_rating < 1 && updatedReview.star_rating > 6 ) throw new Error('Star rating value must be between 1 and 5');
-        if (!updatedReview.star_rating) throw new Error('Star rating is required')
-        if (!updatedReview.review_comment) throw new Error('Review comment is required')
-        if (updatedReview.review_comment.length < 12) throw new Error('Review comment must be at least 12 characters')
-        if (!updatedReview.user_id) throw new Error('user_id is required')
-
+        // businessService.getBusinessById(updatedReview.business_id)
+        const currReview : Review = getReview(updatedReview.user_id, updatedReview.business_id)
         currReview.review_comment = updatedReview.review_comment || currReview.review_comment
         currReview.star_rating = updatedReview.star_rating || currReview.star_rating 
         currReview.update_date = Date.now()
         currReview.flagged = updatedReview.flagged || currReview.flagged
         currReview.inappropriate_comment = updatedReview.inappropriate_comment || currReview.inappropriate_comment
-
+        _validReview(currReview)
+ 
+        console.log(currReview)
         return reviewsRepo.updateReview(currReview)
 
     }
@@ -86,14 +92,22 @@ const markReviewAsInappropriate = (userId : number, businessId : number) : Revie
 
 const deleteReview = (userId : number, businessId : number) => { 
    try {
-    businessService.getBusinessById(businessId)
-    userService.getUserById(userId)
-
-    const review = reviewsRepo.findReview(userId, businessId)
-    reviewsRepo.deleteReview(review.id)
+    // businessService.getBusinessById(businessId)
+    // userService.getUserById(userId)
+    const review = getReview(userId, businessId)
+    return reviewsRepo.deleteReview(review.id)
    }
    catch (e) {
        throw e
    }
+}
+
+const _validReview = (review: Review) => {
+    if (review.star_rating < 1 && review.star_rating > 6 ) throw new Error('Star rating value must be between 1 and 5');
+    if (!review.star_rating) throw new Error('Star rating is required')
+    if (!review.review_comment) throw new Error('Review comment is required')
+    if (review.review_comment.length < 12) throw new Error('Review comment must be at least 12 characters')
+    if (!review.user_id) throw new Error('user_id is required')
+    return true
 }
 module.exports = {getReviewsByBusinessId, createReview, updateReview, deleteReview, flagReview, markReviewAsInappropriate}

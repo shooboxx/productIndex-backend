@@ -9,12 +9,11 @@ import { Review } from './reviewType'
 
 
 
-router.post('/business/:businessId/review', (req, res) => {
+router.post('/api/review', (req, res) => {
     try {
-        const bizId = req.params.businessId
         const newReview : Review = {
-            business_id: bizId,
-            user_id: req.user.id,
+            business_id: req.body.business_id,
+            user_id: req.body.user_id,
             star_rating: req.body.star_rating,
             review_comment: req.body.review_comment
         }
@@ -24,17 +23,13 @@ router.post('/business/:businessId/review', (req, res) => {
     catch (e : any) {
         res.status(200).json({"error": e.message})
     }
-
-
 })
 
-router.put('/business/:businessId/review', (req, res) => {
+router.put('/api/review', (req, res) => {
     try {
-        const bizId = req.params.businessId
-
         const updatedReview : Review = {
-            business_id: bizId,
-            user_id: req.user.id,
+            business_id: req.body.business_id,
+            user_id: req.body.user_id,
             star_rating: req.body.star_rating,
             review_comment: req.body.review_comment
         }
@@ -46,11 +41,9 @@ router.put('/business/:businessId/review', (req, res) => {
     }
 })
 
-router.delete('/business/:businessId/review', (req, res) => {
+router.delete('/api/review', (req, res) => {
     try {
-        const bizId = req.params.businessId
-        
-        return res.status(200).json(reviewService.deleteReview(req.user.id, bizId))
+        return res.status(200).json(reviewService.deleteReview(req.body.user_id, req.body.business_id))
     }
     catch (e : any) {
         res.status(200).json({"error": e.message})
