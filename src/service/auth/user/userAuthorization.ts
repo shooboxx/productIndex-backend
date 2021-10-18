@@ -2,6 +2,7 @@
 
 import { UserRole } from "./authTypes"
 const jwt = require('jsonwebtoken')
+import AppError from '../../../utils/appError.js'
 
 
 const roles : UserRole[] = []
@@ -62,4 +63,16 @@ const getUserRole = (userID) : UserRole => {
 const setUserRole = (userID, roleID) => {
 
 }
-module.exports = {getRoleByID, adminOnlyAccess, hasAccessLevel}
+
+function authenticateToken (req, res, next) {
+    const authHeader = req.headers['authorization']
+    const token = authHeader && authHeader.split(' ')[1]
+    if (token == null) throw new AppError('User login is required', 403)
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+        if (err) throw new AppError('Token invalid or expired', 403)
+        req.user_id = user.user_id
+        return next()
+    })
+}
+module.exports = {getRoleByID, adminOnlyAccess, hasAccessLevel, authenticateToken}

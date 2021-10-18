@@ -1,5 +1,5 @@
 import { UserLogin, User } from "../../user/userType";
-
+const { authenticateToken } = require('./userAuthorization')
 
 export {};
 const bcrypt = require('bcrypt')
@@ -12,7 +12,7 @@ const {adminOnlyAccess, hasAccessLevel} = require('./userAuthorization')
 const crypto = require('crypto')
 
 // Created user : Tested : Working
-router.post('/auth/register', async (req: any, res: any) => {
+router.post('/api/auth/register', checkNotAuthenticated, async (req: any, res: any) => {
     try {
         const hashedPass = await bcrypt.hash(req.body.password, 10)
         const user : User = {
@@ -37,15 +37,14 @@ router.post('/auth/register', async (req: any, res: any) => {
 
 });
 // Sign in : Tested : Worked
-router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
+router.post('/api/auth/login', checkNotAuthenticated, async (req, res) => {
     try{
         const user = userService.getUserLoginByEmail(req.body.email_address)
-        console.log('This ran')
         await bcrypt.compare(req.body.password, user.password, (err, resp) => {
             if (err) res.sendStatus(404)
             if (resp){
-                const accessToken = generateAccessToken({userID: user.id})
-                const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET)
+                const accessToken = generateAccessToken({user_id: user.id})
+                const refreshToken = jwt.sign({user_id: user.id}, process.env.REFRESH_TOKEN_SECRET)
                 refreshTokens.push(refreshToken) 
                 return res.json({access_token: accessToken, refresh_token: refreshToken})
             }
@@ -57,20 +56,22 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
     }
 })
 
-router.delete('/auth/logout', authenticateToken, (req: any, res: any) => {
+router.delete('/api/auth/logout', authenticateToken, (req: any, res: any) => {
 
     refreshTokens = refreshTokens.filter(token => token !== req.body.token)
     res.sendStatus(204)
 });
 
 // Forget password : Tested : Works :TODO = Send email with token to user
-router.post('/auth/forget-password', checkNotAuthenticated, async (req: any, res: any) => {
+router.post('/api/auth/forgot-password', checkNotAuthenticated, async (req: any, res: any) => {
 
     let resetToken 
     try {
-        const user = userService.getUserLoginByEmail(req.body.email_address)
+        let user = userService.getUserLoginByEmail(req.body.email_address)
+        
         resetToken = await createUserPasswordResetToken(user.id)
-        return res.json({reset_token: resetToken})
+
+        return res.status(200).json({reset_token: resetToken})
     }
     catch(err : any) {
         res.status(200).json({"error": err.message})
@@ -78,10 +79,11 @@ router.post('/auth/forget-password', checkNotAuthenticated, async (req: any, res
 
 });
 
-router.post('/auth/reset-password/:resetToken', async (req: any, res: any) => {
+router.post('/api/auth/reset-password/:resetToken', checkNotAuthenticated, async (req: any, res: any) => {
     try {
-        const user = userService.getUserLoginByEmail(req.body.emailAddress)
-        await bcrypt.compare(req.params.resetToken, user.passwordResetToken, (err, resp) => {
+        const user = userService.getUserLoginByEmail(req.body.email_address)
+        // if (!req.body.password) res.sendStatus(400).json({error: 'password is required'})
+        await bcrypt.compare(req.params.resetToken, user.password_reset_token, (err, resp) => {
             if (resp) {
                 if (user.password_reset_expires_in < Date.now()) {
                     return res.status(200).send("Token expired")
@@ -105,19 +107,19 @@ router.post('/auth/reset-password/:resetToken', async (req: any, res: any) => {
             return res.sendStatus(400).json({error: 'Invalid token'})
         })
     }
-    catch (e){
-        return res.status(400).send(e) 
+    catch (e : any){
+        return res.status(400).send(e.message) 
     }
 });
 
-router.post('/auth/token', (req, res) => {
+router.post('/api/auth/token', (req, res) => {
     const refreshToken = req.body.token
     if (refreshToken == null) return res.sendStatus(401)
     if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403)
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user)=> {
         if (err) return res.sendStatus(403)
-        const accessToken = generateAccessToken({name: user.name})
-        return res.json(accessToken)
+        const accessToken = generateAccessToken({user_id: user.user_id})
+        return res.json({access_token: accessToken})
     })
 })
 
@@ -136,17 +138,7 @@ async function createUserPasswordResetToken (userId)  {
     return resetToken
 }
 
-function authenticateToken (req, res, next) {
-    const authHeader = req.headers['authorization']
-    const token = authHeader && authHeader.split(' ')[1]
-    if (token == null) return res.sendStatus(401)
 
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403)
-        req.user = user
-        return next()
-    })
-}
 function checkNotAuthenticated (req, res, next) {
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
@@ -162,7 +154,8 @@ function checkNotAuthenticated (req, res, next) {
 }
 
 function generateAccessToken(user){
-    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '15m'})
+    // expiration time should be 15m in prod
+    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: process.env.NODE_ENV == 'development' ? '1440m' : '15m'})
 }
 
 

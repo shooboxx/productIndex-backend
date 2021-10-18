@@ -1,4 +1,5 @@
 import { User, UserLogin } from "./userType"
+import AppError from '../../utils/appError.js'
 
 const userRepo = require('./userRepo')
 
@@ -23,7 +24,7 @@ const getUserById = (userId : number) : User => {
     const user = userRepo.findUser(userId, null) || null;
 
     if (!user) {
-        throw Error('User not found with that Id')
+        throw new AppError('User not found with that Id', 404)
     }
     return user
 }
@@ -45,20 +46,18 @@ const getUserMasterDetail = () => {
 }
 
 const createUser = (user : User) => {
-    if (!user.email_address) {throw new Error('Email address is required')}
-    if (!user.password) throw new Error('Password is required')
+    if (!user.email_address) {throw new AppError('Email address is required', 400)}
+    if (!user.password) throw new AppError('Password is required', 400)
 
     try {
-        console.log(user.email_address)
 
         getUserLoginByEmail(user.email_address)
     }
     catch(e) {
         const newUser = userRepo.addUser(user)
-        return newUser.email_address
-        
+        return newUser.email_address  
     }
-    throw new Error(`User already exist with that email address`)
+    throw new AppError('User already exist with that email address', 400)
 
     
 }
@@ -68,6 +67,7 @@ const updateUserProfile = (user: User) => {
 }
 
 const updateUserLogin = (updatedUser : UserLogin) => {
+    console.log(updatedUser)
     try {
         const user = getUserById(updatedUser.id)
         const userLogin = getUserLoginByEmail(user.email_address)
