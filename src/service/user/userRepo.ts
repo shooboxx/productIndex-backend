@@ -14,8 +14,16 @@ const findUser = (userId : number, emailAddress : string) => {
             return users[i]
         }
     }
+    return null
 }
-
+const findUserByResetToken = (resetToken : string) => {
+    for (let i = 0; i< users.length; i++) {
+        if (users[i].password_reset_token == resetToken) {
+            return users[i]
+        }
+    }
+    return null
+}
 const updateUserLogin = (user: UserLogin) => {
     for (let i = 0; i< users.length; i++) {
         if (users[i].id == user.id) {
@@ -27,4 +35,4 @@ const updateUserLogin = (user: UserLogin) => {
         }
     }
 }
-module.exports = { addUser, findUser, updateUserLogin }
+module.exports = { addUser, findUser, updateUserLogin, findUserByResetToken }

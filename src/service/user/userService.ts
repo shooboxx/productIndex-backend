@@ -30,14 +30,11 @@ const getUserById = (userId : number) : User => {
 }
 
 const getUserLoginByResetToken = (resetToken : string) : UserLogin => {
+    if (!resetToken) throw new Error('reset_token is required')
+    const user = userRepo.findUserByResetToken(resetToken);
 
-    return {
-        id: 0,
-        email_address: '',
-        password: '',
-        password_reset_token: '',
-        password_reset_expires_in: 0
-    }
+    if (!user) throw new AppError('User not found', 404)
+    return user
 }
 
 // Returns full info about a user. For admin purposes only
@@ -67,7 +64,6 @@ const updateUserProfile = (user: User) => {
 }
 
 const updateUserLogin = (updatedUser : UserLogin) => {
-    console.log(updatedUser)
     try {
         const user = getUserById(updatedUser.id)
         const userLogin = getUserLoginByEmail(user.email_address)

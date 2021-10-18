@@ -70,42 +70,43 @@ router.post('/api/auth/forgot-password', checkNotAuthenticated, async (req: any,
         let user = userService.getUserLoginByEmail(req.body.email_address)
         
         resetToken = await createUserPasswordResetToken(user.id)
-
-        return res.status(200).json({reset_token: resetToken})
+        const updatedUser = userService.updateUserLogin(user);
+        return res.status(200).json({reset_token: updatedUser.password_reset_token}) 
     }
     catch(err : any) {
-        res.status(200).json({"error": err.message})
+        return res.status(200).json({"error": err.message})
     }
 
 });
 
 router.post('/api/auth/reset-password/:resetToken', checkNotAuthenticated, async (req: any, res: any) => {
     try {
-        const user = userService.getUserLoginByEmail(req.body.email_address)
-        // if (!req.body.password) res.sendStatus(400).json({error: 'password is required'})
-        await bcrypt.compare(req.params.resetToken, user.password_reset_token, (err, resp) => {
-            if (resp) {
-                if (user.password_reset_expires_in < Date.now()) {
-                    return res.status(200).send("Token expired")
-                }
-                // Find users by the reset token instead of email
-                // check to see if new password matches old password
-                // -- if same as old password, prompt user that they cannot use a password that they've used previously
-                // check to see if new password and verify new password is the same.
-                // -- if it doesn't, tell user that password is not the same
-                // -- if it does, then allow user to update password. Call the updateUserLogin func
-                // -- destroy active sessions and remember me cookies
-                // delete reset token and tokenexpiry
-                // 
-                
-                return res.status(200).send('works')
-                
+        const resetToken = req.params.resetToken
+        // Should check if we're saving and getting an encrypted resetToken from the database for comparison
+        const user = userService.getUserLoginByResetToken(resetToken)
+        const newPassword = req.body.password
+        const newPasswordConfirm = req.body.password_confirm
+        if (user) {
+            if (user.password_reset_expires_in < Date.now()) {
+                res.status(200).json({"error": "Token expired"})
             }
-            if (err) {
-                return res.sendStatus(400)
+            if (newPassword !== newPasswordConfirm) {
+                res.status(200).json({"error": "Passwords do not match"})
             }
-            return res.sendStatus(400).json({error: 'Invalid token'})
-        })
+            user.password = await bcrypt.hash(req.body.password, 10)
+            user.password_reset_token = null
+            user.password_reset_expires_in = null
+
+            userService.updateUserLogin(user)
+            return res.status(200).send('success')
+        }
+       
+        // check to see if new password matches old password
+        // -- if same as old password, prompt user that they cannot use a password that they've used previously
+
+        // -- destroy active sessions and remember me cookies
+    
+            return res.status(400).json({error: 'Invalid token'})
     }
     catch (e : any){
         return res.status(400).send(e.message) 
@@ -125,7 +126,7 @@ router.post('/api/auth/token', (req, res) => {
 
 async function createUserPasswordResetToken (userId)  {
     const resetToken = crypto.randomBytes(32).toString('hex');
-    const hashedResetToken =  await bcrypt.hash(resetToken, 10)
+    const hashedResetToken = crypto.createHash('sha256').update(resetToken).digest('hex')
     const userResetTokenExpiry = Date.now() * 10 * 60 * 1000;
     const user : UserLogin = {
         id: userId,
@@ -135,6 +136,7 @@ async function createUserPasswordResetToken (userId)  {
         password_reset_expires_in: userResetTokenExpiry
     }
     userService.updateUserLogin(user);
+    
     return resetToken
 }
 
