@@ -1,6 +1,6 @@
 export {}
 import { User } from './userType'
-const users : any = []
+let users : any = []
 import { UserLogin } from './userType'
 
 const addUser = (user: User) => {
@@ -37,4 +37,16 @@ const updateUserLogin = (user: UserLogin) => {
         }
     }
 }
+
+const deleteUser = (userId) => {
+    // TODO: Implement this
+    users = users.filter(user => user.id !== userId)
+    return -1
+}
+
+const deactivateUser = (userId) => {
+    // TODO: Implement this
+    return -1
+}
+
 module.exports = { addUser, findUser, updateUserLogin, findUserByResetToken }

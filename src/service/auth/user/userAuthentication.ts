@@ -9,7 +9,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken')
 const userService = require('../../user/userService')
 let refreshTokens : any = []
-const {adminOnlyAccess, hasAccessLevel} = require('./userAuthorization')
+const {adminOnlyAccess, hasAccessLevel, getRoleID, checkNotAuthenticated} = require('./userAuthorization')
 const crypto = require('crypto')
 
 // Created user : Tested : Working
@@ -78,7 +78,7 @@ router.post('/api/auth/forgot-password', checkNotAuthenticated, async (req: any,
         return res.status(200).json({reset_token: resetToken, reset_token_expires: userResetTokenExpiry}) 
     }
     catch(err : any) {
-        return res.status(200).json({"error": err.message})
+        return res.status(400).json({"error": err.message})
     }
 
 });
@@ -93,15 +93,12 @@ router.post('/api/auth/reset-password/:resetToken', checkNotAuthenticated, async
         const newPasswordConfirm = req.body.password_confirm
         if (user) {
             if (user.password_reset_expires_in && user.password_reset_expires_in < Date.now()) {
-                res.status(200).json({"error": "Token expired"})
+                res.status(400).json({"error": "Token expired"})
             }
             userService.updatePassword(user.email_address, newPassword, newPasswordConfirm)
             
             return res.status(200).send('success')
         }
-       
-
-        // -- TODO: destroy active sessions and remember me cookies
     
             return res.status(400).json({error: 'Invalid token'})
     }
@@ -109,6 +106,8 @@ router.post('/api/auth/reset-password/:resetToken', checkNotAuthenticated, async
         return res.status(400).send(e.message) 
     }
 });
+
+// TODO: Create a verify route
 
 router.post('/api/auth/token', (req, res) => {
     const refreshToken = req.body.refresh_token
@@ -121,39 +120,13 @@ router.post('/api/auth/token', (req, res) => {
     })
 })
 
-async function createUserPasswordResetToken (emailAddress)  {
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const hashedResetToken = crypto.createHash('sha256').update(resetToken).digest('hex')
-    const userResetTokenExpiry = Date.now() * 10 * 60 * 1000;
-    userService.updateResetToken(emailAddress, hashedResetToken, userResetTokenExpiry);
-    
-    return resetToken
-}
-
-
-function checkNotAuthenticated (req, res, next) {
-    const authHeader = req.headers['authorization']
-    const token = authHeader && authHeader.split(' ')[1]
-    if (token == null) return next()
-    try {
-        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-    }
-    catch {
-        return next()
-    }
-    
-    return res.status(403).json({"error": "user already logged in"})
-}
-
 function generateAccessToken(user){
     // expiration time should be 15m in prod
     return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: process.env.NODE_ENV == 'development' ? '1440m' : '15m'})
 }
 
 
-function getRoleID(roleName) {
-    return 1
-}
+
 
 
 module.exports = router

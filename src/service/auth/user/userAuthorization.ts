@@ -75,4 +75,23 @@ function authenticateToken (req, res, next) {
         return next()
     })
 }
-module.exports = {getRoleByID, adminOnlyAccess, hasAccessLevel, authenticateToken}
+
+function getRoleID(roleName) {
+    return 1
+}
+
+function checkNotAuthenticated (req, res, next) {
+    const authHeader = req.headers['authorization']
+    const token = authHeader && authHeader.split(' ')[1]
+    if (token == null) return next()
+    try {
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+    }
+    catch {
+        return next()
+    }
+    
+    return res.status(403).json({"error": "user already logged in"})
+}
+
+module.exports = {getRoleByID, adminOnlyAccess, hasAccessLevel, authenticateToken, checkNotAuthenticated}

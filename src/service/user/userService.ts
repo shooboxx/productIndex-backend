@@ -40,7 +40,7 @@ const getUserLoginByResetToken = (resetToken : string) : UserLogin => {
 
 // Returns full info about a user. For admin purposes only
 const getUserMasterDetail = () => {
-
+    // TODO: Implement this
 }
 
 const createUser = (user : User) => {
@@ -60,7 +60,7 @@ const createUser = (user : User) => {
     
 }
 const updateUserProfile = (user: User) => {
-
+    // TODO: Implement this
     
 }
 const updateResetToken = (emailAddress, resetToken, resetTokenExpiry) => {
@@ -86,23 +86,29 @@ const updatePassword = async (emailAddress, newPassword, newPasswordConfirm) => 
     user.password_reset_token = ''
     user.password_reset_expires_in = 0
     user.password_last_updated = Date.now()
-
+        // -- TODO: destroy active sessions and remember me cookies
     return userRepo.updateUserLogin(user)
 
 }
 
 const deleteUser = (userId : number) => {
-    const user = getUserById(userId)
-    if (!user) throw new AppError('No user found', 404)
-
-    return userRepo.deleteUser(userId);
+    try {
+        getUserById(userId)
+        return userRepo.deleteUser(userId);
+    }
+    catch (e) {
+        throw e
+    }
 }
 
 const deactivateUser = (userId) => {
-    const user = getUserById(userId)
-    if (!user) throw new AppError('No user found', 404)
-
-    return userRepo.deactivateUser(userId);
+    try {
+        getUserById(userId)
+        return userRepo.deactivateUser(userId);
+    }
+    catch (e) {
+        throw e
+    }   
 }
 
-module.exports = { getUserLoginByEmail, getUserById, createUser, updateResetToken, updatePassword, getUserLoginByResetToken }
+module.exports = { getUserLoginByEmail, getUserById, createUser, updateResetToken, updatePassword, getUserLoginByResetToken, deleteUser, deactivateUser }

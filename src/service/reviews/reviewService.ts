@@ -102,6 +102,10 @@ const deleteReview = (userId : number, businessId : number) => {
    }
 }
 
+const getUserReviews = (userId : number) => {
+    //Todo: Implement this
+}
+
 const _validReview = (review: Review) => {
     if (review.star_rating < 1 && review.star_rating > 6 ) throw new Error('Star rating value must be between 1 and 5');
     if (!review.star_rating) throw new Error('Star rating is required')
