@@ -1,5 +1,6 @@
 import { User, UserLogin } from "./userType"
 import AppError from '../../utils/appError.js'
+const bcrypt = require('bcrypt')
 
 const userRepo = require('./userRepo')
 
@@ -62,33 +63,46 @@ const updateUserProfile = (user: User) => {
 
     
 }
-
-const updateUserLogin = (updatedUser : UserLogin) => {
+const updateResetToken = (emailAddress, resetToken, resetTokenExpiry) => {
     try {
-        const user = getUserById(updatedUser.id)
-        const userLogin = getUserLoginByEmail(user.email_address)
+        const userLogin = getUserLoginByEmail(emailAddress)
+        userLogin.password_reset_token =  resetToken
+        userLogin.password_reset_expires_in = resetTokenExpiry
         
-        // ensures that if data is null, do not override
-        const uUser : UserLogin = {
-            id: updatedUser.id,
-            email_address: updatedUser.email_address || userLogin.email_address,
-            password: updatedUser.password || userLogin.password,
-            password_reset_token: updatedUser.password_reset_token || userLogin.password_reset_token,
-            password_reset_expires_in: updatedUser.password_reset_expires_in || userLogin.password_reset_expires_in
-        }
-         return userRepo.updateUserLogin(uUser)
+         return userRepo.updateUserLogin(userLogin)
     } 
     catch (err) {
         throw err
     }
 }
 
-const deleteUser = (userId : number) => {
+const updatePassword = async (emailAddress, newPassword, newPasswordConfirm) => {
+    const user = getUserLoginByEmail(emailAddress)
+    if (!user) throw AppError('No user found', 404)
+    if (newPassword !== newPasswordConfirm) {
+        throw AppError("Passwords do not match", 400)
+    } 
+    user.password = await bcrypt.hash(newPassword, 10)
+    user.password_reset_token = ''
+    user.password_reset_expires_in = 0
+    user.password_last_updated = Date.now()
 
+    return userRepo.updateUserLogin(user)
+
+}
+
+const deleteUser = (userId : number) => {
+    const user = getUserById(userId)
+    if (!user) throw new AppError('No user found', 404)
+
+    return userRepo.deleteUser(userId);
 }
 
 const deactivateUser = (userId) => {
+    const user = getUserById(userId)
+    if (!user) throw new AppError('No user found', 404)
 
+    return userRepo.deactivateUser(userId);
 }
 
-module.exports = { getUserLoginByEmail, getUserById, createUser, updateUserLogin, getUserLoginByResetToken }
+module.exports = { getUserLoginByEmail, getUserById, createUser, updateResetToken, updatePassword, getUserLoginByResetToken }

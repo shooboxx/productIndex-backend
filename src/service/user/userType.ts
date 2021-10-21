@@ -24,6 +24,7 @@ export interface UserLogin {
     password: string,
     password_reset_token?: string,
     password_reset_expires_in?: number
+    password_last_updated?: number
 
 }
 

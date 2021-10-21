@@ -1,5 +1,6 @@
 import { UserLogin, User } from "../../user/userType";
 const { authenticateToken } = require('./userAuthorization')
+import { AppError } from '../../../utils/appError.js';
 
 export {};
 const bcrypt = require('bcrypt')
@@ -50,6 +51,7 @@ router.post('/api/auth/login', checkNotAuthenticated, async (req, res) => {
             }
             return res.json({"error": "Email address or password is incorrect"})
         } ) 
+        
     }
     catch(e : any) { 
         return res.status(200).json({"error": e.message}) 
@@ -64,14 +66,16 @@ router.delete('/api/auth/logout', authenticateToken, (req: any, res: any) => {
 
 // Forget password : Tested : Works :TODO = Send email with token to user
 router.post('/api/auth/forgot-password', checkNotAuthenticated, async (req: any, res: any) => {
-
-    let resetToken 
     try {
-        let user = userService.getUserLoginByEmail(req.body.email_address)
+        let user : UserLogin = userService.getUserLoginByEmail(req.body.email_address)
+
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const hashedResetToken = crypto.createHash('sha256').update(resetToken).digest('hex')
+        const userResetTokenExpiry = Date.now() * 10 * 60 * 1000;
         
-        resetToken = await createUserPasswordResetToken(user.id)
-        const updatedUser = userService.updateUserLogin(user);
-        return res.status(200).json({reset_token: updatedUser.password_reset_token}) 
+        userService.updateResetToken(user.email_address, hashedResetToken, userResetTokenExpiry);
+    
+        return res.status(200).json({reset_token: resetToken, reset_token_expires: userResetTokenExpiry}) 
     }
     catch(err : any) {
         return res.status(200).json({"error": err.message})
@@ -83,21 +87,16 @@ router.post('/api/auth/reset-password/:resetToken', checkNotAuthenticated, async
     try {
         const resetToken = req.params.resetToken
         // Should check if we're saving and getting an encrypted resetToken from the database for comparison
-        const user = userService.getUserLoginByResetToken(resetToken)
+        const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex') 
+        const user : UserLogin = userService.getUserLoginByResetToken(hashedToken)
         const newPassword = req.body.password
         const newPasswordConfirm = req.body.password_confirm
         if (user) {
-            if (user.password_reset_expires_in < Date.now()) {
+            if (user.password_reset_expires_in && user.password_reset_expires_in < Date.now()) {
                 res.status(200).json({"error": "Token expired"})
             }
-            if (newPassword !== newPasswordConfirm) {
-                res.status(200).json({"error": "Passwords do not match"})
-            }
-            user.password = await bcrypt.hash(req.body.password, 10)
-            user.password_reset_token = null
-            user.password_reset_expires_in = null
-
-            userService.updateUserLogin(user)
+            userService.updatePassword(user.email_address, newPassword, newPasswordConfirm)
+            
             return res.status(200).send('success')
         }
        
@@ -112,7 +111,7 @@ router.post('/api/auth/reset-password/:resetToken', checkNotAuthenticated, async
 });
 
 router.post('/api/auth/token', (req, res) => {
-    const refreshToken = req.body.token
+    const refreshToken = req.body.refresh_token
     if (refreshToken == null) return res.sendStatus(401)
     if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403)
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user)=> {
@@ -122,18 +121,11 @@ router.post('/api/auth/token', (req, res) => {
     })
 })
 
-async function createUserPasswordResetToken (userId)  {
+async function createUserPasswordResetToken (emailAddress)  {
     const resetToken = crypto.randomBytes(32).toString('hex');
     const hashedResetToken = crypto.createHash('sha256').update(resetToken).digest('hex')
     const userResetTokenExpiry = Date.now() * 10 * 60 * 1000;
-    const user : UserLogin = {
-        id: userId,
-        email_address: '',
-        password: '',
-        password_reset_token: hashedResetToken,
-        password_reset_expires_in: userResetTokenExpiry
-    }
-    userService.updateUserLogin(user);
+    userService.updateResetToken(emailAddress, hashedResetToken, userResetTokenExpiry);
     
     return resetToken
 }
@@ -162,4 +154,6 @@ function generateAccessToken(user){
 function getRoleID(roleName) {
     return 1
 }
+
+
 module.exports = router

@@ -18,7 +18,9 @@ const findUser = (userId : number, emailAddress : string) => {
 }
 const findUserByResetToken = (resetToken : string) => {
     for (let i = 0; i< users.length; i++) {
+        console.log('Passed in:'+ resetToken, "available" + users[i].password_reset_token)
         if (users[i].password_reset_token == resetToken) {
+
             return users[i]
         }
     }

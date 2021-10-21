@@ -59,7 +59,7 @@ const updateInventoryItem = (item : InventoryItem) : InventoryItem => {
         currItem.quantity = item.quantity || currItem.quantity
         currItem.update_date = item.update_date || currItem.quantity
         
-        return currItem
+        return inventoryRepo.updateInventoryItem(currItem)
     }
     catch (e) {
         throw e
@@ -70,14 +70,14 @@ const createInventoryItem = (item : InventoryItem) : InventoryItem => {
     try {
         const bizItem = getBusinessItemById(item.item.id)
         
-        if (!bizItem) {
-            return inventoryRepo.addInventoryItem(item)
+        if (bizItem) {
+            throw new Error('Item already exist in inventory')
         }
-        throw new Error('Item already exist in inventory')
     }
-    catch (e) {
-        throw e
+    catch {
+        return inventoryRepo.addInventoryItem(item)
     }
+    return {} as InventoryItem
 };
 
 const deleteInventoryItem = (itemId : number) => {
@@ -87,7 +87,6 @@ const deleteInventoryItem = (itemId : number) => {
         if (exist) {
             return inventoryRepo.deleteInventoryItem(itemId)
         }
-        throw new Error('Inventory item with that id does not exist')
     }
     catch (e) {
         throw e

@@ -7,7 +7,7 @@ const findStoreByBusinessId = (businessId : number) : BusinessStore[] => {
     let businessStores : BusinessStore[]= []
     for (let i = 0; i < stores.length; i++) {
         if (stores[i].business_id === businessId) {
-            businessStores.push(store[i])
+            businessStores.push(stores[i])
         }
     }
     return businessStores
