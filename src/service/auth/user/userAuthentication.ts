@@ -101,10 +101,8 @@ router.post('/api/auth/reset-password/:resetToken', checkNotAuthenticated, async
             return res.status(200).send('success')
         }
        
-        // check to see if new password matches old password
-        // -- if same as old password, prompt user that they cannot use a password that they've used previously
 
-        // -- destroy active sessions and remember me cookies
+        // -- TODO: destroy active sessions and remember me cookies
     
             return res.status(400).json({error: 'Invalid token'})
     }
