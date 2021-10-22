@@ -61,7 +61,20 @@ const createUser = (user : User) => {
 }
 const updateUserProfile = (user: User) => {
     // TODO: Implement this
+    const currUser = getUserById(user.id)
     
+    currUser.first_name = user.first_name || currUser.first_name
+    currUser.last_name = user.last_name || currUser.last_name
+    currUser.dob = user.dob || currUser.dob
+    currUser.gender = user.gender || currUser.gender
+    currUser.profile_picture_url = user.profile_picture_url || currUser.profile_picture_url
+    currUser.country = user.country || currUser.country
+    currUser.city = user.city || currUser.city
+    currUser.primary_phone = user.primary_phone || currUser.primary_phone
+    currUser.address = user.address || currUser.address
+    currUser.update_date = Date.now()
+
+    return userRepo.updateUser(currUser)
 }
 const updateResetToken = (emailAddress, resetToken, resetTokenExpiry) => {
     try {
@@ -76,9 +89,10 @@ const updateResetToken = (emailAddress, resetToken, resetTokenExpiry) => {
     }
 }
 
-const updatePassword = async (emailAddress, newPassword, newPasswordConfirm) => {
+const updatePassword = async (userId, emailAddress, newPassword, newPasswordConfirm) => {
     const user = getUserLoginByEmail(emailAddress)
     if (!user) throw AppError('No user found', 404)
+    if (userId !== user.id) throw AppError('User not allowed', 403)
     if (newPassword !== newPasswordConfirm) {
         throw AppError("Passwords do not match", 400)
     } 
@@ -91,24 +105,47 @@ const updatePassword = async (emailAddress, newPassword, newPasswordConfirm) => 
 
 }
 
-const deleteUser = (userId : number) => {
+const deactivateUser = (userId : number) => {
     try {
-        getUserById(userId)
-        return userRepo.deleteUser(userId);
-    }
-    catch (e) {
-        throw e
-    }
-}
-
-const deactivateUser = (userId) => {
-    try {
-        getUserById(userId)
-        return userRepo.deactivateUser(userId);
+        const user = getUserById(userId)
+        user.active = false
+        return userRepo.updateUser(user);
     }
     catch (e) {
         throw e
     }   
 }
 
-module.exports = { getUserLoginByEmail, getUserById, createUser, updateResetToken, updatePassword, getUserLoginByResetToken, deleteUser, deactivateUser }
+const verifyUser = (userId : number) => {
+    try {
+        const user = getUserById(userId)
+        user.is_verified = true
+        return userRepo.updateUser(user)
+    }
+    catch (e) {
+        
+    }
+}
+
+const deleteUser = (userId : number) => {
+    try {
+        const user = getUserById(userId)
+        user.deleted_date = Date.now()
+        return userRepo.updateUser(user);
+    }
+    catch (e) {
+        throw e
+    }
+}
+
+const setAciveStatus = (userId, active) => {
+    try {
+        const user = getUserById(userId)
+        user.active = active
+        return userRepo.updateUser(user);
+    }
+    catch (e) {
+        throw e
+    }
+}
+module.exports = { getUserLoginByEmail, getUserById, createUser, updateResetToken, updatePassword, getUserLoginByResetToken, deleteUser, deactivateUser, updateUserProfile, verifyUser, setAciveStatus }

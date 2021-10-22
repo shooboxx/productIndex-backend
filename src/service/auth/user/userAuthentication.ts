@@ -95,7 +95,7 @@ router.post('/api/auth/reset-password/:resetToken', checkNotAuthenticated, async
             if (user.password_reset_expires_in && user.password_reset_expires_in < Date.now()) {
                 res.status(400).json({"error": "Token expired"})
             }
-            userService.updatePassword(user.email_address, newPassword, newPasswordConfirm)
+            userService.updatePassword(user.id, user.email_address, newPassword, newPasswordConfirm)
             
             return res.status(200).send('success')
         }
@@ -107,7 +107,6 @@ router.post('/api/auth/reset-password/:resetToken', checkNotAuthenticated, async
     }
 });
 
-// TODO: Create a verify route
 
 router.post('/api/auth/token', (req, res) => {
     const refreshToken = req.body.refresh_token
@@ -124,9 +123,5 @@ function generateAccessToken(user){
     // expiration time should be 15m in prod
     return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: process.env.NODE_ENV == 'development' ? '1440m' : '15m'})
 }
-
-
-
-
 
 module.exports = router

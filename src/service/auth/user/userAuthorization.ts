@@ -94,4 +94,4 @@ function checkNotAuthenticated (req, res, next) {
     return res.status(403).json({"error": "user already logged in"})
 }
 
-module.exports = {getRoleByID, adminOnlyAccess, hasAccessLevel, authenticateToken, checkNotAuthenticated}
+module.exports = {getRoleByID, adminOnlyAccess, hasAccessLevel, authenticateToken, checkNotAuthenticated, getRoleID}

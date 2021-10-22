@@ -29,7 +29,6 @@ const findUserByResetToken = (resetToken : string) => {
 const updateUserLogin = (user: UserLogin) => {
     for (let i = 0; i< users.length; i++) {
         if (users[i].id == user.id) {
-            users[i].email_address = user.email_address;
             users[i].password = user.password
             users[i].password_reset_expires_in = user.password_reset_expires_in
             users[i].password_reset_token = user.password_reset_token
@@ -37,16 +36,26 @@ const updateUserLogin = (user: UserLogin) => {
         }
     }
 }
+const updateUser = (user: User) => {
+    for (let i = 0; i< users.length; i++) {
+        if (users[i].id == user.id) {
+            users[i].first_name = user.first_name
+            users[i].last_name = user.last_name
+            users[i].dob = user.dob
+            users[i].gender = user.gender
+            users[i].profile_picture_url = user.profile_picture_url
+            users[i].country = user.country
+            users[i].city = user.city
+            users[i].primary_phone = user.primary_phone
+            users[i].address = user.address
+            users[i].is_verified = user.is_verified
+            users[i].active = user.active
+            users[i].deleted_date = user.deleted_date
+            users[i].update_date = Date.now()
 
-const deleteUser = (userId) => {
-    // TODO: Implement this
-    users = users.filter(user => user.id !== userId)
-    return -1
+            return users[i]
+        }
+    }
 }
 
-const deactivateUser = (userId) => {
-    // TODO: Implement this
-    return -1
-}
-
-module.exports = { addUser, findUser, updateUserLogin, findUserByResetToken }
+module.exports = { addUser, findUser, updateUserLogin, findUserByResetToken, updateUser }
