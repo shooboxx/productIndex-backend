@@ -1,7 +1,6 @@
 export {}
 import { User } from './userType'
 let users : any = []
-import { UserLogin } from './userType'
 
 const addUser = (user: User) => {
     users.push(user)
@@ -26,21 +25,13 @@ const findUserByResetToken = (resetToken : string) => {
     }
     return null
 }
-const updateUserLogin = (user: UserLogin) => {
-    for (let i = 0; i< users.length; i++) {
-        if (users[i].id == user.id) {
-            users[i].password = user.password
-            users[i].password_reset_expires_in = user.password_reset_expires_in
-            users[i].password_reset_token = user.password_reset_token
-            return users[i]
-        }
-    }
-}
+
 const updateUser = (user: User) => {
     for (let i = 0; i< users.length; i++) {
         if (users[i].id == user.id) {
             users[i].first_name = user.first_name
             users[i].last_name = user.last_name
+            users[i].password = user.password
             users[i].dob = user.dob
             users[i].gender = user.gender
             users[i].profile_picture_url = user.profile_picture_url
@@ -49,6 +40,8 @@ const updateUser = (user: User) => {
             users[i].primary_phone = user.primary_phone
             users[i].address = user.address
             users[i].is_verified = user.is_verified
+            users[i].password_reset_expires_in = user.password_reset_expires_in
+            users[i].password_reset_token = user.password_reset_token
             users[i].active = user.active
             users[i].deleted_date = user.deleted_date
             users[i].update_date = Date.now()
@@ -58,4 +51,4 @@ const updateUser = (user: User) => {
     }
 }
 
-module.exports = { addUser, findUser, updateUserLogin, findUserByResetToken, updateUser }
+module.exports = { addUser, findUser, findUserByResetToken, updateUser }

@@ -2,6 +2,8 @@ if (process.env.NODE_ENV !== 'production') {
      require('dotenv').config()
 }
 
+const rateLimit = require('express-rate-limit')
+const helmet = require('helmet')
 let morgan = require('morgan')
 const AppError = require('./utils/appError.js')
 const express = require('express')
@@ -12,6 +14,8 @@ const passport = require('passport')
 const flash = require('express-flash')
 const session = require('express-session')
 const methodOverride = require('method-override')
+const hpp = require('hpp')
+const xss = require('xss')
 
 const users : any = []
 
@@ -26,8 +30,17 @@ let user = require('./service/user/userController')
 // Setup server port
 var port = process.env.PORT || 8080;
 
-app.use(morgan('tiny'));
+const limiter = rateLimit({
+     max: 100,
+     windowMs: 60 * 60 * 1000,
+     message: 'Too many request from this IP address. Please try again in 1 hour'
+})
 
+if (process.env.NODE_ENV === 'development') {
+     app.use(morgan('dev'));
+}
+
+app.use(express.json())
 app.use(flash())
 app.use(session({
      secret: process.env.SESSION_SECRET,
@@ -37,18 +50,27 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
-app.use(express.json())
-app.use(product);
-app.use(store)
-app.use(userAuth)
-app.use(business)
-app.use(review)
-app.use(user)
+
+
+app.use(helmet())
+app.use('/api/auth', limiter)
+
+
+
+
+app.use('/api',product);
+app.use('/api',store)
+app.use('/api',userAuth)
+app.use('/api',business)
+app.use('/api',review)
+app.use('/api',user)
+// app.use(xss())
+app.use(hpp())
 
 
 
 // Send message for default URL
-app.get('/', (req: any, res: any) => res.send('Hello World with Express'));
+app.get('/', (req: any, res: any) => res.send('Check was successful'));
 
 app.all('*', (req, res, next) => {
 

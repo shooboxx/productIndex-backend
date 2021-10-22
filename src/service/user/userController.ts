@@ -4,9 +4,10 @@ const router = express.Router()
 const businessService = require('../business/businessService')
 const reviewService = require('../reviews/reviewService')
 const userService = require('../user/userService')
+const {authenticateToken} = require('../auth/user/userAuthorization.ts')
 
 //Get User Businesses
-router.get('/api/user/:userid/businesses', (req, res) => {
+router.get('/user/:userid/businesses', (req, res) => {
     try {
         return res.status(200).json(businessService.getUserBusinesses(req.params.userId))
     }
@@ -16,7 +17,7 @@ router.get('/api/user/:userid/businesses', (req, res) => {
 })
 
 // Get user reviews
-router.get('/api/user/:userid/reviews', (req, res) => {
+router.get('/user/:userid/reviews', (req, res) => {
     try {
         return res.status(200).json(reviewService.getUserReviews(req.params.userId))
     }
@@ -25,7 +26,7 @@ router.get('/api/user/:userid/reviews', (req, res) => {
     }
 })
 
-router.get('/api/user/:userid', (req, res) => {
+router.get('/user/:userid', (req, res) => {
     try {
         return res.status(200).json(userService.getUserById(req.params.userid))
     }
@@ -34,18 +35,18 @@ router.get('/api/user/:userid', (req, res) => {
     }
 })
 
-router.delete('/api/user', (req, res) => {
+router.delete('/user', authenticateToken, (req, res) => {
     try {
-        return res.status(200).json(userService.deleteUser(req.params.userid))
+        return res.status(200).json(userService.deleteUser(req.user_id))
     }
     catch (e : any) {
         res.status(400).json({"error": e.message})
     }
 })
-router.put('/api/user/profile', (req, res) => {
+router.put('/user/profile', authenticateToken, (req, res) => {
     try {
         const user = {
-            id: 0,
+            id: req.user_id,
             role_id: 0,
             first_name: req.body.first_name,
             last_name: req.body.last_name,
@@ -71,7 +72,7 @@ router.put('/api/user/profile', (req, res) => {
         res.status(400).json({"error": e.message})
     }
 })
-router.put('/api/user/password', (req, res) => {
+router.put('/user/password', authenticateToken, (req, res) => {
     try {
         const updatedUser = userService.updatePassword(req.user_id, req.body.email_address, req.body.password, req.body.password_confirm)
         return res.status(200).json(updatedUser)
@@ -81,7 +82,7 @@ router.put('/api/user/password', (req, res) => {
     }
 })
 
-router.put('/api/user/verify', (req, res) => {
+router.put('/user/verify', (req, res) => {
     try {
         const updatedUser = userService.verifyUser(req.user_id)
         return res.status(200).json(updatedUser)
@@ -91,9 +92,9 @@ router.put('/api/user/verify', (req, res) => {
     }
 })
 
-router.put('/api/user/active', (req, res) => {
+router.put('/user/active', authenticateToken, (req, res) => {
     try {
-        const updatedUser = userService.setAciveStatus(req.user_id, req.body.active)
+        const updatedUser = userService.setAciveStatus(req.user_id, req.body.is_active)
         return res.status(200).json(updatedUser)     
     }
     catch (e : any) {

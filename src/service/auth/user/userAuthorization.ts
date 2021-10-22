@@ -60,8 +60,8 @@ const getUserRole = (userID) : UserRole => {
        update_date: 0
    } 
 }
-const setUserRole = (userID, roleID) => {
-
+const setUserRole = (userID, roleName) => {
+    const roleId = getRoleID(roleName)
 }
 
 function authenticateToken (req, res, next) {
@@ -93,5 +93,4 @@ function checkNotAuthenticated (req, res, next) {
     
     return res.status(403).json({"error": "user already logged in"})
 }
-
 module.exports = {getRoleByID, adminOnlyAccess, hasAccessLevel, authenticateToken, checkNotAuthenticated, getRoleID}

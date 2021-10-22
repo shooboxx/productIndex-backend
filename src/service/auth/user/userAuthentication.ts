@@ -1,4 +1,4 @@
-import { UserLogin, User } from "../../user/userType";
+import { User } from "../../user/userType";
 const { authenticateToken } = require('./userAuthorization')
 import { AppError } from '../../../utils/appError.js';
 
@@ -13,7 +13,7 @@ const {adminOnlyAccess, hasAccessLevel, getRoleID, checkNotAuthenticated} = requ
 const crypto = require('crypto')
 
 // Created user : Tested : Working
-router.post('/api/auth/register', checkNotAuthenticated, async (req: any, res: any) => {
+router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) => {
     try {
         const hashedPass = await bcrypt.hash(req.body.password, 10)
         const user : User = {
@@ -38,9 +38,9 @@ router.post('/api/auth/register', checkNotAuthenticated, async (req: any, res: a
 
 });
 // Sign in : Tested : Worked
-router.post('/api/auth/login', checkNotAuthenticated, async (req, res) => {
+router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
     try{
-        const user = userService.getUserLoginByEmail(req.body.email_address)
+        const user = userService.getUserByEmail(req.body.email_address)
         await bcrypt.compare(req.body.password, user.password, (err, resp) => {
             if (err) res.sendStatus(404)
             if (resp){
@@ -58,16 +58,16 @@ router.post('/api/auth/login', checkNotAuthenticated, async (req, res) => {
     }
 })
 
-router.delete('/api/auth/logout', authenticateToken, (req: any, res: any) => {
+router.delete('/auth/logout', authenticateToken, (req: any, res: any) => {
 
     refreshTokens = refreshTokens.filter(token => token !== req.body.token)
     res.sendStatus(204)
 });
 
 // Forget password : Tested : Works :TODO = Send email with token to user
-router.post('/api/auth/forgot-password', checkNotAuthenticated, async (req: any, res: any) => {
+router.post('/auth/forgot-password', checkNotAuthenticated, async (req: any, res: any) => {
     try {
-        let user : UserLogin = userService.getUserLoginByEmail(req.body.email_address)
+        let user : User = userService.getUserByEmail(req.body.email_address)
 
         const resetToken = crypto.randomBytes(32).toString('hex');
         const hashedResetToken = crypto.createHash('sha256').update(resetToken).digest('hex')
@@ -83,12 +83,12 @@ router.post('/api/auth/forgot-password', checkNotAuthenticated, async (req: any,
 
 });
 
-router.post('/api/auth/reset-password/:resetToken', checkNotAuthenticated, async (req: any, res: any) => {
+router.post('/auth/reset-password/:resetToken', checkNotAuthenticated, async (req: any, res: any) => {
     try {
         const resetToken = req.params.resetToken
         // Should check if we're saving and getting an encrypted resetToken from the database for comparison
         const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex') 
-        const user : UserLogin = userService.getUserLoginByResetToken(hashedToken)
+        const user : User = userService.getUserByResetToken(hashedToken)
         const newPassword = req.body.password
         const newPasswordConfirm = req.body.password_confirm
         if (user) {
@@ -108,7 +108,7 @@ router.post('/api/auth/reset-password/:resetToken', checkNotAuthenticated, async
 });
 
 
-router.post('/api/auth/token', (req, res) => {
+router.post('/auth/token', (req, res) => {
     const refreshToken = req.body.refresh_token
     if (refreshToken == null) return res.sendStatus(401)
     if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403)
@@ -124,4 +124,11 @@ function generateAccessToken(user){
     return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: process.env.NODE_ENV == 'development' ? '1440m' : '15m'})
 }
 
+function validUserRefreshToken(userId, refreshToken) : Boolean {
+    const hashedRefreshToken = crypto.createHash('sha256').update(refreshToken).digest('hex')
+    const found = userService.validUserRefreshToken(userId, hashedRefreshToken)
+    if (found) return true
+    
+    return false
+}
 module.exports = router

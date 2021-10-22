@@ -1,21 +1,15 @@
-import { User, UserLogin } from "./userType"
+import { User } from "./userType"
 import AppError from '../../utils/appError.js'
 const bcrypt = require('bcrypt')
 
 const userRepo = require('./userRepo')
 
 // Returns id, email and password
-const getUserLoginByEmail = (emailAddress : string) : UserLogin =>  {
+const getUserByEmail = (emailAddress : string) : User =>  {
     if (!emailAddress) throw new Error('Email address is required')
     const user = userRepo.findUser(null, emailAddress) || null
     if (!user) throw Error('User not found with that email')
-    return {
-        id: user.id,
-        email_address: user.email_address,
-        password: user.password,
-        password_reset_token: user.password_reset_token,
-        password_reset_expires_in: user.password_reset_expires_in
-    }
+    return user
 }
 // Returns user without password (for internal use)
 const getUserById = (userId : number) : User => {
@@ -30,7 +24,7 @@ const getUserById = (userId : number) : User => {
     return user
 }
 
-const getUserLoginByResetToken = (resetToken : string) : UserLogin => {
+const getUserByResetToken = (resetToken : string) : User => {
     if (!resetToken) throw new Error('reset_token is required')
     const user = userRepo.findUserByResetToken(resetToken);
 
@@ -49,7 +43,7 @@ const createUser = (user : User) => {
 
     try {
 
-        getUserLoginByEmail(user.email_address)
+        getUserByEmail(user.email_address)
     }
     catch(e) {
         const newUser = userRepo.addUser(user)
@@ -78,11 +72,11 @@ const updateUserProfile = (user: User) => {
 }
 const updateResetToken = (emailAddress, resetToken, resetTokenExpiry) => {
     try {
-        const userLogin = getUserLoginByEmail(emailAddress)
-        userLogin.password_reset_token =  resetToken
-        userLogin.password_reset_expires_in = resetTokenExpiry
+        const user = getUserByEmail(emailAddress)
+        user.password_reset_token =  resetToken
+        user.password_reset_expires_in = resetTokenExpiry
         
-         return userRepo.updateUserLogin(userLogin)
+         return userRepo.updateUser(user)
     } 
     catch (err) {
         throw err
@@ -90,7 +84,7 @@ const updateResetToken = (emailAddress, resetToken, resetTokenExpiry) => {
 }
 
 const updatePassword = async (userId, emailAddress, newPassword, newPasswordConfirm) => {
-    const user = getUserLoginByEmail(emailAddress)
+    const user = getUserByEmail(emailAddress)
     if (!user) throw AppError('No user found', 404)
     if (userId !== user.id) throw AppError('User not allowed', 403)
     if (newPassword !== newPasswordConfirm) {
@@ -101,7 +95,7 @@ const updatePassword = async (userId, emailAddress, newPassword, newPasswordConf
     user.password_reset_expires_in = 0
     user.password_last_updated = Date.now()
         // -- TODO: destroy active sessions and remember me cookies
-    return userRepo.updateUserLogin(user)
+    return userRepo.updateUser(user)
 
 }
 
@@ -148,4 +142,4 @@ const setAciveStatus = (userId, active) => {
         throw e
     }
 }
-module.exports = { getUserLoginByEmail, getUserById, createUser, updateResetToken, updatePassword, getUserLoginByResetToken, deleteUser, deactivateUser, updateUserProfile, verifyUser, setAciveStatus }
+module.exports = { getUserByEmail, getUserById, createUser, updateResetToken, updatePassword, getUserByResetToken, deleteUser, deactivateUser, updateUserProfile, verifyUser, setAciveStatus }
