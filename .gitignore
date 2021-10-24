@@ -120,4 +120,4 @@ dist
 
 .DS_Store
 
-config/**
+config/** 
