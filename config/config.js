@@ -1,13 +1,12 @@
 require("dotenv").config();
 
-const { POSTGRES_PASSWORD, POSTGRES_USER, POSTGRES_DB } = process.env;
 const Sequelize = require('sequelize')
 const dbenv = {
   development: {
-    username: POSTGRES_USER,
-    password: POSTGRES_PASSWORD,
-    database: POSTGRES_DB,
-    host: "127.0.0.1",
+    username: 'productindex',
+    password: 'productindex',
+    database: 'productindex-dev',
+    host: "localhost",
     dialect: "postgres",
   },
   stage: {
