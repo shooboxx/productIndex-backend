@@ -1,15 +1,23 @@
 import { User } from "./userType"
 import AppError from '../../utils/appError.js'
 const bcrypt = require('bcrypt')
+const util = require('../../utils/utils.js')
 
 const userRepo = require('./userRepo')
 
 // Returns id, email and password
-const getUserByEmail = (emailAddress : string) : User =>  {
+const getUserByEmail = async (emailAddress : string) : Promise<User> =>  {
     if (!emailAddress) throw new Error('Email address is required')
-    const user = userRepo.findUser(null, emailAddress) || null
-    if (!user) throw Error('User not found with that email')
-    return user
+    const found = await userRepo.findUser(null, emailAddress).then((ting) => {
+        if (!found) {
+            throw Error('User not found with that email')
+        }
+    }).catch((err) => {
+        return err
+    })
+    console.log(found)
+    return found
+
 }
 // Returns user without password (for internal use)
 const getUserById = (userId : number) : User => {
@@ -18,7 +26,7 @@ const getUserById = (userId : number) : User => {
     }
     const user = userRepo.findUser(userId, null) || null;
 
-    if (!user) {
+    if (user.length === 0) {
         throw new AppError('User not found with that Id', 404)
     }
     return user
@@ -41,15 +49,21 @@ const createUser = (user : User) => {
     if (!user.email_address) {throw new AppError('Email address is required', 400)}
     if (!user.password) throw new AppError('Password is required', 400)
 
-    try {
+    getUserByEmail(user.email_address).then(found => {
+        if (!found[0]) {
+            // console.log(found)
+            userRepo.addUser(user).then((newUser) =>{
+                // console.log(newUser)
+                return newUser.email_address 
+            }).catch(err => console.log(err))  
+        }
+    }).catch(err => {
+        return err   
+    })
 
-        getUserByEmail(user.email_address)
-    }
-    catch(e) {
-        const newUser = userRepo.addUser(user)
-        return newUser.email_address  
-    }
-    throw new AppError('User already exist with that email address', 400)
+    
+
+    // throw new AppError('User already exist with that email address', 400)
 
     
 }
@@ -70,9 +84,9 @@ const updateUserProfile = (user: User) => {
 
     return userRepo.updateUser(currUser)
 }
-const updateResetToken = (emailAddress, resetToken, resetTokenExpiry) => {
+const updateResetToken = async (emailAddress, resetToken, resetTokenExpiry) => {
     try {
-        const user = getUserByEmail(emailAddress)
+        const user = await getUserByEmail(emailAddress)
         user.password_reset_token =  resetToken
         user.password_reset_expires_in = resetTokenExpiry
         
@@ -84,7 +98,7 @@ const updateResetToken = (emailAddress, resetToken, resetTokenExpiry) => {
 }
 
 const updatePassword = async (userId, emailAddress, newPassword, newPasswordConfirm) => {
-    const user = getUserByEmail(emailAddress)
+    const user = await getUserByEmail(emailAddress)
     if (!user) throw AppError('No user found', 404)
     if (userId !== user.id) throw AppError('User not allowed', 403)
     if (newPassword !== newPasswordConfirm) {

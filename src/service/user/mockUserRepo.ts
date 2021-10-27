@@ -1,32 +1,29 @@
 export {}
-const {db} = require('../../../config/config.js')
-const Users = require('../../models/users')
 import { User } from './userType'
 let users : any = []
 
-const addUser = async (user: User) => {
-    Users.create(
-        {
-            email_address: user.email_address, 
-            password: user.password,
-            first_name: "Bob",
-            last_name: "Sagget",
-            insert_date: Date.now(),
-            update_date: Date.now()
-        }).then(newUser => {
-            return newUser
-        }).catch((err)=> console.log(err))
+const addUser = (user: User) => {
+    users.push(user)
+    return users[users.length - 1]
 }
 
-const findUser = async (userId : number, emailAddress : string) => {
-    await Users.findAll({where: { email_address: emailAddress}})
-    .then(user => {
-        return user[0].dataValues
-    }).catch(err => {console.log(err)})
+const findUser = (userId : number, emailAddress : string) => {
+    for (let i = 0; i< users.length; i++) {
+        if (users[i].email_address == emailAddress || users[i].id == userId) {
+            return users[i]
+        }
+    }
+    return null
 }
+const findUserByResetToken = (resetToken : string) => {
+    for (let i = 0; i< users.length; i++) {
+        console.log('Passed in:'+ resetToken, "available" + users[i].password_reset_token)
+        if (users[i].password_reset_token == resetToken) {
 
-const findUserByResetToken = async (resetToken : string) => {
-    return await Users.findAll({where:{ reset_token: resetToken}})
+            return users[i]
+        }
+    }
+    return null
 }
 
 const updateUser = (user: User) => {

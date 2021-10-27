@@ -1,7 +1,7 @@
 if (process.env.NODE_ENV !== 'production') {
      require('dotenv').config()
 }
-const { db } = require('../config/config.js')
+const { db } = require('../config/database.js')
 const rateLimit = require('express-rate-limit')
 const helmet = require('helmet')
 const morgan = require('morgan')

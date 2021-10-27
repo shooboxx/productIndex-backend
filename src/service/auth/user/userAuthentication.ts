@@ -40,16 +40,16 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
 // Sign in : Tested : Worked
 router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
     try{
-        const user = userService.getUserByEmail(req.body.email_address)
+        const user = await userService.getUserByEmail(req.body.email_address)
         await bcrypt.compare(req.body.password, user.password, (err, resp) => {
-            if (err) res.sendStatus(404)
+            if (err) res.status(404)
             if (resp){
                 const accessToken = generateAccessToken({user_id: user.id})
                 const refreshToken = jwt.sign({user_id: user.id}, process.env.REFRESH_TOKEN_SECRET)
                 refreshTokens.push(refreshToken) 
-                return res.json({access_token: accessToken, refresh_token: refreshToken})
+                return res.status(200).json({access_token: accessToken, refresh_token: refreshToken})
             }
-            return res.json({"error": "Email address or password is incorrect"})
+            return res.status(400).json({"error": "Email address or password is incorrect"})
         } ) 
         
     }
