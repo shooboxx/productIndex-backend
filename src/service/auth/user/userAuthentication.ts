@@ -1,6 +1,7 @@
 import { User } from "../../user/userType";
 const { authenticateToken } = require('./userAuthorization')
 import { AppError } from '../../../utils/appError.js';
+import { create } from "domain";
 
 export {};
 const bcrypt = require('bcrypt')
@@ -29,8 +30,14 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
             is_verified: false
 
         }
-        const newUser = userService.createUser(user)
-    return res.send(JSON.stringify(newUser))
+        const newUser = await userService.createUser(user)
+        // .then(newUser => {
+            console.log(newUser)
+            return res.status(200).send(JSON.stringify(newUser))
+        // }).catch( err => {
+        //     console.log(err, ' from controller')
+            // return res.status(400).json({error: err})
+        // })
     }
     catch(err : any)  {
         return res.status(400).json({error: err.message})

@@ -6,16 +6,25 @@ const util = require('../../utils/utils.js')
 const userRepo = require('./userRepo')
 
 // Returns id, email and password
-const getUserByEmail = async (emailAddress : string) : Promise<User> =>  {
-    if (!emailAddress) throw new Error('Email address is required')
-    const found = await userRepo.findUser(null, emailAddress).then((ting) => {
-        if (!found) {
+const getUserByEmail = async (emailAddress : string) =>  {
+    // if (!emailAddress) throw new Error('Email address is required')
+    
+    const found = await userRepo.findUser(null, emailAddress).then(user => {
+        if (!user) {
             throw Error('User not found with that email')
         }
-    }).catch((err) => {
-        return err
+        return user
+    }).catch(err => {
+        throw AppError(err, 400)
     })
-    console.log(found)
+    // const found = await userRepo.findUser(null, emailAddress)
+    // .catch((err) => {
+    //     return err
+    // })
+    // if (!found) {
+    //     throw Error('User not found with that email')
+    // }
+    
     return found
 
 }
@@ -24,6 +33,7 @@ const getUserById = (userId : number) : User => {
     if (!userId) {
         throw Error('User is required')
     }
+    // console.log('something')
     const user = userRepo.findUser(userId, null) || null;
 
     if (user.length === 0) {
@@ -45,20 +55,23 @@ const getUserMasterDetail = () => {
     // TODO: Implement this
 }
 
-const createUser = (user : User) => {
+const createUser = async (user : User) => {
     if (!user.email_address) {throw new AppError('Email address is required', 400)}
     if (!user.password) throw new AppError('Password is required', 400)
 
     getUserByEmail(user.email_address).then(found => {
-        if (!found[0]) {
-            // console.log(found)
+        if (!found) {
             userRepo.addUser(user).then((newUser) =>{
                 // console.log(newUser)
                 return newUser.email_address 
-            }).catch(err => console.log(err))  
+            }).catch(err => {
+                throw new Error(err)
+            })  
         }
+
+        throw new Error('User already exist with this email address')
     }).catch(err => {
-        return err   
+        throw new Error(err)
     })
 
     

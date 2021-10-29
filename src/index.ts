@@ -15,7 +15,6 @@ const methodOverride = require('method-override')
 const hpp = require('hpp')
 const xss = require('xss')
 
-const users : any = []
 
 let product = require('./service/product/productController')
 let store = require('./service/store/businessStoreController')
