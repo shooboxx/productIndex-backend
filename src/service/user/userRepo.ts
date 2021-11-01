@@ -1,4 +1,4 @@
-export {};
+export { };
 const { db } = require("../../../config/config.js");
 const Users = require("../../models/users");
 import { User } from "./userType";
@@ -12,15 +12,20 @@ const addUser = async (user: User) => {
     last_name: "Sagget",
     insert_date: Date.now(),
     update_date: Date.now(),
-  })
-    .then((newUser) => {
-      return newUser;
-    })
-    .catch((err) => console.log(err));
+  }).catch(err => null)
+
+  return user
+  // .then(() => {
+  //   return user;
+  // })
+  // .catch((err) => { return err });
 };
 
 const findUser = async (userId: number, emailAddress: string) => {
   const user = await Users.findOne({ where: { email_address: emailAddress } })
+  if (!user) {
+    return
+  }
   return user.dataValues
 };
 

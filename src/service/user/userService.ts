@@ -6,16 +6,16 @@ const util = require('../../utils/utils.js')
 const userRepo = require('./userRepo')
 
 // Returns id, email and password
-const getUserByEmail = async (emailAddress : string) =>  {
+const getUserByEmail = async (emailAddress: string) => {
     // if (!emailAddress) throw new Error('Email address is required')
-    
+
     const found = await userRepo.findUser(null, emailAddress).then(user => {
         if (!user) {
-            throw Error('User not found with that email')
+            return null
         }
         return user
     }).catch(err => {
-        throw AppError(err, 400)
+        throw new AppError(err, 400)
     })
     // const found = await userRepo.findUser(null, emailAddress)
     // .catch((err) => {
@@ -24,12 +24,12 @@ const getUserByEmail = async (emailAddress : string) =>  {
     // if (!found) {
     //     throw Error('User not found with that email')
     // }
-    
+
     return found
 
 }
 // Returns user without password (for internal use)
-const getUserById = (userId : number) : User => {
+const getUserById = (userId: number): User => {
     if (!userId) {
         throw Error('User is required')
     }
@@ -42,7 +42,7 @@ const getUserById = (userId : number) : User => {
     return user
 }
 
-const getUserByResetToken = (resetToken : string) : User => {
+const getUserByResetToken = (resetToken: string): User => {
     if (!resetToken) throw new Error('reset_token is required')
     const user = userRepo.findUserByResetToken(resetToken);
 
@@ -55,35 +55,56 @@ const getUserMasterDetail = () => {
     // TODO: Implement this
 }
 
-const createUser = async (user : User) => {
-    if (!user.email_address) {throw new AppError('Email address is required', 400)}
+const createUser = async (user: User) => {
+    if (!user.email_address) { throw new AppError('Email address is required', 400) }
     if (!user.password) throw new AppError('Password is required', 400)
-
-    getUserByEmail(user.email_address).then(found => {
+    try {
+        const found = await getUserByEmail(user.email_address)
         if (!found) {
-            userRepo.addUser(user).then((newUser) =>{
-                // console.log(newUser)
-                return newUser.email_address 
-            }).catch(err => {
-                throw new Error(err)
-            })  
+            return await userRepo.addUser(user)
         }
+        throw Error('User already exist')
 
-        throw new Error('User already exist with this email address')
-    }).catch(err => {
-        throw new Error(err)
-    })
+    }
+    catch (e: any) {
+        throw e
+    }
 
-    
+    // .then(found => {
+    //     if (found) {
+    //         throw new AppError('User already exist')
+    // userRepo.addUser(user).then((newUser) => {
+    //     // console.log(newUser)
+    //     return newUser.email_address
+    // }).catch(err => {
+    //     throw new Error(err)
+    // })
+    // }
+    // }).catch(() => {
+    //     userRepo.addUser(user).then((newUser) => {
+    //         // console.log(newUser)
+    //         return newUser.email_address
+    //     }).catch(err => {
+    //         throw new Error(err)
+    //     })
+    // })
+
+
+    //     throw new Error('User already exist with this email address')
+    // }).catch(err => {
+    //     throw new Error(err)
+    // })
+
+
 
     // throw new AppError('User already exist with that email address', 400)
 
-    
+
 }
 const updateUserProfile = (user: User) => {
     // TODO: Implement this
     const currUser = getUserById(user.id)
-    
+
     currUser.first_name = user.first_name || currUser.first_name
     currUser.last_name = user.last_name || currUser.last_name
     currUser.dob = user.dob || currUser.dob
@@ -100,11 +121,11 @@ const updateUserProfile = (user: User) => {
 const updateResetToken = async (emailAddress, resetToken, resetTokenExpiry) => {
     try {
         const user = await getUserByEmail(emailAddress)
-        user.password_reset_token =  resetToken
+        user.password_reset_token = resetToken
         user.password_reset_expires_in = resetTokenExpiry
-        
-         return userRepo.updateUser(user)
-    } 
+
+        return userRepo.updateUser(user)
+    }
     catch (err) {
         throw err
     }
@@ -116,17 +137,17 @@ const updatePassword = async (userId, emailAddress, newPassword, newPasswordConf
     if (userId !== user.id) throw AppError('User not allowed', 403)
     if (newPassword !== newPasswordConfirm) {
         throw AppError("Passwords do not match", 400)
-    } 
+    }
     user.password = await bcrypt.hash(newPassword, 10)
     user.password_reset_token = ''
     user.password_reset_expires_in = 0
     user.password_last_updated = Date.now()
-        // -- TODO: destroy active sessions and remember me cookies
+    // -- TODO: destroy active sessions and remember me cookies
     return userRepo.updateUser(user)
 
 }
 
-const deactivateUser = (userId : number) => {
+const deactivateUser = (userId: number) => {
     try {
         const user = getUserById(userId)
         user.active = false
@@ -134,21 +155,21 @@ const deactivateUser = (userId : number) => {
     }
     catch (e) {
         throw e
-    }   
+    }
 }
 
-const verifyUser = (userId : number) => {
+const verifyUser = (userId: number) => {
     try {
         const user = getUserById(userId)
         user.is_verified = true
         return userRepo.updateUser(user)
     }
     catch (e) {
-        
+
     }
 }
 
-const deleteUser = (userId : number) => {
+const deleteUser = (userId: number) => {
     try {
         const user = getUserById(userId)
         user.deleted_date = Date.now()
