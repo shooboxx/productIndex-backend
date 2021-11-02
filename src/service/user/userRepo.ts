@@ -15,10 +15,6 @@ const addUser = async (user: User) => {
   }).catch(err => null)
 
   return user
-  // .then(() => {
-  //   return user;
-  // })
-  // .catch((err) => { return err });
 };
 
 const findUser = async (userId: number, emailAddress: string) => {
@@ -30,32 +26,37 @@ const findUser = async (userId: number, emailAddress: string) => {
 };
 
 const findUserByResetToken = async (resetToken: string) => {
-  return await Users.findOne({ where: { reset_token: resetToken } });
+    const user = await Users.findOne({ where: { reset_token: resetToken } });
+    if (!user) return 
+
+    return user.dataValues
 };
 
-const updateUser = (user: User) => {
-  for (let i = 0; i < users.length; i++) {
-    if (users[i].id == user.id) {
-      users[i].first_name = user.first_name;
-      users[i].last_name = user.last_name;
-      users[i].password = user.password;
-      users[i].dob = user.dob;
-      users[i].gender = user.gender;
-      users[i].profile_picture_url = user.profile_picture_url;
-      users[i].country = user.country;
-      users[i].city = user.city;
-      users[i].primary_phone = user.primary_phone;
-      users[i].address = user.address;
-      users[i].is_verified = user.is_verified;
-      users[i].password_reset_expires_in = user.password_reset_expires_in;
-      users[i].password_reset_token = user.password_reset_token;
-      users[i].active = user.active;
-      users[i].deleted_date = user.deleted_date;
-      users[i].update_date = Date.now();
+const updateUser = async (user: User) => {
+    await Users.update({
+        first_name: user.first_name,
+        last_name: user.last_name,
+        password: user.password,
+        dob: user.dob,
+        gender: user.gender,
+        profile_picture_url: user.profile_picture_url,
+        country: user.country,
+        city: user.city,
+        primary_phone: user.primary_phone,
+        address: user.address,
+        is_verified: user.is_verified,
+        reset_expires: user.password_reset_expires_in, // TODO: Change dates to dates and not a number
+        reset_token: user.password_reset_token,
+        active: user.active,
+        deleted_date: user.deleted_date,
+        update_date: Date.now(),
+    }, {
+        where: {
+            id: user.id
+        }
+    })
+      return user;
 
-      return users[i];
-    }
-  }
 };
 
 module.exports = { addUser, findUser, findUserByResetToken, updateUser };

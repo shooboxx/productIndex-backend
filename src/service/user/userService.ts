@@ -8,6 +8,7 @@ const userRepo = require('./userRepo')
 // Returns id, email and password
 const getUserByEmail = async (emailAddress: string) => {
     // if (!emailAddress) throw new Error('Email address is required')
+    console.log('This was successfully called')
 
     const found = await userRepo.findUser(null, emailAddress).then(user => {
         if (!user) {
@@ -17,14 +18,6 @@ const getUserByEmail = async (emailAddress: string) => {
     }).catch(err => {
         throw new AppError(err, 400)
     })
-    // const found = await userRepo.findUser(null, emailAddress)
-    // .catch((err) => {
-    //     return err
-    // })
-    // if (!found) {
-    //     throw Error('User not found with that email')
-    // }
-
     return found
 
 }
@@ -69,36 +62,6 @@ const createUser = async (user: User) => {
     catch (e: any) {
         throw e
     }
-
-    // .then(found => {
-    //     if (found) {
-    //         throw new AppError('User already exist')
-    // userRepo.addUser(user).then((newUser) => {
-    //     // console.log(newUser)
-    //     return newUser.email_address
-    // }).catch(err => {
-    //     throw new Error(err)
-    // })
-    // }
-    // }).catch(() => {
-    //     userRepo.addUser(user).then((newUser) => {
-    //         // console.log(newUser)
-    //         return newUser.email_address
-    //     }).catch(err => {
-    //         throw new Error(err)
-    //     })
-    // })
-
-
-    //     throw new Error('User already exist with this email address')
-    // }).catch(err => {
-    //     throw new Error(err)
-    // })
-
-
-
-    // throw new AppError('User already exist with that email address', 400)
-
 
 }
 const updateUserProfile = (user: User) => {

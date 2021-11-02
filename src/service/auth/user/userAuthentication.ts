@@ -13,7 +13,7 @@ let refreshTokens: any = []
 const { adminOnlyAccess, hasAccessLevel, getRoleID, checkNotAuthenticated } = require('./userAuthorization')
 const crypto = require('crypto')
 
-// Created user : Tested : Working
+// Works with database
 router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) => {
     try {
         const hashedPass = await bcrypt.hash(req.body.password, 10)
@@ -31,9 +31,10 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
 
         }
         const newUser = await userService.createUser(user)
+        console.log(newUser)
         // .then(newUser => {
         // console.log(newUser)
-        return res.status(200).json(JSON.stringify(newUser))
+        return res.status(200).json({email_address: newUser.email_address})
         // }).catch( err => {
         //     console.log(err, ' from controller')
         // return res.status(400).json({error: err})
@@ -44,7 +45,7 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
     }
 
 });
-// Sign in : Tested : Worked
+// Works with database
 router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
     try {
         const user = await userService.getUserByEmail(req.body.email_address)
@@ -71,10 +72,10 @@ router.delete('/auth/logout', authenticateToken, (req: any, res: any) => {
     res.sendStatus(204)
 });
 
-// Forget password : Tested : Works :TODO = Send email with token to user
+// Works with database
 router.post('/auth/forgot-password', checkNotAuthenticated, async (req: any, res: any) => {
     try {
-        let user: User = userService.getUserByEmail(req.body.email_address)
+        let user: User = await userService.getUserByEmail(req.body.email_address)
 
         const resetToken = crypto.randomBytes(32).toString('hex');
         const hashedResetToken = crypto.createHash('sha256').update(resetToken).digest('hex')
@@ -89,20 +90,21 @@ router.post('/auth/forgot-password', checkNotAuthenticated, async (req: any, res
     }
 
 });
-
+// Works with database
 router.post('/auth/reset-password/:resetToken', checkNotAuthenticated, async (req: any, res: any) => {
     try {
         const resetToken = req.params.resetToken
         // Should check if we're saving and getting an encrypted resetToken from the database for comparison
         const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex')
-        const user: User = userService.getUserByResetToken(hashedToken)
+        const user: User = await userService.getUserByResetToken(hashedToken)
+
         const newPassword = req.body.password
         const newPasswordConfirm = req.body.password_confirm
         if (user) {
             if (user.password_reset_expires_in && user.password_reset_expires_in < Date.now()) {
                 res.status(400).json({ "error": "Token expired" })
             }
-            userService.updatePassword(user.id, user.email_address, newPassword, newPasswordConfirm)
+            await userService.updatePassword(user.id, user.email_address, newPassword, newPasswordConfirm)
 
             return res.status(200).send('success')
         }
