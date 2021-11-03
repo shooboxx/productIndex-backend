@@ -10,7 +10,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken')
 const userService = require('../../user/userService')
 let refreshTokens: any = []
-const { adminOnlyAccess, hasAccessLevel, getRoleID, checkNotAuthenticated } = require('./userAuthorization')
+const { getRoleID, checkNotAuthenticated } = require('./userAuthorization')
 const crypto = require('crypto')
 
 // Works with database
@@ -31,14 +31,8 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
 
         }
         const newUser = await userService.createUser(user)
-        console.log(newUser)
-        // .then(newUser => {
-        // console.log(newUser)
+
         return res.status(200).json({email_address: newUser.email_address})
-        // }).catch( err => {
-        //     console.log(err, ' from controller')
-        // return res.status(400).json({error: err})
-        // })
     }
     catch (err: any) {
         return res.status(400).json({ error: err.message })
