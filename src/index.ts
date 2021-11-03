@@ -1,7 +1,7 @@
 if (process.env.NODE_ENV !== 'production') {
      require('dotenv').config()
 }
-const { db } = require('../config/config.js')
+const { db } = require('../config/database.js')
 const rateLimit = require('express-rate-limit')
 const helmet = require('helmet')
 const morgan = require('morgan')
@@ -15,7 +15,6 @@ const methodOverride = require('method-override')
 const hpp = require('hpp')
 const xss = require('xss')
 
-const users : any = []
 
 let product = require('./service/product/productController')
 let store = require('./service/store/businessStoreController')

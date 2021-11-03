@@ -12,9 +12,10 @@
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}/src/index.ts",
-            "outFiles": [
-                "${workspaceFolder}/**/*.js"
-            ]
+            "runtimeArgs": ["-r", "ts-node/register", "-r", "tsconfig-paths/register"],
+            // "outputCapture": "std",
+            "env": {"NODE_ENV": "development"},
+            "console": "integratedTerminal"
         }
     ]
 }
