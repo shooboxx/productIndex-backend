@@ -15,10 +15,9 @@ module.exports = {
     create table "public".review (id serial not null, user_id int4 not null, businessId int4 not null, store_id int4 not null, rating_number int4 not null, comment text not null, inappropriate_flag bool, flag_reason varchar(255), deleted_date timestamp, insert_date timestamp not null, update_date timestamp, primary key (id));
     create table "public".single_sign_on (id serial not null, name varchar(255) not null, description varchar(255), insert_date timestamp not null, update_date timestamp not null, primary key (id));
     create table "public".single_sign_on_user_link (id serial not null, single_sign_onid int4 not null, usersid int4 not null, sso_token varchar(255) not null, insert_date timestamp not null, update_date timestamp not null, primary key (id));
-    create table "public".user_agent_data (id serial not null, usersid int4 not null, user_agent text not null, insert_date timestamp not null, update_date timestamp not null, primary key (id));
     create table "public".user_business_role (id serial not null, user_id int4 not null, business_role_id int4 not null, insert_date timestamp not null, update_date timestamp not null, primary key (id));
-    create table "public".user_token (id serial not null, user_id int4 not null, token text not null, insert_date timestamp not null, update_date timestamp not null, primary key (id));
-    create table "public".users (id serial not null, system_role_id int4, email_address text, password varchar(100), first_name varchar(50) not null, last_name varchar(50), date_of_birth date, gender varchar(255), country varchar(255), city varchar(255), address varchar(255), profile_pic_url text, active bool, is_verified bool, verify_token text, verify_expires date, verify_changes text, reset_token text, reset_expires date, primary_phone_contact varchar(255), deleted_date date, insert_date timestamp not null, update_date timestamp not null, primary key (id));
+    create table "public".user_tokens (id serial not null, user_id int4 not null, refresh_token text not null, insert_date timestamp not null, update_date timestamp not null, primary key (id));
+    create table "public".users (id serial not null, system_role_id int4, email_address text not null, password varchar(100) not null, first_name varchar(50), last_name varchar(50), date_of_birth date, gender varchar(255), country varchar(255), city varchar(255), address varchar(255), profile_pic_url text, active bool, is_verified bool, verify_token text, verify_expires date, verify_changes text, reset_token text, reset_expires date, primary_phone_contact varchar(255), deleted_date date, insert_date timestamp not null, update_date timestamp, primary key (id));
     alter table "public".review add constraint FKreview377146 foreign key (store_id) references "public".business_store (id);
     alter table "public.business_item" add constraint "FKpublic.bus325448" foreign key (business_id) references "public".business (Id);
     alter table "public".user_business_role add constraint FKuser_busin670551 foreign key (business_role_id) references "public".business_role (id);
@@ -29,15 +28,15 @@ module.exports = {
     alter table "public".business_role add constraint FKbusiness_r425550 foreign key (business_id) references "public".business (Id);
     alter table "public".product add constraint FKproduct67907 foreign key (business_id) references "public".business (Id);
     alter table "public".review add constraint FKreview86893 foreign key (businessId) references "public".business (Id);
-    alter table "public".user_token add constraint FKuser_token41507 foreign key (user_id) references "public".users (id);
+    alter table "public".user_tokens add constraint FKuser_token786593 foreign key (user_id) references "public".users (id);
     alter table "public.inventory_item" add constraint "FKpublic.inv732732" foreign key (business_store_id) references "public".business_store (id);
     alter table "public".single_sign_on_user_link add constraint FKsingle_sig486425 foreign key (usersid) references "public".users (id);
     alter table "public".single_sign_on_user_link add constraint FKsingle_sig118188 foreign key (single_sign_onid) references "public".single_sign_on (id);
     alter table "public".business_portfolio add constraint FKbusiness_p146485 foreign key (businessId) references "public".business (Id);
     alter table "public".business_store add constraint FKbusiness_s784049 foreign key (business_id) references "public".business (Id);
     alter table "public".user_business_role add constraint FKuser_busin352826 foreign key (user_id) references "public".users (id);
-    alter table "public".user_agent_data add constraint FKuser_agent589138 foreign key (usersid) references "public".users (id);
     alter table "public".review add constraint FKreview900863 foreign key (user_id) references "public".users (id);
+    
     `);
   },
 

@@ -1,19 +1,19 @@
 if (process.env.NODE_ENV !== 'production') {
      require('dotenv').config()
 }
-
-let morgan = require('morgan')
+const { db } = require('../config/database.js')
+const rateLimit = require('express-rate-limit')
+const helmet = require('helmet')
+const morgan = require('morgan')
 const AppError = require('./utils/appError.js')
 const express = require('express')
 // Initialize the app
 const app = express();
 const bodyParser = require('body-parser')
 const passport = require('passport')
-const flash = require('express-flash')
-const session = require('express-session')
 const methodOverride = require('method-override')
-
-const users : any = []
+const hpp = require('hpp')
+const xss = require('xss')
 
 
 let product = require('./service/product/productController')
@@ -21,37 +21,39 @@ let store = require('./service/store/businessStoreController')
 let userAuth = require('./service/auth/user/userAuthentication')
 let business = require('./service/business/businessController')
 let review = require('./service/reviews/reviewController')
+let user = require('./service/user/userController')
 
 // Setup server port
 var port = process.env.PORT || 8080;
 
-app.use(morgan('tiny'));
+const limiter = rateLimit({
+     max: 100,
+     windowMs: 60 * 60 * 1000,
+     message: 'Too many request from this IP address. Please try again in 1 hour'
+})
 
-app.use(flash())
-app.use(session({
-     secret: process.env.SESSION_SECRET,
-     resave: false,
-     saveUnitialized: false
-}))
-app.use(passport.initialize())
-app.use(passport.session())
-app.use(methodOverride('_method'))
+if (process.env.NODE_ENV === 'development') {
+     app.use(morgan('dev'));
+}
+
 app.use(express.json())
-app.use(product);
-app.use(store)
-app.use(userAuth)
-app.use(business)
-app.use(review)
+app.use(methodOverride('_method'))
+app.use(helmet())
+app.use('/api/auth', limiter)
 
+app.use('/api',product);
+app.use('/api',store)
+app.use('/api',userAuth)
+app.use('/api',business)
+app.use('/api',review)
+app.use('/api',user)
+
+app.use(hpp())
 
 
 // Send message for default URL
-app.get('/', (req: any, res: any) => res.send('Hello World with Express'));
-
-app.all('*', (req, res, next) => {
-
-     next(new AppError(`Can't find ${req.originalUrl} on this server.`, 404));
-})
+app.get('/', (req: any, res: any) => res.send('Check was successful'));
+app.all('*', (req, res, next) => next(new AppError(`Can't find ${req.originalUrl} on this server.`, 404)))
 
 app.use((err, req, res, next) => {
      err.statusCode = err.statusCode || 500;

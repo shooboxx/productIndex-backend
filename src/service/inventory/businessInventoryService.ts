@@ -93,5 +93,4 @@ const deleteInventoryItem = (itemId : number) => {
     }
 };
 
-
 module.exports = { getAllStoreItems, getInventoryItemById, updateInventoryItem, createInventoryItem, deleteInventoryItem }

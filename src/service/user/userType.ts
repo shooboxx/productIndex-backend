@@ -14,18 +14,12 @@ export interface User {
     address?: string,
     is_verified: boolean,
     active: boolean,
-    deleted_date?: number
-    insert_date: number,
-    update_date?: number,
-}
-export interface UserLogin {
-    id: number,
-    email_address: string,
-    password: string,
     password_reset_token?: string,
     password_reset_expires_in?: number
     password_last_updated?: number
-
+    deleted_date?: number
+    insert_date: number,
+    update_date?: number,
 }
 
 // Super details about a user

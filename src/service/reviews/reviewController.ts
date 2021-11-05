@@ -8,7 +8,7 @@ const { authenticateToken } = require('../auth/user/userAuthorization')
 import { Review } from './reviewType'
 
 
-router.post('/api/review', authenticateToken, (req, res) => {
+router.post('/review', authenticateToken, (req, res) => {
     try {
         const newReview : Review = {
             business_id: req.body.business_id,
@@ -24,7 +24,7 @@ router.post('/api/review', authenticateToken, (req, res) => {
     }
 })
 
-router.put('/api/review', authenticateToken, (req, res) => {
+router.put('/review', authenticateToken, (req, res) => {
     try {
         const updatedReview : Review = {
             business_id: req.body.business_id,
@@ -40,7 +40,7 @@ router.put('/api/review', authenticateToken, (req, res) => {
     }
 })
 
-router.delete('/api/review', authenticateToken, (req, res) => {
+router.delete('/review', authenticateToken, (req, res) => {
     try {
         return res.status(200).json(reviewService.deleteReview(req.user_id, req.body.business_id))
     }

@@ -1,52 +1,62 @@
-export {}
-import { User } from './userType'
-let users : any = []
-import { UserLogin } from './userType'
+export { };
+const { db } = require("../../../config/config.js");
+const Users = require("../../models/users");
+import { User } from "./userType";
+let users: any = [];
 
-const addUser = (user: User) => {
-    users.push(user)
-    return users[users.length - 1]
-}
+const addUser = async (user: User) => {
+  await Users.create({
+    email_address: user.email_address,
+    password: user.password,
+    first_name: "Bob",
+    last_name: "Sagget",
+    insert_date: Date.now(),
+    update_date: Date.now(),
+  }).catch(err => null)
 
-const findUser = (userId : number, emailAddress : string) => {
-    for (let i = 0; i< users.length; i++) {
-        if (users[i].email_address == emailAddress || users[i].id == userId) {
-            return users[i]
+  return user
+};
+
+const findUser = async (userId: number, emailAddress: string) => {
+  const user = await Users.findOne({ where: { email_address: emailAddress } })
+  if (!user) {
+    return
+  }
+  return user.dataValues
+};
+
+const findUserByResetToken = async (resetToken: string) => {
+    const user = await Users.findOne({ where: { reset_token: resetToken } });
+    if (!user) return 
+
+    return user.dataValues
+};
+
+const updateUser = async (user: User) => {
+    await Users.update({
+        first_name: user.first_name,
+        last_name: user.last_name,
+        password: user.password,
+        dob: user.dob,
+        gender: user.gender,
+        profile_picture_url: user.profile_picture_url,
+        country: user.country,
+        city: user.city,
+        primary_phone: user.primary_phone,
+        address: user.address,
+        is_verified: user.is_verified,
+        reset_expires: user.password_reset_expires_in, // TODO: Change dates to dates and not a number
+        reset_token: user.password_reset_token,
+        active: user.active,
+        deleted_date: user.deleted_date,
+        update_date: Date.now(),
+    }, {
+        where: {
+            id: user.id
         }
-    }
-    return null
-}
-const findUserByResetToken = (resetToken : string) => {
-    for (let i = 0; i< users.length; i++) {
-        console.log('Passed in:'+ resetToken, "available" + users[i].password_reset_token)
-        if (users[i].password_reset_token == resetToken) {
+    })
+      return user;
 
-            return users[i]
-        }
-    }
-    return null
-}
-const updateUserLogin = (user: UserLogin) => {
-    for (let i = 0; i< users.length; i++) {
-        if (users[i].id == user.id) {
-            users[i].email_address = user.email_address;
-            users[i].password = user.password
-            users[i].password_reset_expires_in = user.password_reset_expires_in
-            users[i].password_reset_token = user.password_reset_token
-            return users[i]
-        }
-    }
-}
+};
 
-const deleteUser = (userId) => {
-    // TODO: Implement this
-    users = users.filter(user => user.id !== userId)
-    return -1
-}
-
-const deactivateUser = (userId) => {
-    // TODO: Implement this
-    return -1
-}
-
-module.exports = { addUser, findUser, updateUserLogin, findUserByResetToken }
+module.exports = { addUser, findUser, findUserByResetToken, updateUser };
