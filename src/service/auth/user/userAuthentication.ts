@@ -10,8 +10,10 @@ const router = express.Router();
 const jwt = require('jsonwebtoken')
 const userService = require('../../user/userService')
 let refreshTokens: any = []
-const { getRoleID, checkNotAuthenticated } = require('./userAuthorization')
+const { checkNotAuthenticated } = require('./userAuthorization')
 const crypto = require('crypto')
+
+const systemRoleService = require('./systemRole/systemRoleService')
 
 // Works with database
 router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) => {
@@ -19,7 +21,7 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
         const hashedPass = await bcrypt.hash(req.body.password, 10)
         const user: User = {
             id: 1,
-            role_id: getRoleID('user'),
+            role_id: await systemRoleService.getRoleId('USER'),
             first_name: req.body.first_name,
             last_name: req.body.last_name,
             email_address: req.body.email_address,

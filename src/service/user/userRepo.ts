@@ -1,15 +1,15 @@
 export { };
-const { db } = require("../../../config/config.js");
 const Users = require("../../models/users");
 import { User } from "./userType";
-let users: any = [];
 
 const addUser = async (user: User) => {
+  console.log(user)
   await Users.create({
     email_address: user.email_address,
     password: user.password,
-    first_name: "Bob",
-    last_name: "Sagget",
+    system_role_id: user.role_id,
+    first_name: user.first_name,
+    last_name: user.last_name,
     insert_date: Date.now(),
     update_date: Date.now(),
   }).catch(err => null)

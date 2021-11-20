@@ -7,8 +7,7 @@ const userRepo = require('./userRepo')
 
 // Returns id, email and password
 const getUserByEmail = async (emailAddress: string) => {
-    // if (!emailAddress) throw new Error('Email address is required')
-    console.log('This was successfully called')
+    if (!emailAddress) throw new Error('Email address is required')
 
     const found = await userRepo.findUser(null, emailAddress).then(user => {
         if (!user) {
@@ -26,7 +25,6 @@ const getUserById = (userId: number): User => {
     if (!userId) {
         throw Error('User is required')
     }
-    // console.log('something')
     const user = userRepo.findUser(userId, null) || null;
 
     if (user.length === 0) {
