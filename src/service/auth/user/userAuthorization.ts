@@ -40,9 +40,9 @@ function hasAccessLevel(accessLevel) {
         })
     }
 }
-const getRoleByID = (roleID) : UserRole => {
+const getRole = (roleName) : UserRole => {
     for (let i = 0; i< roles.length; i++ ) {
-        if (roles[i].id == roleID) {
+        if (roles[i].role_name == roleName) {
             return roles[i]
         }
     }
@@ -61,7 +61,7 @@ const getUserRole = (userID) : UserRole => {
    } 
 }
 const setUserRole = (userID, roleName) => {
-    const roleId = getRoleID(roleName)
+    const roleId = getRole(roleName)
 }
 
 function authenticateToken (req, res, next) {
@@ -74,10 +74,6 @@ function authenticateToken (req, res, next) {
         req.user_id = user.user_id
         return next()
     })
-}
-
-function getRoleID(roleName) {
-    return 1
 }
 
 function checkNotAuthenticated (req, res, next) {
@@ -93,4 +89,4 @@ function checkNotAuthenticated (req, res, next) {
     
     return res.status(403).json({"error": "user already logged in"})
 }
-module.exports = {getRoleByID, adminOnlyAccess, hasAccessLevel, authenticateToken, checkNotAuthenticated, getRoleID}
+module.exports = {getRole, adminOnlyAccess, hasAccessLevel, authenticateToken, checkNotAuthenticated}
