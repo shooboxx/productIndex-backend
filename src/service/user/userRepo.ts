@@ -8,8 +8,9 @@ const addUser = async (user: User) => {
   await Users.create({
     email_address: user.email_address,
     password: user.password,
-    first_name: "Bob",
-    last_name: "Sagget",
+    first_name: user.first_name,
+    last_name: user.last_name,
+    verify_token: user.verify_token,
     insert_date: Date.now(),
     update_date: Date.now(),
   }).catch(err => null)
@@ -27,10 +28,17 @@ const findUser = async (userId: number, emailAddress: string) => {
 
 const findUserByResetToken = async (resetToken: string) => {
     const user = await Users.findOne({ where: { reset_token: resetToken } });
-    if (!user) return 
+    if (!user) return null
 
     return user.dataValues
 };
+
+const findUserByVerificationToken = async (verifyToken : string) => {
+    const user = await Users.findOne({ where: { verify_token: verifyToken } });
+    if (!user) return null
+
+    return user.dataValues
+}
 
 const updateUser = async (user: User) => {
     await Users.update({
@@ -59,4 +67,4 @@ const updateUser = async (user: User) => {
 
 };
 
-module.exports = { addUser, findUser, findUserByResetToken, updateUser };
+module.exports = { addUser, findUser, findUserByResetToken, updateUser, findUserByVerificationToken };

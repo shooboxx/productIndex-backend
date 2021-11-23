@@ -13,6 +13,8 @@ export interface User {
     primary_phone?: string,
     address?: string,
     is_verified: boolean,
+    verify_token?: string,
+    verify_expires?: Date,
     active: boolean,
     password_reset_token?: string,
     password_reset_expires_in?: number

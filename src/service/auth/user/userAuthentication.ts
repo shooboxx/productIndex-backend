@@ -13,6 +13,19 @@ let refreshTokens: any = []
 const { getRoleID, checkNotAuthenticated } = require('./userAuthorization')
 const crypto = require('crypto')
 
+const sgMail = require('@sendgrid/mail')
+
+router.get('/auth/verify', async (req: any, res: any) => {
+    try {
+        const user : User = await userService.verifyUser(req.query.token)
+        if (user) return res.send(`Verification successful`)
+    }
+    catch (err : any){
+        return res.status(400).json({ error: err.message })
+    }
+    res.sendStatus(400)
+})
+
 // Works with database
 router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) => {
     try {
@@ -27,10 +40,28 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
             dob: '',
             insert_date: Date.now(),
             active: true,
-            is_verified: false
+            is_verified: false,
+            verify_token: crypto.randomBytes(32).toString('hex')
 
         }
-        const newUser = await userService.createUser(user)
+        const newUser : User = await userService.createUser(user)
+
+        // sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+        // const msg = {
+        // to: newUser.email_address, // Change to your recipient
+        // from: 'noreply@theproductindex.io', // Change to your verified sender
+        // subject: 'Welcome to ProductIndex!',
+        // text: newUser.first_name + ', Thank you for registering with us! We\'re happy that you\'re here. To complete your registration, verify your email address by clicking the button below',
+        // html: `<strong>${req.headers.host}/api/auth/verify?token=${newUser.verify_token}</strong>`,
+        // }
+        // sgMail
+        // .send(msg)
+        // .then(() => {
+        //     console.log('Email sent')
+        // })
+        // .catch((error) => {
+        //     console.error(error)
+        // })
 
         return res.status(200).json({email_address: newUser.email_address})
     }
