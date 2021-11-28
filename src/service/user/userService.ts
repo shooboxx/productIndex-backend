@@ -20,6 +20,21 @@ const getUserByEmail = async (emailAddress: string) => {
     return found
 
 }
+// Returns user
+const getUserByVerificationToken = async (token: string) => {
+    if (!token) throw new Error('Verification token is required')
+    const found = await userRepo.findUserByVerificationToken(token).then(user => {
+        if (!user) {
+            throw new Error('No user found with that verification token')
+        }
+        return user
+    }).catch(err => {
+        throw new AppError(err, 400)
+    })
+    return found
+
+}
+
 // Returns user without password (for internal use)
 const getUserById = (userId: number): User => {
     if (!userId) {
@@ -119,9 +134,14 @@ const deactivateUser = (userId: number) => {
     }
 }
 
-const verifyUser = (userId: number) => {
+const verifyUser = async (token: string) => {
     try {
-        const user = getUserById(userId)
+        if (!token) throw new Error('Verification token is required')
+        const user : User = await getUserByVerificationToken(token)
+        // TODO: Send error with error code
+        // if (user.is_verified) throw new Error('User is already verified')
+        // if (user.verify_expires && user.verify_expires.toDateString() > Date.now().toString()) throw new Error('Verification token expired')
+
         user.is_verified = true
         return userRepo.updateUser(user)
     }

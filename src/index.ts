@@ -52,7 +52,10 @@ app.use(hpp())
 
 
 // Send message for default URL
-app.get('/', (req: any, res: any) => res.send('Check was successful'));
+app.get('/', (req: any, res: any) => {
+     res.send('Check was successful');
+
+})
 app.all('*', (req, res, next) => next(new AppError(`Can't find ${req.originalUrl} on this server.`, 404)))
 
 app.use((err, req, res, next) => {
@@ -67,3 +70,5 @@ app.use((err, req, res, next) => {
 app.listen(port, function () {
      console.log("Running RestHub on port " + port);
 });
+
+
