@@ -1,7 +1,7 @@
 export interface Review {
     id?: number,
-    business_id : number,
-    user_id : number,
+    business_id: number,
+    user_id: number,
     star_rating: number,
     review_comment: string,
     inappropriate_comment?: boolean,
