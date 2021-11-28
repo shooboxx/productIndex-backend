@@ -69,8 +69,8 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
             if (resp) {
                 const accessToken = generateAccessToken({ user_id: user.id })
                 const refreshToken = jwt.sign({ user_id: user.id }, process.env.REFRESH_TOKEN_SECRET)
-                refreshTokens.push(refreshToken)
-                userService.storeRefreshToken(user.id, refreshToken)
+                const hashed_token = crypto.createHash('sha256').update(refreshToken).digest('hex')
+                userService.storeRefreshToken(user.id, hashed_token)
                 return res.status(200).json({ access_token: accessToken, refresh_token: refreshToken })
             }
             return res.status(400).json({ "error": "Email address or password is incorrect" })
@@ -138,7 +138,8 @@ router.post('/auth/token', async (req, res) => {
     const userId = req.body.user_id
     if (refreshToken == null) return res.sendStatus(401)
     if (userId == null) return res.sendStatus(401)
-    const token = await userService.findRefreshToken(userId, refreshToken)
+    const hashed_token = crypto.createHash('sha256').update(refreshToken).digest('hex')
+    const token = await userService.findRefreshToken(userId, hashed_token)
     if (!token) return res.sendStatus(403)
     jwt.verify(token.refresh_token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
         if (err) return res.sendStatus(403)
