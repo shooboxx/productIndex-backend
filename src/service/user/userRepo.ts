@@ -1,5 +1,7 @@
 export { };
 const Users = require("../../models/users");
+const UserTokens = require("../../models/user_tokens");
+import { tokenToString } from "typescript";
 import { User } from "./userType";
 
 const addUser = async (user: User) => {
@@ -66,4 +68,28 @@ const updateUser = async (user: User) => {
 
 };
 
-module.exports = { addUser, findUser, findUserByResetToken, updateUser, findUserByVerificationToken };
+const storeRefreshToken = async (user_id: number, refreshToken : string) => {
+  await UserTokens.create({
+    user_id: user_id,
+    refresh_token: refreshToken,
+    insert_date: Date.now()  
+  })
+}
+
+const findRefreshToken = async (userId : number, refreshToken : string) => {
+  const token = await UserTokens.findOne({ where: {user_id: userId, refresh_token: refreshToken} });
+  if (!token) {
+    return
+  }
+  return token.dataValues
+}
+
+const clearRefreshTokens = (userId) => {
+  UserTokens.destroy({
+    where: {
+      user_id: userId
+    }
+  })
+}
+
+module.exports = { addUser, findUser, findUserByResetToken, updateUser, findUserByVerificationToken, storeRefreshToken, findRefreshToken, clearRefreshTokens };
