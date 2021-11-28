@@ -118,8 +118,9 @@ const updatePassword = async (userId, emailAddress, newPassword, newPasswordConf
     user.password_reset_token = ''
     user.password_reset_expires_in = 0
     user.password_last_updated = Date.now()
-    // -- TODO: destroy active sessions and remember me cookies
-    return userRepo.updateUser(user)
+    const found =  userRepo.updateUser(user)
+    if (found) userRepo.clearRefreshTokens(userId)
+    return found
 
 }
 
@@ -171,4 +172,15 @@ const setAciveStatus = (userId, active) => {
         throw e
     }
 }
-module.exports = { getUserByEmail, getUserById, createUser, updateResetToken, updatePassword, getUserByResetToken, deleteUser, deactivateUser, updateUserProfile, verifyUser, setAciveStatus }
+
+const storeRefreshToken = (userId : number,refreshToken : string) => {
+    if (!refreshToken) throw new Error('refresh_token is required')
+    return userRepo.storeRefreshToken(userId, refreshToken)
+}
+
+const findRefreshToken = async (userId : number, refreshToken : string) => {
+    return await userRepo.findRefreshToken(userId, refreshToken)
+}
+
+
+module.exports = { getUserByEmail, getUserById, createUser, updateResetToken, updatePassword, getUserByResetToken, deleteUser, deactivateUser, updateUserProfile, verifyUser, setAciveStatus, storeRefreshToken, findRefreshToken }
