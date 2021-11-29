@@ -1,9 +1,12 @@
 // const dbenv = require('./config')
-const pg = dbenv[process.env.NODE_ENV]
+// const pg = dbenv[process.env.NODE_ENV]
+
+
+const { POSTGRES_PASSWORD, POSTGRES_USER, POSTGRES_DB, DB_HOST, POSTGRES_PORT} = process.env;
 const Sequelize = require('sequelize')
-const db = new Sequelize(pg.database, pg.username, pg.password, {
-    host: pg.host,
-    dialect: pg.dialect,
+const db = new Sequelize(POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, {
+    host: DB_HOST,
+    dialect: "postgres",
     operatorsAliases: false,
     pool: {
         max: 5,
