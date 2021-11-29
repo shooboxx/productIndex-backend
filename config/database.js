@@ -1,4 +1,4 @@
-const dbenv = require('./config')
+// const dbenv = require('./config')
 const pg = dbenv[process.env.NODE_ENV]
 const Sequelize = require('sequelize')
 const db = new Sequelize(pg.database, pg.username, pg.password, {
