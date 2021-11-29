@@ -12,7 +12,7 @@ const db = new Sequelize(POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, {
         max: 5,
         min: 0,
         aquire: 30000,
-        idle: 10000
+        idle: 10000 
     },
 })
 // Test db connection
