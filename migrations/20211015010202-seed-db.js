@@ -22,7 +22,7 @@ module.exports = {
     alter table "public".business_item add constraint "FKpublic.bus325448" foreign key (business_id) references "public".business (Id);
     alter table "public".user_business_role add constraint FKuser_busin670551 foreign key (business_role_id) references "public".business_role (id);
     alter table "public".business_role add constraint FKbusiness_r802551 foreign key (permissions_id) references "public".permission (id);
-    alter table "public".inventory_item add constraint "FKpublic.inv291690" foreign key (business_item_id) references "public.business_item" (id);
+    alter table "public".inventory_item add constraint "FKpublic.inv291690" foreign key (business_item_id) references "public".business_item (id);
     alter table "public".business_item add constraint "FKpublic.bus192435" foreign key (product_id) references "public".product (id);
     alter table "public".business_store_hours add constraint FKbusiness_s954772 foreign key (business_store_id) references "public".business_store (id);
     alter table "public".business_role add constraint FKbusiness_r425550 foreign key (business_id) references "public".business (Id);
