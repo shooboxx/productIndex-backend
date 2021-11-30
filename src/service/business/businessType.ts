@@ -14,6 +14,7 @@ export interface Business {
     roles?: BusinessRole[],
     items?: BusinessItem[],
     active?: boolean,
+    created_by: number,
     update_date?: number,
     insert_date?: number
 }

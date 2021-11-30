@@ -4,7 +4,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     return queryInterface.sequelize.query(
    `
-    create table "public".business (Id serial not null, created_by int4 not null, business_name varchar(255) not null, description text, email_address text not null, profile_banner_url text, profile_pic_url text, active bool not null, category varchar(100), insert_date timestamp not null, update_date timestamp, primary key (Id));
+    create table "public".business (Id serial not null, created_by int4 not null, business_name varchar(255) not null, description text, profile_banner_url text, profile_pic_url text, active bool not null, category varchar(100), insert_date timestamp not null, update_date timestamp, primary key (Id));
     create table "public".business_item (id serial not null, product_id int4 not null, business_id int4 not null, product_key int4 not null, description int4, "tag" text, insert_date timestamp, update_date timestamp, primary key (id));
     create table "public".business_portfolio (id serial not null, business_id int4 not null, media_url text, media_type varchar(255), title varchar(255), description text, insert_date timestamp, update_date timestamp, primary key (id));
     create table "public".business_store (id serial not null, business_id int4 not null, unique_name varchar(255) not null unique, email text, phone varchar(255), phone_2 varchar(255), phone_3 varchar(255), address_line_1 varchar(255), address_line_2 varchar(255), latitude float4, longitude float4, country varchar(255), city varchar(255), postal_code varchar(255), is_primary bool, temp_or_perm_closure char(4), reopen_date date, insert_date timestamp not null, update_date timestamp not null, primary key (id));

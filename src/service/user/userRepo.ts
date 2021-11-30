@@ -1,7 +1,6 @@
 export { };
 const Users = require("../../models/users");
 const UserTokens = require("../../models/user_tokens");
-import { tokenToString } from "typescript";
 import { User } from "./userType";
 
 const addUser = async (user: User) => {

@@ -1,54 +1,51 @@
 export {}
 const Sequelize = require('sequelize');
-module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('business', {
-    id: {
-      autoIncrement: true,
-      type: DataTypes.INTEGER,
+const db = require('../../config/database.js')
+
+const Business =  db.define('business', {
+    created_by: {
+      type: Sequelize.INTEGER,
       allowNull: false,
-      primaryKey: true
+      references: {
+        model: 'users',
+        key: 'id'
+      }
     },
     business_name: {
-      type: DataTypes.STRING(255),
+      type: Sequelize.STRING,
       allowNull: false
     },
     description: {
-      type: DataTypes.TEXT,
+      type: Sequelize.STRING,
       allowNull: true
     },
-    email: {
-      type: DataTypes.TEXT,
-      allowNull: false
-    },
     profile_banner_url: {
-      type: DataTypes.TEXT,
+      type: Sequelize.STRING,
       allowNull: true
     },
     profile_pic_url: {
-      type: DataTypes.TEXT,
+      type: Sequelize.STRING,
       allowNull: true
     },
     active: {
-      type: DataTypes.BOOLEAN,
+      type: Sequelize.BOOLEAN,
       allowNull: false
     },
     category: {
-      type: DataTypes.STRING(100),
+      type: Sequelize.STRING,
       allowNull: true
     },
     insert_date: {
-      type: DataTypes.DATE,
+      type: Sequelize.DATE,
       allowNull: false
     },
     update_date: {
-      type: DataTypes.DATE,
-      allowNull: false
+      type: Sequelize.DATE,
+      allowNull: true
     }
   }, {
-    sequelize,
-    tableName: 'business',
-    schema: 'public',
     timestamps: false,
+    freezeTableName: true,
     indexes: [
       {
         name: "business_pkey",
@@ -59,4 +56,5 @@ module.exports = function(sequelize, DataTypes) {
       },
     ]
   });
-};
+
+module.exports = Business;

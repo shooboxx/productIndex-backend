@@ -2,25 +2,25 @@ import { Business } from "./businessType";
 import { BusinessRole, UserBusinessRole } from '../auth/business/businessRoleType';
 import { BusinessErrors } from './businessErrors'
 
-const businessAuthService = require('../auth/business/businessAuthService')
 const userService = require('../user/userService');
 const businessRepo = require('./businessRepo')
 
-const getUserBusinesses = (userId : number) : UserBusinessRole[] => {
+const getUserBusinesses = async (userId : number) : Promise<Business[]> => {
     try {
-        userService.getUserById(userId)
-        return businessRepo.findUserBusinesses(userId)
+        await userService.getUserById(userId)
+        const biz =  await businessRepo.findUserBusinesses(userId)
+        return biz
     }
     catch (e) {
         throw e
     }
     
 }
-const getBusinessById = (businessId : number) : Business => {
+const getBusinessById = async (businessId : number) : Promise<Business> => {
     if (!businessId) throw Error(BusinessErrors.BusinessIdRequired)
     try {
-        const business = businessRepo.findBusinessById(businessId)
-        if (business.id == 0) {
+        const business = await businessRepo.findBusinessById(businessId)
+        if (!business) {
             throw Error(BusinessErrors.NoBusinessFound)
         }
         return business
@@ -30,62 +30,66 @@ const getBusinessById = (businessId : number) : Business => {
     }
 
 }
+const businessNameMatch = async (businessName : string) => {
+    if (!businessName) throw Error('Business name is required')
+    try {
+        return await businessRepo.businessNameMatch(businessName.trim().toLocaleUpperCase())
+    }
+    catch (e) {
+        throw e
+    }
+}
 
-const createBusiness = (userId : number, newBusiness : Business) : UserBusinessRole => {
+const createBusiness = async (newBusiness : Business) => {
     try {
         if(!newBusiness.category) throw new Error('Business category is required')
         if(!newBusiness.name) throw new Error('Business name is required')
-
-        const business : Business = businessRepo.createBusiness(userId, newBusiness)
-        const role : BusinessRole = businessAuthService.createOwnerBusinessRole(business.id)
+        // do a check to see if business exists
+        const business = await businessRepo.createBusiness(newBusiness)
     
-        return {
-            userId: userId,
-            business_role: role
-        }
+        return business
     }
     catch (e) {
         throw e
     }
-
 
 }
-const deleteBusiness = (userId : number, businessId : number) => {
-    try {
-        const businesses = getUserBusinesses(userId)
-        for (let i = 0; i <= businesses.length; i++) {
-            if (businesses[i].business_role.business_id == businessId ) {
-                return businessRepo.removeBusiness(businessId)
-            }
-        }
-        throw Error(BusinessErrors.NoBusinessFound)
+// const deleteBusiness = (userId : number, businessId : number) => {
+//     try {
+//         const businesses = getUserBusinesses(userId)
+//         for (let i = 0; i <= businesses.length; i++) {
+//             if (businesses[i].business_role.business_id == businessId ) {
+//                 return businessRepo.removeBusiness(businessId)
+//             }
+//         }
+//         throw Error(BusinessErrors.NoBusinessFound)
 
-    }
-    catch (e) {
-        throw e
-    }
+//     }
+//     catch (e) {
+//         throw e
+//     }
     
-}
-const setBusinessActiveStatus = (userId : number, businessId : number, status : boolean) : Business => {
-    try {
-        const businesses = getUserBusinesses(userId)
-        for (let i = 0; i <= businesses.length; i++) {
-            if (businesses[i].business_role.business_id== businessId ) {
-                return businessRepo.setBusinessActiveStatus(businessId, status)
-            }
-        }
-        throw Error(BusinessErrors.NoBusinessFound)
-    }
-    catch (e) {
-        throw e
-    }
-}
+// }
+// const setBusinessActiveStatus = (userId : number, businessId : number, status : boolean) : Business => {
+//     try {
+//         const businesses = getUserBusinesses(userId)
+//         for (let i = 0; i <= businesses.length; i++) {
+//             if (businesses[i].business_role.business_id== businessId ) {
+//                 return businessRepo.setBusinessActiveStatus(businessId, status)
+//             }
+//         }
+//         throw Error(BusinessErrors.NoBusinessFound)
+//     }
+//     catch (e) {
+//         throw e
+//     }
+// }
 
-const updateBusiness = (userId : number, businessId: number, updatedBusiness : Business) : Business => {
+const updateBusiness = async (userId : number, businessId: number, updatedBusiness : Business) : Promise<Business> => {
     try {
-        const businesses = getUserBusinesses(userId)
-        for (let i = 0; i <= businesses.length; i++) {
-            if (businesses[i].business_role.business_id == businessId ) {
+        const businesses = await getUserBusinesses(userId)
+        for (let i = 0; i < businesses.length; i++) {
+            if (businesses[i].id == businessId ) {
                 return businessRepo.updateBusiness(businessId, updatedBusiness)
             }
         }
@@ -97,19 +101,20 @@ const updateBusiness = (userId : number, businessId: number, updatedBusiness : B
 
 }
 
-const isBusinessActive = (businessId : number) : Boolean => {
-    try {
-        const business = getBusinessById(businessId)
-        return business.active || false
-    }
-    catch (e) {
-        throw e
-    }
+// const isBusinessActive = (businessId : number) : Boolean => {
+//     try {
+//         const business = getBusinessById(businessId)
+//         return business.active || false
+//     }
+//     catch (e) {
+//         throw e
+//     }
 
-}
+// }
 
-const getBusinessMasterDetail = () => {
+// const getBusinessMasterDetail = () => {
 
-}
+// }
 
-module.exports = {getBusinessById, getUserBusinesses, createBusiness, deleteBusiness, setBusinessActiveStatus, updateBusiness, isBusinessActive}
+module.exports = {getBusinessById, getUserBusinesses, createBusiness, updateBusiness}
+    // , deleteBusiness, setBusinessActiveStatus, updateBusiness, isBusinessActive}
