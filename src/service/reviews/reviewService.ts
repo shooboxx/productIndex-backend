@@ -9,9 +9,9 @@ if (process.env.NODE_ENV == 'test') {
 
 import { Review } from './reviewType'
 
-const getReviewsByBusinessId = (businessId: number): Review[] => {
+const getReviewsByBusinessId = async (businessId: number) => {
     try {
-        const reviews = reviewsRepo.findReviewsByBusinessId(businessId)
+        const reviews = await reviewsRepo.findReviewsByBusinessId(businessId)
 
         if (reviews.length === 0) throw new Error('No reviews for this business')
         return reviews
@@ -21,9 +21,9 @@ const getReviewsByBusinessId = (businessId: number): Review[] => {
     }
 
 }
-const getReview = (userId: number, business_id: number): Review => {
+const getReview = async (userId: number, business_id: number) => {
     try {
-        const review = reviewsRepo.findReview(userId, business_id)
+        const review = await reviewsRepo.findReview(userId, business_id)
         if (!exist(review)) throw new Error('User has not left a review for this business')
         return review
     }
@@ -52,15 +52,14 @@ const createReview = async (newReview: Review) => {
 const updateReview = async (updatedReview: Review) => {
     try {
         // businessService.getBusinessById(updatedReview.business_id)
-        const currReview: Review = getReview(updatedReview.user_id, updatedReview.business_id)
-        currReview.review_comment = updatedReview.review_comment || currReview.review_comment
+        const currReview: Review = await getReview(updatedReview.user_id, updatedReview.business_id)
+        currReview.comment = updatedReview.comment || currReview.comment
         currReview.star_rating = updatedReview.star_rating || currReview.star_rating
         currReview.update_date = Date.now()
         currReview.flagged = updatedReview.flagged || currReview.flagged
         currReview.inappropriate_comment = updatedReview.inappropriate_comment || currReview.inappropriate_comment
         _validReview(currReview)
 
-        console.log(currReview)
         return await reviewsRepo.updateReview(currReview)
 
     }
@@ -94,7 +93,7 @@ const deleteReview = async (userId: number, businessId: number) => {
         // businessService.getBusinessById(businessId)
         // userService.getUserById(userId)
         const review = await getReview(userId, businessId)
-        return reviewsRepo.deleteReview(review.id)
+        return await reviewsRepo.deleteReview(review.id)
     }
     catch (e) {
         throw e
@@ -108,8 +107,8 @@ const getUserReviews = (userId: number) => {
 const _validReview = (review: Review) => {
     if (review.star_rating < 1 && review.star_rating > 6) throw new Error('Star rating value must be between 1 and 5');
     if (!review.star_rating) throw new Error('Star rating is required')
-    if (!review.review_comment) throw new Error('Review comment is required')
-    if (review.review_comment.length < 12) throw new Error('Review comment must be at least 12 characters')
+    if (!review.comment) throw new Error('Review comment is required')
+    if (review.comment.length < 12) throw new Error('Review comment must be at least 12 characters')
     if (!review.user_id) throw new Error('user_id is required')
     return true
 }
