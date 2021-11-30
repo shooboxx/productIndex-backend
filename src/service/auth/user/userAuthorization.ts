@@ -1,11 +1,8 @@
 // Define roles and create middlewares that control authorization within the application
 
-import { UserRole } from "./authTypes"
 const jwt = require('jsonwebtoken')
 import AppError from '../../../utils/appError.js'
-
-
-const roles : UserRole[] = []
+const sysRole = require('./systemRole/systemRoleService')
 
 function adminOnlyAccess (req, res, next) {
     const authHeader = req.headers['authorization']
@@ -14,7 +11,7 @@ function adminOnlyAccess (req, res, next) {
 
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
         if (err) return res.sendStatus(403)
-        const userRole = getUserRole(user.userID)
+        const userRole = sysRole.getUserRole(user.userID)
         if (userRole.access_level == 0) {
             return next();
         }
@@ -31,7 +28,7 @@ function hasAccessLevel(accessLevel) {
     
         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
             if (err) return res.sendStatus(403)
-            const userRole = getUserRole(user.userID)
+            const userRole = sysRole.getUserRole(user.userID)
             if (userRole.access_level == accessLevel) {
                 return next();
             }
@@ -39,29 +36,6 @@ function hasAccessLevel(accessLevel) {
             
         })
     }
-}
-const getRoleByID = (roleID) : UserRole => {
-    for (let i = 0; i< roles.length; i++ ) {
-        if (roles[i].id == roleID) {
-            return roles[i]
-        }
-    }
-    throw Error("Role not found with that ID")
-}
-
-const getUserRole = (userID) : UserRole => {
-    // const user = getUserById(userID)
-    // return getRoleByID(user.id)
-   return {
-       id: 1,
-       role_name: "User",
-       access_level: 5,
-       insert_date: 0,
-       update_date: 0
-   } 
-}
-const setUserRole = (userID, roleName) => {
-    const roleId = getRoleID(roleName)
 }
 
 function authenticateToken (req, res, next) {
@@ -74,10 +48,6 @@ function authenticateToken (req, res, next) {
         req.user_id = user.user_id
         return next()
     })
-}
-
-function getRoleID(roleName) {
-    return 1
 }
 
 function checkNotAuthenticated (req, res, next) {
@@ -93,4 +63,4 @@ function checkNotAuthenticated (req, res, next) {
     
     return res.status(403).json({"error": "user already logged in"})
 }
-module.exports = {getRoleByID, adminOnlyAccess, hasAccessLevel, authenticateToken, checkNotAuthenticated, getRoleID}
+module.exports = {adminOnlyAccess, hasAccessLevel, authenticateToken, checkNotAuthenticated}

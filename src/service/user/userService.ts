@@ -7,8 +7,7 @@ const userRepo = require('./userRepo')
 
 // Returns id, email and password
 const getUserByEmail = async (emailAddress: string) => {
-    // if (!emailAddress) throw new Error('Email address is required')
-    console.log('This was successfully called')
+    if (!emailAddress) throw new Error('Email address is required')
 
     const found = await userRepo.findUser(null, emailAddress).then(user => {
         if (!user) {
@@ -21,12 +20,26 @@ const getUserByEmail = async (emailAddress: string) => {
     return found
 
 }
+// Returns user
+const getUserByVerificationToken = async (token: string) => {
+    if (!token) throw new Error('Verification token is required')
+    const found = await userRepo.findUserByVerificationToken(token).then(user => {
+        if (!user) {
+            throw new Error('No user found with that verification token')
+        }
+        return user
+    }).catch(err => {
+        throw new AppError(err, 400)
+    })
+    return found
+
+}
+
 // Returns user without password (for internal use)
 const getUserById = (userId: number): User => {
     if (!userId) {
         throw Error('User is required')
     }
-    // console.log('something')
     const user = userRepo.findUser(userId, null) || null;
 
     if (user.length === 0) {
@@ -105,8 +118,9 @@ const updatePassword = async (userId, emailAddress, newPassword, newPasswordConf
     user.password_reset_token = ''
     user.password_reset_expires_in = 0
     user.password_last_updated = Date.now()
-    // -- TODO: destroy active sessions and remember me cookies
-    return userRepo.updateUser(user)
+    const found =  userRepo.updateUser(user)
+    if (found) userRepo.clearRefreshTokens(userId)
+    return found
 
 }
 
@@ -121,9 +135,14 @@ const deactivateUser = (userId: number) => {
     }
 }
 
-const verifyUser = (userId: number) => {
+const verifyUser = async (token: string) => {
     try {
-        const user = getUserById(userId)
+        if (!token) throw new Error('Verification token is required')
+        const user : User = await getUserByVerificationToken(token)
+        // TODO: Send error with error code
+        // if (user.is_verified) throw new Error('User is already verified')
+        // if (user.verify_expires && user.verify_expires.toDateString() > Date.now().toString()) throw new Error('Verification token expired')
+
         user.is_verified = true
         return userRepo.updateUser(user)
     }
@@ -153,4 +172,15 @@ const setAciveStatus = (userId, active) => {
         throw e
     }
 }
-module.exports = { getUserByEmail, getUserById, createUser, updateResetToken, updatePassword, getUserByResetToken, deleteUser, deactivateUser, updateUserProfile, verifyUser, setAciveStatus }
+
+const storeRefreshToken = (userId : number,refreshToken : string) => {
+    if (!refreshToken) throw new Error('refresh_token is required')
+    return userRepo.storeRefreshToken(userId, refreshToken)
+}
+
+const findRefreshToken = async (userId : number, refreshToken : string) => {
+    return await userRepo.findRefreshToken(userId, refreshToken)
+}
+
+
+module.exports = { getUserByEmail, getUserById, createUser, updateResetToken, updatePassword, getUserByResetToken, deleteUser, deactivateUser, updateUserProfile, verifyUser, setAciveStatus, storeRefreshToken, findRefreshToken }

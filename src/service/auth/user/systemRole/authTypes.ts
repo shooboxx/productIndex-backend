@@ -1,4 +1,4 @@
-export interface UserRole {
+export interface SystemRole {
     id: number,
     role_name: string,
     access_level: number,
