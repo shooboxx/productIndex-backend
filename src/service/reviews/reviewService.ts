@@ -21,6 +21,7 @@ const getReviewsByBusinessId = async (businessId: number) => {
     }
 
 }
+
 const getReview = async (userId: number, business_id: number) => {
     try {
         const review = await reviewsRepo.findReview(userId, business_id)
@@ -67,6 +68,7 @@ const updateReview = async (updatedReview: Review) => {
         throw e
     }
 }
+
 const flagReview = async (userId: number, businessId: number) => {
     try {
         const review: Review = reviewsRepo.findReview(userId, businessId)
@@ -77,6 +79,7 @@ const flagReview = async (userId: number, businessId: number) => {
         throw e
     }
 }
+
 const markReviewAsInappropriate = async (userId: number, businessId: number) => {
     try {
         const review: Review = await reviewsRepo.findReview(userId, businessId)
@@ -100,8 +103,16 @@ const deleteReview = async (userId: number, businessId: number) => {
     }
 }
 
-const getUserReviews = (userId: number) => {
-    //Todo: Implement this
+const getUserReviews = async (userId: number) => {
+    try {
+        const reviews = await reviewsRepo.findReviewsByUserId(userId)
+
+        if (reviews.length === 0) throw new Error('No reviews for this user')
+        return reviews
+    }
+    catch (e) {
+        throw e
+    }
 }
 
 const _validReview = (review: Review) => {
@@ -112,4 +123,5 @@ const _validReview = (review: Review) => {
     if (!review.user_id) throw new Error('user_id is required')
     return true
 }
-module.exports = { getReviewsByBusinessId, createReview, updateReview, deleteReview, flagReview, markReviewAsInappropriate }
+
+module.exports = { getReviewsByBusinessId, createReview, updateReview, deleteReview, flagReview, markReviewAsInappropriate, getUserReviews }

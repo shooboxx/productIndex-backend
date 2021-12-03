@@ -1,18 +1,16 @@
 const Reviews = require("../../models/review");
 import { Review } from "./reviewType"
 
-let reviews: Review[] = [
-    {
-        id: 1,
-        business_id: 1,
-        user_id: 1000,
-        star_rating: 1,
-        comment: 'The food was terrible here.'
-    }
-]
-
 const findReviewsByBusinessId = async (businessId: number) => {
-    const review = await Reviews.findOne({ where: { businessid: businessId } })
+    const review = await Reviews.findAll({ where: { businessid: businessId } })
+    if (!review) {
+        return
+    }
+    return review.dataValues
+}
+
+const findReviewsByUserId = async (userId: number) => {
+    const review = await Reviews.findAll({ where: { user_id: userId } })
     if (!review) {
         return
     }
@@ -46,7 +44,11 @@ const updateReview = async (updatedReview: Review) => {
     if (!review) {
         return
     }
-    review.update({ comment: updatedReview.comment })
+    review.update({
+        comment: updatedReview.comment,
+        inappropriate_comment: updatedReview.inappropriate_comment,
+        inappropriate_flag: updatedReview.flagged
+    })
 
     return updatedReview
 }
@@ -60,4 +62,4 @@ const deleteReview = async (review_id: number) => {
     return review
 
 }
-module.exports = { findReviewsByBusinessId, findReview, createReview, updateReview, deleteReview }
+module.exports = { findReviewsByBusinessId, findReview, createReview, updateReview, deleteReview, findReviewsByUserId }

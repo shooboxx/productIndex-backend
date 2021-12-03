@@ -62,7 +62,9 @@ const Review = db.define('review', {
         allowNull: true
     }
 }, {
-    timestamps: false,
+    createdAt: 'insert_date',
+    updatedAt: 'update_date',
+    timestamps: true,
     freezeTableName: true
 })
 
