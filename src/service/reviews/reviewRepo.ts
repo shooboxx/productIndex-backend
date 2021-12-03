@@ -17,21 +17,15 @@ const findReviewsByBusinessId = async (businessId: number) => {
         return
     }
     return review.dataValues
-    // let bizReviews: Review[] = []
-    // for (let i = 0; i < reviews.length; i++) {
-    //     if (reviews[i].business_id == businessId) {
-    //         bizReviews.push(reviews[i])
-    //     }
-    // }
-    // return bizReviews
 }
+
 const findReview = async (userId: number, businessId: number) => {
     const review = await Reviews.findOne({ where: { businessid: businessId, user_id: userId } })
     if (!review) {
         return null
     }
     return review.dataValues
-};
+}
 
 const createReview = async (newReview: Review) => {
 
@@ -62,7 +56,7 @@ const deleteReview = async (review_id: number) => {
     if (!review) {
         return
     }
-        review.update({ deleted_date: Date.now()})
+    review.destroy()
     return review
 
 }
