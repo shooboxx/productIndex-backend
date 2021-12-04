@@ -106,7 +106,6 @@ const deleteReview = async (userId: number, businessId: number) => {
 const getUserReviews = async (userId: number) => {
     try {
         const reviews = await reviewsRepo.findReviewsByUserId(userId)
-
         if (reviews.length === 0) throw new Error('No reviews for this user')
         return reviews
     }

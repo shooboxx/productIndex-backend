@@ -10,11 +10,12 @@ const findReviewsByBusinessId = async (businessId: number) => {
 }
 
 const findReviewsByUserId = async (userId: number) => {
-    const review = await Reviews.findAll({ where: { user_id: userId } })
-    if (!review) {
+    const reviews = await Reviews.findAll({ where: { user_id: userId }, raw: true })
+    if (!reviews) {
         return
     }
-    return review.dataValues
+
+    return reviews
 }
 
 const findReview = async (userId: number, businessId: number) => {
