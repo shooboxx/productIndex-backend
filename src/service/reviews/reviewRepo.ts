@@ -19,11 +19,11 @@ const findReviewsByUserId = async (userId: number) => {
 }
 
 const findReview = async (userId: number, businessId: number) => {
-    const review = await Reviews.findOne({ where: { businessid: businessId, user_id: userId } })
+    const review = await Reviews.findOne({ where: { businessid: businessId, user_id: userId }, raw: true })
     if (!review) {
         return null
     }
-    return review.dataValues
+    return review
 }
 
 const createReview = async (newReview: Review) => {
