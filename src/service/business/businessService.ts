@@ -90,6 +90,12 @@ const updateBusiness = async (userId : number, businessId: number, updatedBusine
         const businesses = await getUserBusinesses(userId)
         for (let i = 0; i < businesses.length; i++) {
             if (businesses[i].id == businessId ) {
+                businesses[i].active = updatedBusiness.active || businesses[i].active;
+                businesses[i].category = updatedBusiness.category || businesses[i].category;
+                businesses[i].description = updatedBusiness.description || businesses[i].description;
+                businesses[i].name = updatedBusiness.name || businesses[i].name;
+                businesses[i].update_date = Date.now()
+
                 return businessRepo.updateBusiness(businessId, updatedBusiness)
             }
         }
