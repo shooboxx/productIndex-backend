@@ -1,9 +1,9 @@
 import { Business } from "./businessType";
 const Businesses = require("../../models/business");
-const businesses : Business[] = []
+const businesses: Business[] = []
 
 const findUserBusinesses = async (userId) => {
-  const list : any = []
+  const list: any = []
   const businesses = await Businesses.findAll({ where: { created_by: userId } })
   if (!businesses) {
     return null
@@ -12,18 +12,18 @@ const findUserBusinesses = async (userId) => {
     list.push(businesses[i].dataValues)
   }
   return list
-    
+
 }
 
-const findBusinessById = async (businessId : number)  => {
-  const business = await Businesses.findOne({ where: { id: businessId } })
+const findBusinessById = async (businessId: number) => {
+  const business = await Businesses.findByPk(businessId)
   if (!businesses) {
     return null
   }
   return business.dataValues
 }
 
-const createBusiness = async (newBusiness : Business) => {
+const createBusiness = async (newBusiness: Business) => {
   await Businesses.create({
     business_name: newBusiness.name,
     description: newBusiness.description,
@@ -32,52 +32,58 @@ const createBusiness = async (newBusiness : Business) => {
     email_address: newBusiness,
     created_by: newBusiness.created_by,
     insert_date: Date.now(),
-    
+
   }).catch(err => console.log(err))
 
   return newBusiness
 
 }
-const removeBusiness = (businessId) => {
-    for (let i = 0; i <= businesses.length; i++) {
-        if (businesses[i].id == businessId ) {
-            businesses.splice(i, 1)
-            return -1
-        }
-      }
-    return 0 
- 
+
+const removeBusiness = async (businessId) => {
+  const business = await Businesses.findByPk(businessId)
+  if (!review) {
+    return
+  }
+  review.destroy()
+  return review
+
 }
 
-const setBusinessActiveStatus = (businessId, status) => {
-    for (let i = 0; i <= businesses.length; i++) {
-        if (businesses[i] == businessId ) {
-            businesses[i].active = status
-            return businesses[i]
-        }
-    }
-}
-const updateBusiness = async (businessId, updatedBusiness : Business) => {
-    await Businesses.update({
-      business_name: updatedBusiness.name,
-      description: updatedBusiness.description,
-      category: updatedBusiness.category,
-      profile_picture_url: updatedBusiness.profile_picture_url,
-      active: updatedBusiness.active,
-      update_date: Date.now(),
-  }, {
-      where: {
-          id: businessId
-      }
+const setBusinessActiveStatus = async (businessId, status) => {
+
+  const business = await Businesses.findByPk(businessId)
+
+  if (!business) {
+    return
+  }
+  business.update({
+    active: status,
+    update_date: Date.now(),
   })
-    return updatedBusiness;
+
+  return business;
+}
+const updateBusiness = async (businessId, updatedBusiness: Business) => {
+  await Businesses.update({
+    business_name: updatedBusiness.name,
+    description: updatedBusiness.description,
+    category: updatedBusiness.category,
+    profile_picture_url: updatedBusiness.profile_picture_url,
+    active: updatedBusiness.active,
+    update_date: Date.now(),
+  }, {
+    where: {
+      id: businessId
+    }
+  })
+  return updatedBusiness;
 }
 
 const findBusinessMasterDetail = () => {
 
 }
 
-const businessNameMatch = async( bname : string) => {
+const businessNameMatch = async (bname: string) => {
   //TODO: Figure out how to name match (trim and lowercase)
   const businesses = await Businesses.findAll({ where: { business_name: bname } })
   if (!businesses) {
@@ -86,4 +92,4 @@ const businessNameMatch = async( bname : string) => {
   return businesses.dataValues
 }
 
-module.exports = {findBusinessById, findUserBusinesses, createBusiness, removeBusiness, setBusinessActiveStatus, updateBusiness, businessNameMatch}
+module.exports = { findBusinessById, findUserBusinesses, createBusiness, removeBusiness, setBusinessActiveStatus, updateBusiness, businessNameMatch }
