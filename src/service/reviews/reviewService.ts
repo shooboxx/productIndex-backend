@@ -69,16 +69,6 @@ const updateReview = async (updatedReview: Review) => {
     }
 }
 
-const flagReview = async (userId: number, businessId: number) => {
-    try {
-        const review: Review = reviewsRepo.findReview(userId, businessId)
-        review.flagged = true
-        return await updateReview(review)
-    }
-    catch (e) {
-        throw e
-    }
-}
 
 const markReviewAsInappropriate = async (userId: number, businessId: number) => {
     try {
@@ -123,4 +113,4 @@ const _validReview = (review: Review) => {
     return true
 }
 
-module.exports = { getReviewsByBusinessId, createReview, updateReview, deleteReview, flagReview, markReviewAsInappropriate, getUserReviews }
+module.exports = { getReviewsByBusinessId, createReview, updateReview, deleteReview,   markReviewAsInappropriate, getUserReviews }
