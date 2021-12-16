@@ -1,47 +1,55 @@
-import {BusinessStore} from './storeTypes'
+import { BusinessStore } from './storeTypes'
 import { Business } from '../business/businessType';
+const Store = require("../../models/stores");
 
-let stores : BusinessStore[]= []
 
-const findStoreByBusinessId = (businessId : number) : BusinessStore[] => {
-    let businessStores : BusinessStore[]= []
-    for (let i = 0; i < stores.length; i++) {
-        if (stores[i].business_id === businessId) {
-            businessStores.push(stores[i])
-        }
+let stores: BusinessStore[] = []
+
+const findStoreByBusinessId = async (businessId: number) => {
+
+    const businessStore = await Store.findOne({ where: { business_id: businessId }, raw: true })
+    if (!businessStore) {
+        return
     }
-    return businessStores
+    return businessStore
 }
 
-const findStoreById = (storeId : number) : BusinessStore => {
-    let businessStores : BusinessStore[]= []
-    for (let i = 0; i < stores.length; i++) {
-        if (stores[i].id === storeId) {
-            return stores[i]
-        }
+const findStoreById = async (storeId: number) => {
+    const businessStore = await Store.findByPk(storeId, { raw: true })
+    if (!businessStore) {
+        return
     }
-    return businessStores as any
+    return businessStore
 }
 
-const createBusinessStore = (store) : BusinessStore => {
-    stores.push(store)
-    return stores[stores.length-1]
-} 
+const createBusinessStore = async (store: BusinessStore) => {
+    await Store.create({ store }).catch(err => null)
 
-const updateStore = (store) : BusinessStore => {
-    for (let i = 0; i < stores.length; i++) {
-        if (stores[i].id === store.id) {
-            stores[i] = store
-            return stores[i]
-        }
-    }
-    return {} as any
+    return store
 }
 
-const deleteStore = (storeId) : BusinessStore => {
+const updateStore = async (store: BusinessStore) => {
+    await Store.update({
+        unique_name: store.unique_name,
+        // description: store.description,
+        // category: store.category,
+        // profile_picture_url: store.profile_picture_url,
+        // active: store.active,
+        // update_date: Date.now(),
+    }, {
+        where: {
+            id: store.id
+        }
+    })
+
+    return store;
+
+}
+
+const deleteStore = (storeId): BusinessStore => {
 
     stores = stores.filter(foundStore => foundStore.id != storeId)
-    
+
     return {} as any
 }
-module.exports = {findStoreByBusinessId, findStoreById, createBusinessStore, updateStore, deleteStore}
+module.exports = { findStoreByBusinessId, findStoreById, createBusinessStore, updateStore, deleteStore }
