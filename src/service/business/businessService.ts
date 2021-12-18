@@ -5,18 +5,18 @@ import { BusinessErrors } from './businessErrors'
 const userService = require('../user/userService');
 const businessRepo = require('./businessRepo')
 
-const getUserBusinesses = async (userId : number) : Promise<Business[]> => {
+const getUserBusinesses = async (userId: number) => {
     try {
         await userService.getUserById(userId)
-        const biz =  await businessRepo.findUserBusinesses(userId)
+        const biz = await businessRepo.findUserBusinesses(userId)
         return biz
     }
     catch (e) {
         throw e
     }
-    
+
 }
-const getBusinessById = async (businessId : number) : Promise<Business> => {
+const getBusinessById = async (businessId: number) => {
     if (!businessId) throw Error(BusinessErrors.BusinessIdRequired)
     try {
         const business = await businessRepo.findBusinessById(businessId)
@@ -25,12 +25,12 @@ const getBusinessById = async (businessId : number) : Promise<Business> => {
         }
         return business
     }
-    catch(e) {
+    catch (e) {
         throw e
     }
 
 }
-const businessNameMatch = async (businessName : string) => {
+const businessNameMatch = async (businessName: string) => {
     if (!businessName) throw Error('Business name is required')
     try {
         return await businessRepo.businessNameMatch(businessName.trim().toLocaleUpperCase())
@@ -40,13 +40,13 @@ const businessNameMatch = async (businessName : string) => {
     }
 }
 
-const createBusiness = async (newBusiness : Business) => {
+const createBusiness = async (newBusiness: Business) => {
     try {
-        if(!newBusiness.category) throw new Error('Business category is required')
-        if(!newBusiness.name) throw new Error('Business name is required')
+        if (!newBusiness.category) throw new Error('Business category is required')
+        if (!newBusiness.name) throw new Error('Business name is required')
         // do a check to see if business exists
         const business = await businessRepo.createBusiness(newBusiness)
-    
+
         return business
     }
     catch (e) {
@@ -68,7 +68,7 @@ const createBusiness = async (newBusiness : Business) => {
 //     catch (e) {
 //         throw e
 //     }
-    
+
 // }
 // const setBusinessActiveStatus = (userId : number, businessId : number, status : boolean) : Business => {
 //     try {
@@ -85,11 +85,11 @@ const createBusiness = async (newBusiness : Business) => {
 //     }
 // }
 
-const updateBusiness = async (userId : number, businessId: number, updatedBusiness : Business) : Promise<Business> => {
+const updateBusiness = async (userId: number, businessId: number, updatedBusiness: Business): Promise<Business> => {
     try {
         const businesses = await getUserBusinesses(userId)
         for (let i = 0; i < businesses.length; i++) {
-            if (businesses[i].id == businessId ) {
+            if (businesses[i].id == businessId) {
                 businesses[i].active = updatedBusiness.active || businesses[i].active;
                 businesses[i].category = updatedBusiness.category || businesses[i].category;
                 businesses[i].description = updatedBusiness.description || businesses[i].description;
@@ -122,5 +122,5 @@ const updateBusiness = async (userId : number, businessId: number, updatedBusine
 
 // }
 
-module.exports = {getBusinessById, getUserBusinesses, createBusiness, updateBusiness}
+module.exports = { getBusinessById, getUserBusinesses, createBusiness, updateBusiness }
     // , deleteBusiness, setBusinessActiveStatus, updateBusiness, isBusinessActive}

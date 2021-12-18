@@ -1,7 +1,7 @@
 export { }
 const Sequelize = require('sequelize');
 const db = require('../../config/database.js')
-const Users = require("../../models/users");
+const Users = require("../models/users");
 
 const Business = db.define('business', {
   created_by: {

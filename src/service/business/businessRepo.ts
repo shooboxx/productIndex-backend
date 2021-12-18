@@ -1,4 +1,5 @@
 import { Business } from "./businessType";
+const db = require("../../../config/database.js")
 const Businesses = require("../../models/business");
 const businesses: Business[] = []
 
@@ -24,6 +25,13 @@ const findBusinessById = async (businessId: number) => {
 }
 
 const createBusiness = async (newBusiness: Business) => {
+  const biz = newBusiness.name.toUpperCase().replace(' ', '')
+  const businesses = await Businesses.findAll({ where: { business_name: db.where(db.fn('UPPER', db.fn('REPLACE', db.col('business_name'), ' ', '')), '=', biz) }, raw: true })
+
+  if (businesses) {
+    return
+  }
+
   await Businesses.create({
     business_name: newBusiness.name,
     description: newBusiness.description,
@@ -85,7 +93,7 @@ const findBusinessMasterDetail = () => {
 
 const businessNameMatch = async (bname: string) => {
   //TODO: Figure out how to name match (trim and lowercase)
-  const businesses = await Businesses.findAll({ where: { business_name: bname } })
+  const businesses = await Businesses.findAll({ where: db.fn('upper', db.col('business_name'), bname), raw: true })
   if (!businesses) {
     return null
   }
