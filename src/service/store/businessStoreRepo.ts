@@ -1,5 +1,7 @@
 import { BusinessStore } from './storeTypes'
 import { Business } from '../business/businessType';
+const sequelize = require('sequelize');
+
 const Store = require("../../models/stores");
 
 
@@ -23,6 +25,12 @@ const findStoreById = async (storeId: number) => {
 }
 
 const createBusinessStore = async (store: BusinessStore) => {
+    const businessStore = await Store.findAll({ where: sequelize.fn('upper', sequelize.col('unique_name'), store.unique_name.trim().toLowerCase()), raw: true })
+
+    if (businessStore) {
+        return
+    }
+
     await Store.create({ store }).catch(err => null)
 
     return store
@@ -31,11 +39,7 @@ const createBusinessStore = async (store: BusinessStore) => {
 const updateStore = async (store: BusinessStore) => {
     await Store.update({
         unique_name: store.unique_name,
-        // description: store.description,
-        // category: store.category,
-        // profile_picture_url: store.profile_picture_url,
-        // active: store.active,
-        // update_date: Date.now(),
+        update_date: Date.now(),
     }, {
         where: {
             id: store.id
