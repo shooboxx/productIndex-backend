@@ -47,6 +47,8 @@ const createBusiness = async (newBusiness: Business) => {
         // do a check to see if business exists
         const business = await businessRepo.createBusiness(newBusiness)
 
+        if (!business) throw new Error('This business already exist!')
+
         return business
     }
     catch (e) {

@@ -38,7 +38,7 @@ const createBusiness = async (newBusiness: Business) => {
     raw: true,
   });
 
-  if (businesses) {
+  if (businesses.length != 0) {
     return;
   }
 
