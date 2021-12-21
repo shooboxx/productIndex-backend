@@ -9,10 +9,10 @@ const businessService = require('../business/businessService')
 const businessStoreService = require('../store/businessStoreService')
 
 
-router.get('/store/:storeId', (req, res) => {
+router.get('/store/:storeId', async (req, res) => {
     try {
         const storeId = req.params.storeId
-        const store : BusinessStore = businessStoreService.getStoreById(storeId)
+        const store : BusinessStore = await businessStoreService.getStoreById(storeId)
 
         res.status(200).json({store})
     }
@@ -21,7 +21,7 @@ router.get('/store/:storeId', (req, res) => {
     }
 
 })
-router.put('/store/:storeId', (req, res) => {
+router.put('/store/:storeId', async (req, res) => {
     try {
 
         const storeId = req.params.storeId
@@ -46,7 +46,7 @@ router.put('/store/:storeId', (req, res) => {
             reopen_date: req.body.reopen_date
         }
 
-        const updated = businessStoreService.updateStore(store)
+        const updated = await businessStoreService.updateStore(store)
 
         res.status(200).json({updated})
     }
@@ -55,7 +55,7 @@ router.put('/store/:storeId', (req, res) => {
     }
 
 })
-router.post('/stores', (req, res) => {
+router.post('/stores', async (req, res) => {
     try {
         const storeId = req.params.storeId
 
@@ -78,7 +78,7 @@ router.post('/stores', (req, res) => {
             temp_or_perm_closure: req.body.temp_or_perm_closure,
             reopen_date: req.body.reopen_date
         }
-        const newStore = businessStoreService.createStore(store)
+        const newStore = await businessStoreService.createBusinessStore(store)
         res.status(200).json({newStore})
     }
     catch (e : any) {
@@ -86,12 +86,12 @@ router.post('/stores', (req, res) => {
     }
 
 })
-router.delete('/store/:storeId', (req, res) => {
+router.delete('/store/:storeId', async (req, res) => {
     try {
         const storeId = req.params.storeId
 
-        const store : BusinessStore = businessStoreService.getStoreById(storeId)
-        const deleted = businessStoreService.deleteStore(store.id)
+        const store : BusinessStore = await businessStoreService.getStoreById(storeId)
+        const deleted = await businessStoreService.deleteStore(store.id)
 
         res.sendStatus(200).json({deleted})
     }
