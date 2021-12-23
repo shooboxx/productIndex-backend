@@ -57,11 +57,15 @@ const createBusiness = async (newBusiness: Business) => {
 
 const removeBusiness = async (businessId) => {
   const business = await Businesses.findByPk(businessId);
-  if (!review) {
+
+  if (!business) {
     return;
   }
-  review.destroy();
-  return review;
+  business.update({
+    delete_date: Date.now(),
+  });
+
+  return business;
 };
 
 const setBusinessActiveStatus = async (businessId, status) => {
@@ -107,7 +111,7 @@ const businessNameMatch = async (bname: string) => {
   if (!businesses) {
     return null;
   }
-  return businesses.dataValues;
+  return businesses;
 };
 
 module.exports = {
