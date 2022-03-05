@@ -1,55 +1,66 @@
-import { Review } from './reviewType'
+const Reviews = require("../../models/review");
+import { Review } from "./reviewType"
 
-let reviews : Review[] = [
-    {
-        id: 1,
-        business_id: 1,
-        user_id: 1000,
-        star_rating: 1,
-        review_comment: 'The food was terrible here.'
+const findReviewsByBusinessId = async (businessId: number) => {
+    const review = await Reviews.findAll({ where: { businessid: businessId } })
+    if (!review) {
+        return
     }
-]
-
-const findReviewsByBusinessId = (businessId : number) : Review[]=> {
-    let bizReviews : Review[] = []
-    for (let i = 0; i < reviews.length; i++) {
-        if (reviews[i].business_id == businessId) {
-            bizReviews.push(reviews[i])
-        }
-    }
-    return bizReviews
-}
-const findReview = (userId: number, businessId : number) : Review => {
-    for (let i = 0; i < reviews.length; i++) {
-        if (reviews[i].business_id == businessId && reviews[i].user_id == userId) {
-            return reviews[i]
-        }
-    }
-    return {} as Review
+    return review.dataValues
 }
 
-const createReview = (newReview : Review) : Review => {
-    newReview.id = reviews.length + 1
-    reviews.push(newReview)
-    return reviews[reviews.length-1]
+const findReviewsByUserId = async (userId: number) => {
+    const reviews = await Reviews.findAll({ where: { user_id: userId }, raw: true })
+    if (!reviews) {
+        return
+    }
+
+    return reviews
 }
 
-const updateReview = (updatedReview : Review) : Review => {
-    for (let i = 0; i < reviews.length; i++) {
-        if (reviews[i].business_id == updatedReview.business_id && reviews[i].user_id == updatedReview.user_id) {
-            reviews[i] = updatedReview
-            return reviews[i]
-        }
+const findReview = async (userId: number, businessId: number) => {
+    const review = await Reviews.findOne({ where: { businessid: businessId, user_id: userId }, raw: true })
+    if (!review) {
+        return null
     }
+    return review
+}
+
+const createReview = async (newReview: Review) => {
+
+    await Reviews.create({
+        user_id: newReview.user_id,
+        businessid: newReview.business_id,
+        rating_number: newReview.star_rating,
+        comment: newReview.comment,
+        insert_date: Date.now(),
+        store_id: 1
+    })
+    return newReview
+
+}
+
+const updateReview = async (updatedReview: Review) => {
+    const review = await Reviews.findByPk(updatedReview.id)
+    if (!review) {
+        return
+    }
+    review.update({
+        comment: updatedReview.comment,
+        inappropriate_comment: updatedReview.inappropriate_comment,
+        inappropriate_flag: updatedReview.flagged
+    })
+
     return updatedReview
 }
 
-const deleteReview = (review_id : number) => { 
-    for (let i = 0; i <= reviews.length; i++) {
-        if (reviews[i].id == review_id) {
-            reviews.splice(i, 1)
-            return -1
-        }
+const deleteReview = async (review_id: number) => {
+    const review = await Reviews.findByPk(review_id)
+    if (!review) {
+        return
     }
+    review.destroy()
+    return review
+
 }
-module.exports = {findReviewsByBusinessId, findReview, createReview, updateReview, deleteReview}
+module.exports = { findReviewsByBusinessId, findReview, createReview, updateReview, deleteReview, findReviewsByUserId }
