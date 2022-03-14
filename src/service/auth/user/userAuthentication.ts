@@ -64,6 +64,7 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
 router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
     try {
         const user = await userService.getUserByEmail(req.body.email_address)
+        if (!user) res.status(400).json({ "error": "Email address or password is incorrect" })
         await bcrypt.compare(req.body.password, user.password, (err, resp) => {
             if (err) res.status(404)
             if (resp) {
