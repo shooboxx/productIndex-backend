@@ -7,6 +7,7 @@ const helmet = require('helmet')
 const morgan = require('morgan')
 const AppError = require('./utils/appError.js')
 const express = require('express')
+const cors = require('cors')
 // Initialize the app
 const app = express();
 const bodyParser = require('body-parser')
@@ -35,7 +36,7 @@ const limiter = rateLimit({
 if (process.env.NODE_ENV === 'development') {
      app.use(morgan('dev'));
 }
-
+app.use(cors())
 app.use(express.json())
 app.use(methodOverride('_method'))
 app.use(helmet())
@@ -66,6 +67,7 @@ app.use((err, req, res, next) => {
           message: err.message
      })
 })
+
 // Launch app to listen to specified port
 app.listen(port, function () {
      console.log("Running RestHub on port " + port);
