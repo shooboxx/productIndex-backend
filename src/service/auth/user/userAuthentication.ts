@@ -84,7 +84,8 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
 })
 
 router.delete('/auth/logout', authenticateToken, (req: any, res: any) => {
-
+    // TODO: Needs to implement
+    localStorage.setItem('', '')
     refreshTokens = refreshTokens.filter(token => token !== req.body.token)
     res.sendStatus(204)
 });

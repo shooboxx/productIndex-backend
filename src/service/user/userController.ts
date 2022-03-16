@@ -6,29 +6,41 @@ const reviewService = require('../reviews/reviewService')
 const userService = require('../user/userService')
 const {authenticateToken} = require('../auth/user/userAuthorization.ts')
 
+//TODO: ADD THIS TO BUSINESS PROJECT
 //Get User Businesses
-router.get('/user/:userid/businesses', (req, res) => {
-    try {
-        return res.status(200).json(businessService.getUserBusinesses(req.params.userId))
-    }
-    catch(e : any) {
-        res.status(200).json({"error": e.message})
-    }
-})
+// router.get('/user/businesses', (req, res) => {
+//     try {
+//         return res.status(200).json(businessService.getUserBusinesses(req.user_id))
+//     }
+//     catch(e : any) {
+//         res.status(200).json({"error": e.message})
+//     }
+// })
 
+//TODO: ADD THIS TO Admin PROJECT
 // Get user reviews
-router.get('/user/:userid/reviews', (req, res) => {
+// router.get('/user/reviews', (req, res) => {
+//     try {
+//         return res.status(200).json(reviewService.getUserReviews(req.params.userId))
+//     }
+//     catch(e : any) {
+//         res.status(200).json({"error": e.message})
+//     }
+// })
+// TODO: ADD to Admin project
+// router.get('/user/:userid', (req, res) => {
+//     try {
+//         return res.status(200).json(userService.getUserById(req.params.userid))
+//     }
+//     catch (e : any) {
+//         res.status(400).json({"error": e.message})
+//     }
+// })
+router.get('/profile', authenticateToken, async (req, res) => {
     try {
-        return res.status(200).json(reviewService.getUserReviews(req.params.userId))
-    }
-    catch(e : any) {
-        res.status(200).json({"error": e.message})
-    }
-})
-
-router.get('/user/:userid', (req, res) => {
-    try {
-        return res.status(200).json(userService.getUserById(req.params.userid))
+        const profile = await userService.getUserById(req.user_id)
+        profile.password = ''
+        return res.status(200).json(profile)
     }
     catch (e : any) {
         res.status(400).json({"error": e.message})
@@ -43,7 +55,7 @@ router.delete('/user', authenticateToken, (req, res) => {
         res.status(400).json({"error": e.message})
     }
 })
-router.put('/user/profile', authenticateToken, (req, res) => {
+router.put('/profile', authenticateToken, (req, res) => {
     try {
         const user = {
             id: req.user_id,
@@ -82,7 +94,7 @@ router.put('/user/password', authenticateToken, (req, res) => {
     }
 })
 
-router.put('/user/verify', (req, res) => {
+router.put('/user/verify', authenticateToken, (req, res) => {
     try {
         const updatedUser = userService.verifyUser(req.user_id)
         return res.status(200).json(updatedUser)
