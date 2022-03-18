@@ -3,6 +3,9 @@ import { Business } from "../business/businessType";
 const sequelize = require("sequelize");
 const db = require("../../../config/database.js");
 const Store = require("../../models/stores");
+const business = require("../../models/business");
+const business_tags = require("../../models/business_tags");
+const store_hours = require("../../models/business_store_hours")
 
 const findStoreByBusinessId = async (businessId: number) => {
   const businessStore = await Store.findOne({
@@ -87,8 +90,16 @@ const updateStore = async (store: BusinessStore) => {
   return store;
 };
 
-const deleteStore = async (storeId) => {
-  
+const deleteStore = async (storeId) => {};
+
+const getStoreDetails = async (storeId: number) => {
+  const businessSearch = await Store.findAll({
+    include: [
+      {model: store_hours}, { model: business, required: true , attributes: ['id'] , include: [{ model: business_tags }] },
+    ],
+    where: { id: storeId },
+  });
+  return businessSearch;
 };
 
 module.exports = {
@@ -97,4 +108,5 @@ module.exports = {
   createBusinessStore,
   updateStore,
   deleteStore,
+  getStoreDetails,
 };

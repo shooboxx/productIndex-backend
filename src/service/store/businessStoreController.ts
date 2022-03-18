@@ -21,6 +21,20 @@ router.get('/store/:storeId', async (req, res) => {
     }
 
 })
+
+router.get('/store/:storeId/details', async (req, res) => {
+    try {
+        const storeId = req.params.storeId
+        const store : BusinessStore = await businessStoreService.getStoreDetails(storeId)
+
+        res.status(200).json({store})
+    }
+    catch (e : any) {
+        res.status(200).json({"error": e.message})
+    }
+
+})
+
 router.put('/store/:storeId', async (req, res) => {
     try {
 

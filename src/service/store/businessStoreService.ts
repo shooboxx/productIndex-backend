@@ -84,5 +84,14 @@ const deleteStore = async (storeId: number) => {
     }
 }
 
+const getStoreDetails = async (storeId: number) => {
+    try {
+        const store = await businessStoreRepo.getStoreDetails(storeId)
+        return store
+    }
+    catch (e) {
+        throw e
+    }
+}
 
-module.exports = { getStoresByBusinessId, getStoreById, createBusinessStore, updateStore, deleteStore }
+module.exports = { getStoresByBusinessId, getStoreById, createBusinessStore, updateStore, deleteStore,getStoreDetails }

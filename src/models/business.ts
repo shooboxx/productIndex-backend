@@ -2,6 +2,9 @@ export { }
 const Sequelize = require('sequelize');
 const db = require('../../config/database.js')
 const Users = require("../models/users");
+const BusinessTags = require("../models/business_tags")
+const Store = require("../models/stores")
+const StoreHours = require("../models/business_store_hours")
 
 const Business = db.define('business', {
   created_by: {
@@ -58,7 +61,13 @@ const Business = db.define('business', {
   ]
 });
 
-Business.belongsTo(Users, { as: "created_by_user", foreignKey: "created_by" });
+Business.belongsTo(Users, {foreignKey: "created_by" });
+Business.hasMany(BusinessTags, { foreignKey: "business_id"});
+Store.belongsTo(Business, {foreignKey: "business_id"});
+Business.hasMany(Store, { as:"business_stores", foreignKey: "business_id"});
+BusinessTags.belongsTo(Business, { foreignKey: "business_id"});
+Store.hasMany(StoreHours, { foreignKey: "business_store_id"});
+StoreHours.belongsTo(Store, { foreignKey: "business_store_id"});
 
 
 module.exports = Business;

@@ -9,7 +9,7 @@ const findUserBusinesses = async (userId) => {
     where: { created_by: userId },
   });
   if (!businesses) {
-    return null;
+    return;
   }
   for (let i = 0; i < businesses.length; i++) {
     list.push(businesses[i].dataValues);
@@ -20,7 +20,7 @@ const findUserBusinesses = async (userId) => {
 const findBusinessById = async (businessId: number) => {
   const business = await Businesses.findByPk(businessId);
   if (!businesses) {
-    return null;
+    return ;
   }
   return business.dataValues;
 };

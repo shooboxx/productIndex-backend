@@ -1,6 +1,8 @@
 export { }
 const Sequelize = require('sequelize');
 const db = require('../../config/database.js')
+const StoreHours = require("../models/business_store_hours")
+const Business = require("../models/business")
 
 const Store = db.define('store', {
     id: {
@@ -109,6 +111,10 @@ const Store = db.define('store', {
         },
     ]
 });
+
+// Store.hasMany(StoreHours, { as: "business_store_hours", foreignKey: "business_store_id"});
+
+
 
 
 
