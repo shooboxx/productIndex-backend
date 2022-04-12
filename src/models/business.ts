@@ -1,73 +1,120 @@
-export { }
-const Sequelize = require('sequelize');
-const db = require('../../config/database.js')
-const Users = require("../models/users");
-const BusinessTags = require("../models/business_tags")
-const Store = require("../models/stores")
-const StoreHours = require("../models/business_store_hours")
+"use strict";
+const { Model } = require("sequelize");
 
-const Business = db.define('business', {
-  created_by: {
-    type: Sequelize.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'users',
-      key: 'id'
+export interface BusinessAttributes {
+  id: number;
+  created_by: number;
+  business_name: string;
+  description?: string;
+  profile_banner_url?: string;
+  profile_pic_url?: string;
+  active: boolean;
+  category?: string;
+  insert_date: Date;
+  update_date?: Date;
+  delete_date?: Date;
+}
+
+module.exports = (sequelize, DataTypes) => {
+  class Business
+    extends Model<BusinessAttributes>
+    implements BusinessAttributes
+  {
+    id!: number;
+    created_by!: number;
+    business_name!: string;
+    description?: string;
+    profile_banner_url?: string;
+    profile_pic_url?: string;
+    active!: boolean;
+    category?: string;
+    insert_date!: Date;
+    update_date?: Date;
+    delete_date?: Date;
+    /**
+     * Helper method for defining associations.
+     * This method is not a part of Sequelize lifecycle.
+     * The `models/index` file will call this method automatically.
+     */
+    static associate(models) {
+      Business.belongsTo(models.Users, { foreignKey: "created_by" });
+      Business.hasMany(models.BusinessStore, { foreignKey: "business_id" });
+      Business.hasMany(models.BusinessTags, { foreignKey: "business_id" });
+      Business.hasMany(models.BusinessItem, { foreignKey: "business_id"});
+      Business.hasMany(models.Product, {foreignKey: "business_id"});
+
     }
-  },
-  business_name: {
-    type: Sequelize.STRING,
-    allowNull: false
-  },
-  description: {
-    type: Sequelize.STRING,
-    allowNull: true
-  },
-  profile_banner_url: {
-    type: Sequelize.STRING,
-    allowNull: true
-  },
-  profile_pic_url: {
-    type: Sequelize.STRING,
-    allowNull: true
-  },
-  active: {
-    type: Sequelize.BOOLEAN,
-    allowNull: false
-  },
-  category: {
-    type: Sequelize.STRING,
-    allowNull: true
-  },
-  insert_date: {
-    type: Sequelize.DATE,
-    allowNull: false
-  },
-  update_date: {
-    type: Sequelize.DATE,
-    allowNull: true
   }
-}, {
-  timestamps: false,
-  freezeTableName: true,
-  indexes: [
+  Business.init(
     {
-      name: "business_pkey",
-      unique: true,
-      fields: [
-        { name: "id" },
-      ]
+      id: {
+        autoIncrement: true,
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+      },
+      created_by: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "users",
+          key: "id",
+        },
+      },
+      business_name: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+      },
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      profile_banner_url: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      profile_pic_url: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      active: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+      },
+      category: {
+        type: DataTypes.STRING(100),
+        allowNull: true,
+      },
+      insert_date: {
+        type: DataTypes.DATE,
+        allowNull: false,
+      },
+      update_date: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      delete_date: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
     },
-  ]
-});
+    {
+      sequelize,
+      modelName: "Business",
+      tableName: "business",
+      schema: "public",
+      timestamps: true,
+      createdAt: 'insert_date',
+      updatedAt: 'update_date',
+      indexes: [
+        {
+          name: "business_pkey",
+          unique: true,
+          fields: [{ name: "id" }],
+        },
+      ],
+    }
+  );
 
-Business.belongsTo(Users, {foreignKey: "created_by" });
-Business.hasMany(BusinessTags, { foreignKey: "business_id"});
-Store.belongsTo(Business, {foreignKey: "business_id"});
-Business.hasMany(Store, { as:"business_stores", foreignKey: "business_id"});
-BusinessTags.belongsTo(Business, { foreignKey: "business_id"});
-Store.hasMany(StoreHours, { foreignKey: "business_store_id"});
-StoreHours.belongsTo(Store, { foreignKey: "business_store_id"});
-
-
-module.exports = Business;
+  return Business;
+};
