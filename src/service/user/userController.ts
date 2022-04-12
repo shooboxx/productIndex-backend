@@ -16,7 +16,7 @@ router.get('/user/:userid/businesses', (req, res) => {
     }
 })
 
-// Get user reviews
+//Get user reviews
 router.get('/user/:userid/reviews', (req, res) => {
     try {
         return res.status(200).json(reviewService.getUserReviews(req.params.userId))
@@ -26,9 +26,9 @@ router.get('/user/:userid/reviews', (req, res) => {
     }
 })
 
-router.get('/user/:userid', (req, res) => {
+router.get('/user/:userid', async (req, res) => {
     try {
-        return res.status(200).json(userService.getUserById(req.params.userid))
+        return res.status(200).json(await userService.getUserById(req.params.userid))
     }
     catch (e : any) {
         res.status(400).json({"error": e.message})
@@ -43,6 +43,7 @@ router.delete('/user', authenticateToken, (req, res) => {
         res.status(400).json({"error": e.message})
     }
 })
+
 router.put('/user/profile', authenticateToken, (req, res) => {
     try {
         const user = {
@@ -72,6 +73,7 @@ router.put('/user/profile', authenticateToken, (req, res) => {
         res.status(400).json({"error": e.message})
     }
 })
+
 router.put('/user/password', authenticateToken, (req, res) => {
     try {
         const updatedUser = userService.updatePassword(req.user_id, req.body.email_address, req.body.password, req.body.password_confirm)
@@ -82,9 +84,9 @@ router.put('/user/password', authenticateToken, (req, res) => {
     }
 })
 
-router.put('/user/verify', (req, res) => {
+router.put('/user/verify', async (req, res) => {
     try {
-        const updatedUser = userService.verifyUser(req.user_id)
+        const updatedUser = await userService.verifyUser(req.user_id)
         return res.status(200).json(updatedUser)
     }
     catch (e : any) {
