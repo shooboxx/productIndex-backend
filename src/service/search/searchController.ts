@@ -12,11 +12,11 @@ router.get("/search/:searchCriteria", async (req: any, res: any) => {
     }
   });
 
-router.get("/search/product/:searchCriteria", async (req: any, res: any) => {
+router.get("/search/product/:searchCriteria/:product_type", async (req: any, res: any) => {
     try {
       return res
         .status(200)
-        .json(await searchService.productFuzzySearch(req.params.searchCriteria));
+        .json(await searchService.productFuzzySearch(req.params.searchCriteria, req.params.product_type));
     } catch (e) {
       throw e;
     }

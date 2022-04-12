@@ -75,7 +75,7 @@ const businessSearch = async (searchCriteria: string) => {
   return businesses;
 }
 
-const productSearch = async (searchCriteria: string) => {
+const productSearch = async (searchCriteria: string, product_type: string) => {
   //TODO: Figure out how to name match (trim and lowercase)
   const businesses = await db.Business.findAll({
     include: [
@@ -114,7 +114,8 @@ const productSearch = async (searchCriteria: string) => {
       },
       {
         model: db.Product,
-        attributes: []
+        attributes: [],
+        where: {product_type: product_type}
       }
     ],
     where: {
@@ -122,18 +123,6 @@ const productSearch = async (searchCriteria: string) => {
         {
           product_name: db.sequelize.where(
             db.sequelize.fn("METAPHONE", db.sequelize.col("product_name"), 10),
-            Op.like,
-            db.sequelize.fn(
-              "CONCAT",
-              "%",
-              db.sequelize.fn("METAPHONE", searchCriteria, 10),
-              "%"
-            )
-          ),
-        },
-        {
-          product_type: db.sequelize.where(
-            db.sequelize.fn("METAPHONE", db.sequelize.col("product_type"), 10),
             Op.like,
             db.sequelize.fn(
               "CONCAT",
