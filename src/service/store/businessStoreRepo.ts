@@ -1,14 +1,10 @@
 import { BusinessStore } from "./storeTypes";
-import { Business } from "../business/businessType";
-const sequelize = require("sequelize");
-const db = require("../../../config/database.js");
-const Store = require("../../models/stores");
-const business = require("../../models/business");
-const business_tags = require("../../models/business_tags");
-const store_hours = require("../../models/business_store_hours")
+
+
+import db from "../../models";
 
 const findStoreByBusinessId = async (businessId: number) => {
-  const businessStore = await Store.findOne({
+  const businessStore = await db.BusinessStore.findAll({
     where: { business_id: businessId },
     raw: true,
   });
@@ -19,7 +15,7 @@ const findStoreByBusinessId = async (businessId: number) => {
 };
 
 const findStoreById = async (storeId: number) => {
-  const businessStore = await Store.findByPk(storeId, { raw: true });
+  const businessStore = await db.BusinessStore.findByPk(storeId, { raw: true });
   if (!businessStore) {
     return;
   }
@@ -29,12 +25,12 @@ const findStoreById = async (storeId: number) => {
 const createBusinessStore = async (store: BusinessStore) => {
   const store_name = store.unique_name.toUpperCase().split(" ").join("");
 
-  const business_store = await Store.findAll({
+  const business_store = await db.BusinessStore.findAll({
     where: {
-      unique_name: db.where(
-        db.fn("UPPER", db.fn("REPLACE", db.col("unique_name"), " ", "")),
-        "=",
-        store_name
+      unique_name: db.sequelize.where(
+        db.sequelize.fn("UPPER", db.sequelize.fn("REPLACE", db.sequelize.col("unique_name"), " ", "")),
+        "like",
+        `%${store_name}%`
       ),
     },
     raw: true,
@@ -44,7 +40,7 @@ const createBusinessStore = async (store: BusinessStore) => {
     return;
   }
 
-  await Store.create({
+  await db.BusinessStore.create({
     business_id: store.business_id,
     unique_name: store.unique_name,
     email_address: store.email_address,
@@ -63,7 +59,7 @@ const createBusinessStore = async (store: BusinessStore) => {
 };
 
 const updateStore = async (store: BusinessStore) => {
-  await Store.update(
+  await db.BusinessStore.update(
     {
       unique_name: store.unique_name,
       email_address: store.email_address,
@@ -93,14 +89,34 @@ const updateStore = async (store: BusinessStore) => {
 const deleteStore = async (storeId) => {};
 
 const getStoreDetails = async (storeId: number) => {
-  const businessSearch = await Store.findAll({
+  const storeSearch = await db.BusinessStore.findAll({
     include: [
-      {model: store_hours}, { model: business, required: true , attributes: ['id'] , include: [{ model: business_tags }] },
+      {model: db.StoreHours},
+      {
+        model: db.Business,
+        attributes: ["id"],
+        include: [{ model: db.BusinessTags }],
+      }
     ],
     where: { id: storeId },
   });
-  return businessSearch;
+  return storeSearch;
 };
+
+const getInventoryByStoreId = async (storeId: number) => {
+  const storeSearch = await db.BusinessStore.findAll({
+    attributes: ["id"],
+    include: [
+      {
+        model: db.InventoryItem,
+        attributes: ["id"],
+        include: [{ model: db.BusinessItem }],
+      }
+    ],
+    where: { id: storeId },
+  });
+  return storeSearch;
+}
 
 module.exports = {
   findStoreByBusinessId,
@@ -109,4 +125,5 @@ module.exports = {
   updateStore,
   deleteStore,
   getStoreDetails,
+  getInventoryByStoreId
 };
