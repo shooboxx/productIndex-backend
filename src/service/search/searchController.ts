@@ -2,21 +2,19 @@ import express from "express";
 const router = express.Router();
 const searchService = require("./searchService");
 
-router.get("/search/:searchCriteria", async (req: any, res: any) => {
+router.get("/search", async (req: any, res: any) => {
+  const {type, location, search } = req.query
     try {
+      if (type == 'BUSINESS') {
+        return res
+        .status(200)
+        .json(await searchService.businessFuzzySearch(search,location));
+      }
+      if (type == 'PRODUCT' || type == 'SERVICE') {
       return res
         .status(200)
-        .json(await searchService.businessFuzzySearch(req.params.searchCriteria));
-    } catch (e) {
-      throw e;
-    }
-  });
-
-router.get("/search/product/:searchCriteria/:product_type", async (req: any, res: any) => {
-    try {
-      return res
-        .status(200)
-        .json(await searchService.productFuzzySearch(req.params.searchCriteria, req.params.product_type));
+        .json(await searchService.productFuzzySearch(search, type, location));
+      }
     } catch (e) {
       throw e;
     }

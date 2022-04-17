@@ -1,7 +1,7 @@
 import db from "../../models";
 const { Op } = require("sequelize");
 
-const businessSearch = async (searchCriteria: string) => {
+const businessSearch = async (searchCriteria: string, location: string) => { 
   const businesses = await db.Business.findAll({
     include: [
       {
@@ -13,8 +13,7 @@ const businessSearch = async (searchCriteria: string) => {
           [
             db.sequelize.literal(`(
                 select
-                  floor(avg(review.rating_number)),
-                  count(review.rating_number)
+                  floor(avg(review.rating_number))
                 from
                   review as review
                 where
@@ -22,17 +21,26 @@ const businessSearch = async (searchCriteria: string) => {
                     )`),
             "avg_star_rating",
           ],
+          [
+            db.sequelize.literal(`(
+                select
+                  count(review.rating_number)
+                from
+                  review as review
+                where
+                  review.store_id = "BusinessStores".id
+                    )`),
+            "review_count",
+          ],
           "id",
           "unique_name",
           "country",
           "city",
           "temp_or_perm_closure",
           "address_line_1",
-          "address_line_2"
+          "address_line_2",
         ],
-        where: {
-          temp_or_perm_closure: { [Op.is]: null },
-        },
+        where: { city: location, temp_or_perm_closure: { [Op.is]: null } },
         include: [
           {
             model: db.StoreHours,
@@ -75,9 +83,9 @@ const businessSearch = async (searchCriteria: string) => {
     return null;
   }
   return businesses;
-}
+};
 
-const productSearch = async (searchCriteria: string, product_type: string) => {
+const productSearch = async (searchCriteria: string,product_type: string,location: string) => {
   const businesses = await db.Business.findAll({
     include: [
       {
@@ -97,15 +105,26 @@ const productSearch = async (searchCriteria: string, product_type: string) => {
                     )`),
             "avg_star_rating",
           ],
+          [
+            db.sequelize.literal(`(
+                select
+                  count(review.rating_number)
+                from
+                  review as review
+                where
+                  review.store_id = "BusinessStores".id
+                    )`),
+            "review_count",
+          ],
           "id",
           "unique_name",
           "country",
           "city",
           "temp_or_perm_closure",
+          "address_line_1",
+          "address_line_2",
         ],
-        where: {
-          temp_or_perm_closure: { [Op.is]: null },
-        },
+        where: { city: location, temp_or_perm_closure: { [Op.is]: null } },
         include: [
           {
             model: db.StoreHours,
@@ -116,8 +135,8 @@ const productSearch = async (searchCriteria: string, product_type: string) => {
       {
         model: db.Product,
         attributes: [],
-        where: {product_type: product_type}
-      }
+        where: { product_type: product_type },
+      },
     ],
     where: {
       [Op.or]: [
@@ -157,5 +176,5 @@ const productSearch = async (searchCriteria: string, product_type: string) => {
 
 module.exports = {
   businessSearch,
-  productSearch
+  productSearch,
 };

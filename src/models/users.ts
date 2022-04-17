@@ -97,7 +97,7 @@ module.exports = (sequelize : any, DataTypes : any) => {
       allowNull: true
     },
     date_of_birth: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: true
     },
     gender: {
