@@ -130,7 +130,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       reopen_date: {
-        type: DataTypes.DATEONLY,
+        type: DataTypes.DATE,
         allowNull: true,
       },
       insert_date: {

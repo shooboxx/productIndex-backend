@@ -2,7 +2,6 @@ import db from "../../models";
 const { Op } = require("sequelize");
 
 const businessSearch = async (searchCriteria: string) => {
-  //TODO: Figure out how to name match (trim and lowercase)
   const businesses = await db.Business.findAll({
     include: [
       {
@@ -14,7 +13,8 @@ const businessSearch = async (searchCriteria: string) => {
           [
             db.sequelize.literal(`(
                 select
-                  floor(avg(review.rating_number))
+                  floor(avg(review.rating_number)),
+                  count(review.rating_number)
                 from
                   review as review
                 where
@@ -27,6 +27,8 @@ const businessSearch = async (searchCriteria: string) => {
           "country",
           "city",
           "temp_or_perm_closure",
+          "address_line_1",
+          "address_line_2"
         ],
         where: {
           temp_or_perm_closure: { [Op.is]: null },
@@ -76,7 +78,6 @@ const businessSearch = async (searchCriteria: string) => {
 }
 
 const productSearch = async (searchCriteria: string, product_type: string) => {
-  //TODO: Figure out how to name match (trim and lowercase)
   const businesses = await db.Business.findAll({
     include: [
       {

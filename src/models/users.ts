@@ -97,7 +97,7 @@ module.exports = (sequelize : any, DataTypes : any) => {
       allowNull: true
     },
     date_of_birth: {
-      type: DataTypes.DATEONLY,
+      type: DataTypes.DATE,
       allowNull: true
     },
     gender: {
@@ -133,7 +133,7 @@ module.exports = (sequelize : any, DataTypes : any) => {
       allowNull: true
     },
     verify_expires: {
-      type: DataTypes.DATEONLY,
+      type: DataTypes.DATE,
       allowNull: true
     },
     verify_changes: {
@@ -145,7 +145,7 @@ module.exports = (sequelize : any, DataTypes : any) => {
       allowNull: true
     },
     reset_expires: {
-      type: DataTypes.DATEONLY,
+      type: DataTypes.DATE,
       allowNull: true
     },
     primary_phone_contact: {
@@ -153,7 +153,7 @@ module.exports = (sequelize : any, DataTypes : any) => {
       allowNull: true
     },
     deleted_date: {
-      type: DataTypes.DATEONLY,
+      type: DataTypes.DATE,
       allowNull: true
     },
     insert_date: {
