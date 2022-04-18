@@ -13,7 +13,7 @@ const businessSearch = async (searchCriteria: string, location: string) => {
           [
             db.sequelize.literal(`(
                 select
-                  floor(avg(review.rating_number))
+                  round(avg(review.rating_number),1)
                 from
                   review as review
                 where
@@ -97,7 +97,7 @@ const productSearch = async (searchCriteria: string,product_type: string,locatio
           [
             db.sequelize.literal(`(
                 select
-                  floor(avg(review.rating_number))
+                  round(avg(review.rating_number),1)
                 from
                   review as review
                 where
