@@ -1,8 +1,5 @@
 import { User } from "../../user/userType";
-const { authenticateToken } = require('./userAuthorization')
-import { AppError } from '../../../utils/appError.js';
 import { sendEmail } from '../../../utils/email';
-import { access } from "fs";
 
 export { };
 const bcrypt = require('bcrypt')

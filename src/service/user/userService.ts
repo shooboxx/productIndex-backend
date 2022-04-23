@@ -37,17 +37,6 @@ const getUserByVerificationToken = async (token: string) => {
 
 // Returns user without password (for internal use)
 const getUserById = async (userId: number): Promise<User> => {
-    // if (!userId) {
-    //     throw Error('User is required')
-    // }
-    // const user = userRepo.findUser(userId, null) || null;
-
-    // if (user.length === 0) {
-    //     throw new AppError('User not found with that Id', 404)
-    // }
-    // return user
-
-
     const found = await userRepo.findUser(userId, null).then(user => {
         if (!user) {
             return null
