@@ -2,6 +2,7 @@ export { };
 const Users = require("../../models/users");
 const UserTokens = require("../../models/user_tokens");
 import { User } from "./userType";
+const {Op} = require('sequelize')
 
 const addUser = async (user: User) => {
   await Users.create({
@@ -19,7 +20,8 @@ const addUser = async (user: User) => {
 };
 
 const findUser = async (userId: number, emailAddress: string) => {
-  const user = await Users.findOne({ where: { email_address: emailAddress } })
+  const user = await Users.findOne({ where: {[Op.or]: [{ email_address: emailAddress }, {id: userId}]} })
+  // const user = await Users.findOne({ where: { id: userId } })
   if (!user) {
     return
   }

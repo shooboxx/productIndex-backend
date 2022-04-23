@@ -26,9 +26,11 @@ router.get('/user/:userid/reviews', (req, res) => {
     }
 })
 
-router.get('/user/:userid', (req, res) => {
+router.get('/user/:userid', async (req, res) => {
     try {
-        return res.status(200).json(userService.getUserById(req.params.userid))
+        const user = await userService.getUserById(req.params.userid)
+        user.password = undefined
+        return res.status(200).json(user)
     }
     catch (e : any) {
         res.status(400).json({"error": e.message})

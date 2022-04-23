@@ -39,10 +39,8 @@ function hasAccessLevel(accessLevel) {
 }
 
 function authenticateToken (req, res, next) {
-    const authHeader = req.headers['authorization']
-    const token = authHeader && authHeader.split(' ')[1]
+    const token = req.cookies.access_token
     if (token == null) throw new AppError('User login is required', 403)
-
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
         if (err) throw new AppError('Token invalid or expired', 403)
         req.user_id = user.user_id
@@ -51,16 +49,12 @@ function authenticateToken (req, res, next) {
 }
 
 function checkNotAuthenticated (req, res, next) {
-    const authHeader = req.headers['authorization']
-    const token = authHeader && authHeader.split(' ')[1]
-    if (token == null) return next()
-    try {
-        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-    }
-    catch {
+    const token = req.cookies.access_token
+    
+    if (token === undefined || token === null) {
         return next()
     }
     
-    return res.status(403).json({"error": "user already logged in"})
+    return res.status(403).json({"error": "User already logged in"})
 }
 module.exports = {adminOnlyAccess, hasAccessLevel, authenticateToken, checkNotAuthenticated}

@@ -2,6 +2,7 @@ import { User } from "../../user/userType";
 const { authenticateToken } = require('./userAuthorization')
 import { AppError } from '../../../utils/appError.js';
 import { sendEmail } from '../../../utils/email';
+import { access } from "fs";
 
 export { };
 const bcrypt = require('bcrypt')
@@ -63,6 +64,7 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
 // Works with database
 router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
     try {
+        
         const user = await userService.getUserByEmail(req.body.email_address)
         if (!user) res.status(400).json({ "error": "Email address or password is incorrect" })
         await bcrypt.compare(req.body.password, user.password, (err, resp) => {
@@ -72,6 +74,16 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
                 const refreshToken = jwt.sign({ user_id: user.id }, process.env.REFRESH_TOKEN_SECRET)
                 const hashed_token = crypto.createHash('sha256').update(refreshToken).digest('hex')
                 userService.storeRefreshToken(user.id, hashed_token)
+                res.cookie("access_token", accessToken, {
+                    httpOnly: true,
+                    Secure: true
+                })
+                res.cookie("refresh_token", refreshToken, {
+                    httpOnly: true,
+                    Secure: true
+                })
+                res.setHeader('Access-Control-Allow-Credentials', true);
+                
                 return res.status(200).json({ access_token: accessToken, refresh_token: refreshToken })
             }
             return res.status(400).json({ "error": "Email address or password is incorrect" })
@@ -83,9 +95,12 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
     }
 })
 
-router.delete('/auth/logout', authenticateToken, (req: any, res: any) => {
+router.delete('/auth/logout', (req: any, res: any) => {
 
-    refreshTokens = refreshTokens.filter(token => token !== req.body.token)
+    refreshTokens = refreshTokens.filter(token => token !== req.cookies.refresh_token)
+    // TODO: Remove refresh token from database
+    res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
     res.sendStatus(204)
 });
 
@@ -93,7 +108,6 @@ router.delete('/auth/logout', authenticateToken, (req: any, res: any) => {
 router.post('/auth/forgot-password', checkNotAuthenticated, async (req: any, res: any) => {
     try {
         let user: User = await userService.getUserByEmail(req.body.email_address)
-
         const resetToken = crypto.randomBytes(32).toString('hex');
         const hashedResetToken = crypto.createHash('sha256').update(resetToken).digest('hex')
         const userResetTokenExpiry = Date.now() * 10 * 60 * 1000;
@@ -119,7 +133,7 @@ router.post('/auth/reset-password/:resetToken', checkNotAuthenticated, async (re
         const newPasswordConfirm = req.body.password_confirm
         if (user) {
             if (user.password_reset_expires_in && user.password_reset_expires_in < Date.now()) {
-                res.status(400).json({ "error": "Token expired" })
+                res.status(403).json({ "error": "Token expired" })
             }
             await userService.updatePassword(user.id, user.email_address, newPassword, newPasswordConfirm)
 
@@ -135,7 +149,7 @@ router.post('/auth/reset-password/:resetToken', checkNotAuthenticated, async (re
  
 
 router.post('/auth/token', async (req, res) => {
-    const refreshToken = req.body.refresh_token
+    const refreshToken = req.cookies.refresh_token
     const userId = req.body.user_id
     if (refreshToken == null) return res.sendStatus(401)
     if (userId == null) return res.sendStatus(401)
@@ -145,6 +159,10 @@ router.post('/auth/token', async (req, res) => {
     jwt.verify(token.refresh_token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
         if (err) return res.sendStatus(403)
         const accessToken = generateAccessToken({ user_id: user.user_id })
+        res.cookie("access_token", accessToken, {
+            httpOnly: true,
+            Secure: true
+        })
         return res.json({ access_token: accessToken })
     })
 })

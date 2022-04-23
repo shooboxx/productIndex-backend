@@ -36,16 +36,27 @@ const getUserByVerificationToken = async (token: string) => {
 }
 
 // Returns user without password (for internal use)
-const getUserById = (userId: number): User => {
-    if (!userId) {
-        throw Error('User is required')
-    }
-    const user = userRepo.findUser(userId, null) || null;
+const getUserById = async (userId: number): Promise<User> => {
+    // if (!userId) {
+    //     throw Error('User is required')
+    // }
+    // const user = userRepo.findUser(userId, null) || null;
 
-    if (user.length === 0) {
-        throw new AppError('User not found with that Id', 404)
-    }
-    return user
+    // if (user.length === 0) {
+    //     throw new AppError('User not found with that Id', 404)
+    // }
+    // return user
+
+
+    const found = await userRepo.findUser(userId, null).then(user => {
+        if (!user) {
+            return null
+        }
+        return user
+    }).catch(err => {
+        throw new AppError(err, 400)
+    })
+    return found
 }
 
 const getUserByResetToken = (resetToken: string): User => {
@@ -77,9 +88,9 @@ const createUser = async (user: User) => {
     }
 
 }
-const updateUserProfile = (user: User) => {
+const updateUserProfile = async (user: User) => {
     // TODO: Implement this
-    const currUser = getUserById(user.id)
+    const currUser = await getUserById(user.id)
 
     currUser.first_name = user.first_name || currUser.first_name
     currUser.last_name = user.last_name || currUser.last_name
@@ -124,9 +135,9 @@ const updatePassword = async (userId, emailAddress, newPassword, newPasswordConf
 
 }
 
-const deactivateUser = (userId: number) => {
+const deactivateUser = async (userId: number) => {
     try {
-        const user = getUserById(userId)
+        const user = await getUserById(userId)
         user.active = false
         return userRepo.updateUser(user);
     }
@@ -151,9 +162,9 @@ const verifyUser = async (token: string) => {
     }
 }
 
-const deleteUser = (userId: number) => {
+const deleteUser = async (userId: number) => {
     try {
-        const user = getUserById(userId)
+        const user = await getUserById(userId)
         user.deleted_date = Date.now()
         return userRepo.updateUser(user);
     }
@@ -162,9 +173,9 @@ const deleteUser = (userId: number) => {
     }
 }
 
-const setAciveStatus = (userId, active) => {
+const setAciveStatus = async (userId, active) => {
     try {
-        const user = getUserById(userId)
+        const user = await getUserById(userId)
         user.active = active
         return userRepo.updateUser(user);
     }
