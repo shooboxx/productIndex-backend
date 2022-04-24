@@ -89,7 +89,7 @@ const updateUserProfile = async (user: User) => {
     currUser.country = user.country || currUser.country
     currUser.city = user.city || currUser.city
     currUser.primary_phone = user.primary_phone || currUser.primary_phone
-    currUser.address = user.address || currUser.address
+    currUser.state = user.state || currUser.state
     currUser.update_date = Date.now()
 
     return userRepo.updateUser(currUser)

@@ -34,7 +34,12 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
             last_name: req.body.last_name,
             email_address: req.body.email_address,
             password: hashedPass,
-            dob: '',
+            dob: req.body.dob,
+            state: req.body.state,
+            city: req.body.city,
+            country: req.body.country,
+            primary_phone: req.body.primary_phone,
+            gender: req.body.gender,
             insert_date: Date.now(),
             active: true,
             is_verified: false,
@@ -47,7 +52,7 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
             from: 'noreply@theproductindex.io', // Change to your verified sender
             subject: 'Welcome to ProductIndex!',
             text: newUser.first_name + ', Thank you for registering with us! We\'re happy that you\'re here. To complete your registration, verify your email address by clicking the button below',
-            html: `<strong>${req.headers.host}/api/auth/verify?token=${newUser.verify_token}</strong>`,
+            html: `<strong>${req.headers.origin}/verify?token=${newUser.verify_token}</strong>`,
         }
         if (!sendEmail(msg)) return res.status(400).json({error: "Email not sent"})
 

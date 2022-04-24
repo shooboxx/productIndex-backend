@@ -11,7 +11,7 @@ export interface User {
     country?: string,
     city?: string,
     primary_phone?: string,
-    address?: string,
+    state?: string,
     is_verified: boolean,
     verify_token?: string,
     verify_expires?: Date,

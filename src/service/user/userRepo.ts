@@ -1,10 +1,11 @@
 export { };
 const Users = require("../../models/users");
-const { Op } = require('@sequelize/core')
+const { Op } = require('sequelize')
 const UserTokens = require("../../models/user_tokens");
 import { User } from "./userType";
 
 const addUser = async (user: User) => {
+  console.log(user)
   await Users.create({
     email_address: user.email_address,
     password: user.password,
@@ -12,8 +13,14 @@ const addUser = async (user: User) => {
     first_name: user.first_name,
     last_name: user.last_name,
     verify_token: user.verify_token,
+    gender: user.gender,
+    country: user.country,
+    city: user.city,
+    address: user.state,
+    date_of_birth: user.dob,
+    primary_phone_contact: user.primary_phone,
     insert_date: Date.now(),
-    update_date: Date.now(),
+    update_date: null,
   }).catch(err => null)
 
   return user
@@ -53,7 +60,7 @@ const updateUser = async (user: User) => {
     country: user.country,
     city: user.city,
     primary_phone: user.primary_phone,
-    address: user.address,
+    address: user.state,
     is_verified: user.is_verified,
     reset_expires: user.password_reset_expires_in, // TODO: Change dates to dates and not a number
     reset_token: user.password_reset_token,

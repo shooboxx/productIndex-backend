@@ -19,6 +19,7 @@ const {authenticateToken} = require('../auth/user/userAuthorization.ts')
 
 //TODO: ADD THIS TO Admin PROJECT
 // Get user reviews
+
 router.get('/user/:userid/reviews', (req, res) => {
     try {
         return res.status(200).json(reviewService.getUserReviews(req.params.userId))
