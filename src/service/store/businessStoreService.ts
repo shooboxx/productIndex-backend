@@ -1,18 +1,17 @@
-const businessService = require('../business/businessService');
-const businessStoreRepo = require('../store/businessStoreRepo');
+const businessService = require("../business/businessService");
+const businessStoreRepo = require("../store/businessStoreRepo");
 
-import { BusinessStore } from './storeTypes'
+import { BusinessStore } from "./storeTypes";
 
 const getStoresByBusinessId = async (businessId: number) => {
-    try {
-        const stores = await businessStoreRepo.findStoreByBusinessId(businessId)
-        if (!stores) throw new Error('No stores found for this business')
-        return stores
-    }
-    catch (e) {
-        throw e
-    }
-}
+  try {
+    const stores = await businessStoreRepo.findStoreByBusinessId(businessId);
+    if (!stores) throw new Error("No stores found for this business");
+    return stores;
+  } catch (e) {
+    throw e;
+  }
+};
 
 const getStoreById = async (storeId: number) => {
     try {
@@ -26,6 +25,7 @@ const getStoreById = async (storeId: number) => {
         throw e
     }
 }
+
 const createBusinessStore = async (store: BusinessStore) => {
     try {
         businessService.getBusinessById(store.business_id)
@@ -43,7 +43,6 @@ const createBusinessStore = async (store: BusinessStore) => {
         throw e
     }
 }
-
 
 const updateStore = async (store: BusinessStore) => {
     try {
@@ -67,12 +66,12 @@ const updateStore = async (store: BusinessStore) => {
             reopen_date: store.reopen_date || currStore.reopen_date
         }
         return await businessStoreRepo.updateStore(updatedStore)
-
     }
     catch (e) {
         throw e
     }
 }
+
 const deleteStore = async (storeId: number) => {
     try {
         const store = await getStoreById(storeId)
@@ -84,5 +83,32 @@ const deleteStore = async (storeId: number) => {
     }
 }
 
+const getStoreDetails = async (storeId: number) => {
+    try {
+        const store = await businessStoreRepo.getStoreDetails(storeId)
+        return store
+    }
+    catch (e) {
+        throw e
+    }
+}
 
-module.exports = { getStoresByBusinessId, getStoreById, createBusinessStore, updateStore, deleteStore }
+const getStoreInventory = async (storeId: number) => {
+    try {
+        const store = await businessStoreRepo.getInventoryByStoreId(storeId)
+        return store
+    }
+    catch (e) {
+        throw e
+    }
+}
+
+module.exports = {
+  getStoresByBusinessId,
+  getStoreById,
+  createBusinessStore,
+  updateStore,
+  deleteStore,
+  getStoreDetails,
+  getStoreInventory
+};

@@ -95,6 +95,7 @@ router.put('/user', authenticateToken, (req, res) => {
         res.status(400).json({"error": e.message})
     }
 })
+
 router.put('/user/password', authenticateToken, (req, res) => {
     try {
         const updatedUser = userService.updatePassword(req.user_id, req.body.email_address, req.body.password, req.body.password_confirm)
@@ -105,9 +106,9 @@ router.put('/user/password', authenticateToken, (req, res) => {
     }
 })
 
-router.put('/user/verify', authenticateToken, (req, res) => {
+router.put('/user/verify', authenticateToken, async (req, res) => {
     try {
-        const updatedUser = userService.verifyUser(req.user_id)
+        const updatedUser = await userService.verifyUser(req.user_id)
         return res.status(200).json(updatedUser)
     }
     catch (e : any) {

@@ -1,15 +1,16 @@
+import db from "../../models";
 import { Business } from "./businessType";
-const db = require("../../../config/database.js");
-const Businesses = require("../../models/business");
-const businesses: Business[] = [];
+const { Op } = require("sequelize");
+
+
 
 const findUserBusinesses = async (userId) => {
   const list: any = [];
-  const businesses = await Businesses.findAll({
+  const businesses = await db.Business.findAll({
     where: { created_by: userId },
   });
   if (!businesses) {
-    return null;
+    return;
   }
   for (let i = 0; i < businesses.length; i++) {
     list.push(businesses[i].dataValues);
@@ -18,21 +19,22 @@ const findUserBusinesses = async (userId) => {
 };
 
 const findBusinessById = async (businessId: number) => {
-  const business = await Businesses.findByPk(businessId);
-  if (!businesses) {
-    return null;
+  const business = await db.Business.findByPk(businessId);
+  if (!business) {
+    return;
   }
   return business.dataValues;
 };
 
+
 const createBusiness = async (newBusiness: Business) => {
   const biz = newBusiness.name.toUpperCase().replace(" ", "");
-  const businesses = await Businesses.findAll({
+  const businesses = await db.Business.findAll({
     where: {
-      business_name: db.where(
-        db.fn("UPPER", db.fn("REPLACE", db.col("business_name"), " ", "")),
-        "=",
-        biz
+      business_name: db.sequelize.where(
+        db.sequelize.fn("UPPER", db.sequelize.fn("REPLACE", db.sequelize.col("business_name"), " ", "")),
+        "like",
+        `%${biz}%`
       ),
     },
     raw: true,
@@ -42,21 +44,21 @@ const createBusiness = async (newBusiness: Business) => {
     return;
   }
 
-  await Businesses.create({
+  await db.Business.create({
     business_name: newBusiness.name,
     description: newBusiness.description,
     category: newBusiness.category,
     active: true,
     email_address: newBusiness,
     created_by: newBusiness.created_by,
-    insert_date: Date.now(),
+    // insert_date: Date.now(),
   }).catch((err) => console.log(err));
 
   return newBusiness;
 };
 
 const removeBusiness = async (businessId) => {
-  const business = await Businesses.findByPk(businessId);
+  const business = await db.Business.findByPk(businessId);
 
   if (!business) {
     return;
@@ -69,7 +71,7 @@ const removeBusiness = async (businessId) => {
 };
 
 const setBusinessActiveStatus = async (businessId, status) => {
-  const business = await Businesses.findByPk(businessId);
+  const business = await db.Business.findByPk(businessId);
 
   if (!business) {
     return;
@@ -82,7 +84,7 @@ const setBusinessActiveStatus = async (businessId, status) => {
   return business;
 };
 const updateBusiness = async (businessId, updatedBusiness: Business) => {
-  await Businesses.update(
+  await db.Business.update(
     {
       business_name: updatedBusiness.name,
       description: updatedBusiness.description,
@@ -102,17 +104,7 @@ const updateBusiness = async (businessId, updatedBusiness: Business) => {
 
 const findBusinessMasterDetail = () => { };
 
-const businessNameMatch = async (bname: string) => {
-  //TODO: Figure out how to name match (trim and lowercase)
-  const businesses = await Businesses.findAll({
-    where: db.fn("upper", db.col("business_name"), bname),
-    raw: true,
-  });
-  if (!businesses) {
-    return null;
-  }
-  return businesses;
-};
+
 
 module.exports = {
   findBusinessById,
@@ -121,5 +113,4 @@ module.exports = {
   removeBusiness,
   setBusinessActiveStatus,
   updateBusiness,
-  businessNameMatch,
 };
