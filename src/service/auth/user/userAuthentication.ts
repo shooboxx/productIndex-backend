@@ -161,8 +161,8 @@ router.post('/auth/reset-password/:resetToken', checkNotAuthenticated, async (re
 router.post('/auth/token', async (req, res) => {
     const refreshToken = req.cookies.refresh_token
     const userId = req.body.user_id
-    if (refreshToken == null) return res.sendStatus(401)
-    if (userId == null) return res.sendStatus(401)
+    if (refreshToken == null) return res.sendStatus(403)
+    if (userId == null) return res.sendStatus(400)
     const hashed_token = crypto.createHash('sha256').update(refreshToken).digest('hex')
     const token = await userService.findRefreshToken(userId, hashed_token)
     if (!token) return res.sendStatus(403)
