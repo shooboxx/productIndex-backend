@@ -1,5 +1,6 @@
 import { User } from "../../user/userType";
 import { sendEmail } from '../../../utils/email';
+import {sendVerificationEmail} from '../../email/emailService'
 
 export { };
 const bcrypt = require('bcrypt')
@@ -47,14 +48,8 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
 
         }
         const newUser : User = await userService.createUser(user)
-        const msg = {
-            to: newUser.email_address, // Change to your recipient
-            from: 'noreply@theproductindex.io', // Change to your verified sender
-            subject: 'Welcome to ProductIndex!',
-            text: newUser.first_name + ', Thank you for registering with us! We\'re happy that you\'re here. To complete your registration, verify your email address by clicking the button below',
-            html: `<strong>${req.headers.origin}/verify?token=${newUser.verify_token}</strong>`,
-        }
-        if (!sendEmail(msg)) return res.status(400).json({error: "Email not sent"})
+        const verificationLink = `${req.headers.origin}/verify?token=${newUser.verify_token}`
+        await sendVerificationEmail({first_name: newUser.first_name, verify_link: verificationLink, email_to: newUser.email_address})
 
         return res.status(200).json({email_address: newUser.email_address})
     }
@@ -160,12 +155,14 @@ router.post('/auth/reset-password/:resetToken', checkNotAuthenticated, async (re
 
 router.post('/auth/token', async (req, res) => {
     const refreshToken = req.cookies.refresh_token
-    const userId = req.body.user_id
+    const userId = req.user_id
     if (refreshToken == null) return res.sendStatus(403)
     if (userId == null) return res.sendStatus(400)
+
     const hashed_token = crypto.createHash('sha256').update(refreshToken).digest('hex')
     const token = await userService.findRefreshToken(userId, hashed_token)
     if (!token) return res.sendStatus(403)
+
     jwt.verify(token.refresh_token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
         if (err) return res.sendStatus(403)
         const accessToken = generateAccessToken({ user_id: user.user_id })

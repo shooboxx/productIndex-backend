@@ -20,7 +20,7 @@ const {authenticateToken} = require('../auth/user/userAuthorization.ts')
 //TODO: ADD THIS TO Admin PROJECT
 // Get user reviews
 
-router.get('/user/:userid/reviews', (req, res) => {
+router.get('/users/:userid/reviews', (req, res) => {
     try {
         return res.status(200).json(reviewService.getUserReviews(req.params.userId))
     }
@@ -28,17 +28,35 @@ router.get('/user/:userid/reviews', (req, res) => {
         res.status(200).json({"error": e.message})
     }
 })
-
-router.get('/user/:userid', async (req, res) => {
+router.get('/user', authenticateToken, async (req, res) => {
     try {
-        const user = await userService.getUserById(req.params.userid)
-        user.password = undefined
+        const user = await userService.getUserById(req.user_id)
         return res.status(200).json(user)
     }
     catch (e : any) {
         res.status(400).json({"error": e.message})
     }
 })
+router.get('/users', async (req, res) => {
+    let user = {}
+    try {
+        const {id, email} = req.query
+        if (id) {
+            user = await userService.getUserById(id)
+            return res.status(200).json(user)
+        }
+        if (email) {
+            user = await userService.getUserByEmail(email)
+            return res.status(200).json(user)
+        }
+        user['password'] = undefined
+        return res.status(200).json(user)
+    }
+    catch (e : any) {
+        res.status(400).json({"error": e.message})
+    }
+})
+
 
 router.delete('/user', authenticateToken, (req, res) => {
     try {
@@ -48,7 +66,7 @@ router.delete('/user', authenticateToken, (req, res) => {
         res.status(400).json({"error": e.message})
     }
 })
-router.put('/profile', authenticateToken, (req, res) => {
+router.put('/user', authenticateToken, (req, res) => {
     try {
         const user = {
             id: req.user_id,
