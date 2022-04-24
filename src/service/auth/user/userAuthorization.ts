@@ -42,7 +42,7 @@ function authenticateToken (req, res, next) {
     const token = req.cookies.access_token
     if (token == null) throw new AppError('User login is required', 403)
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-        if (err) throw new AppError('Token invalid or expired', 403)
+        if (err) throw new AppError('Token invalid or expired', 401)
         req.user_id = user.user_id
         return next()
     })

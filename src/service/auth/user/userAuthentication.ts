@@ -115,6 +115,14 @@ router.post('/auth/forgot-password', checkNotAuthenticated, async (req: any, res
         const userResetTokenExpiry = Date.now() * 10 * 60 * 1000;
 
         userService.updateResetToken(user.email_address, hashedResetToken, userResetTokenExpiry);
+        const msg = {
+            to: user.email_address, // Change to your recipient
+            from: 'noreply@theproductindex.io', // Change to your verified sender
+            subject: 'Password reset request',
+            text: '',
+            html: `<strong>${req.headers.origin}/reset-password?token=${user.password_reset_token}</strong>`,
+        }
+        if (!sendEmail(msg)) return res.status(400).json({error: "Email not sent"})
 
         return res.status(200).json({ reset_token: resetToken, reset_token_expires: userResetTokenExpiry })
     }
@@ -135,7 +143,7 @@ router.post('/auth/reset-password/:resetToken', checkNotAuthenticated, async (re
         const newPasswordConfirm = req.body.password_confirm
         if (user) {
             if (user.password_reset_expires_in && user.password_reset_expires_in < Date.now()) {
-                res.status(403).json({ "error": "Token expired" })
+                res.status(401).json({ "error": "Token expired" })
             }
             await userService.updatePassword(user.id, user.email_address, newPassword, newPasswordConfirm)
 
