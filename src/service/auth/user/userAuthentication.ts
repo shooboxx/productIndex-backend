@@ -16,7 +16,7 @@ const systemRoleService = require('./systemRole/systemRoleService')
 router.get('/auth/verify', async (req: any, res: any) => {
     try {
         const user : User = await userService.verifyUser(req.query.token)
-        if (user) return res.send(`Verification successful`)
+        if (user) return res.status(200).json({success: true})
     }
     catch (err : any){
         return res.status(400).json({ error: err.message })
@@ -33,7 +33,7 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
             role_id: await systemRoleService.getRoleId('USER'),
             first_name: req.body.first_name,
             last_name: req.body.last_name,
-            email_address: req.body.email_address,
+            email_address: req.body.email_address.toLowerCase(),
             password: hashedPass,
             dob: req.body.dob,
             state: req.body.state,
@@ -62,7 +62,7 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
 router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
     try {
         
-        const user = await userService.getUserByEmail(req.body.email_address)
+        const user = await userService.getUserByEmail(req.body.email_address.toLowerCase())
         if (!user) res.status(400).json({ "error": "Email address or password is incorrect" })
         await bcrypt.compare(req.body.password, user.password, (err, resp) => {
             if (err) res.status(404)

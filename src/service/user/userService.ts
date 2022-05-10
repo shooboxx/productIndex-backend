@@ -10,7 +10,7 @@ const getUserByEmail = async (emailAddress: string) => {
   if (!emailAddress) throw new Error("Email address is required");
 
   const found = await userRepo
-    .findUser(null, emailAddress)
+    .findUser(null, emailAddress.toLowerCase())
     .then((user) => {
       if (!user) {
         return null;
@@ -145,6 +145,7 @@ const verifyUser = async (token: string) => {
   try {
     if (!token) throw new Error("Verification token is required");
     const user: User = await getUserByVerificationToken(token);
+    console.log('found', user)
     // TODO: Send error with error code
     // if (user.is_verified) throw new Error('User is already verified')
     // if (user.verify_expires && user.verify_expires.toDateString() > Date.now().toString()) throw new Error('Verification token expired')
