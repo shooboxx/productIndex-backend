@@ -1,11 +1,12 @@
 export interface Review {
     id?: number,
-    store_id: number,
-    user_id: number,
-    star_rating: number,
-    comment: string,
-    inappropriate_comment?: boolean,
-    flagged?: boolean,
-    update_date?: number,
-    insert_date?: number
+    user_id: number;
+    store_id: number;
+    rating_number: number;
+    comment: string;
+    inappropriate_flag?: boolean;
+    flag_reason?: string;
+    deleted_date?: Date;
+    insert_date?: Date;
+    update_date?: Date;
 }
