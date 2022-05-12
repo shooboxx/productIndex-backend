@@ -20,7 +20,6 @@ const findReviewsByUserId = async (userId: number) => {
 }
 
 const findReview = async (userId: number, store_id: number) => {
-    console.log(db.Review)
     const review = await db.Review.findOne({ where: { store_id: store_id, user_id: userId }})
     
     if (!review) {

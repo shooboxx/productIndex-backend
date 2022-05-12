@@ -47,18 +47,17 @@ const findUserByVerificationToken = async (verifyToken: string) => {
 };
 
 const updateUser = async (user: User) => {
-  // TODO: Return db user object
-  const updatedUser = await db.Users.update(
+  await db.Users.update(
     {
       first_name: user.first_name,
       last_name: user.last_name,
       password: user.password,
-      dob: user.dob,
+      date_of_birth: user.dob,
       gender: user.gender,
       profile_picture_url: user.profile_picture_url,
       country: user.country,
       city: user.city,
-      primary_phone: user.primary_phone,
+      primary_phone_contact: user.primary_phone,
       address: user.state,
       is_verified: user.is_verified,
       reset_expires: user.password_reset_expires_in, // TODO: Change dates to dates and not a number
@@ -74,7 +73,7 @@ const updateUser = async (user: User) => {
       },
     }
   );
-  return updatedUser.dataValues;
+  return user;
 };
 
 const storeRefreshToken = async (user_id: number, refreshToken: string) => {

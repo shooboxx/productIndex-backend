@@ -37,19 +37,18 @@ router.get('/user', authenticateToken, async (req, res) => {
 })
 
 
-router.delete('/user', authenticateToken, (req, res) => {
+router.delete('/user', authenticateToken, async (req, res) => {
     try {
-        return res.status(200).json(userService.deleteUser(req.user_id))
+        return res.status(200).json(await userService.deleteUser(req.user_id))
     }
     catch (e : any) {
         res.status(400).json({"error": e.message})
     }
 })
-router.put('/user', authenticateToken, (req, res) => {
+router.put('/user', authenticateToken, async (req, res) => {
     try {
         const user = {
             id: req.user_id,
-            role_id: 0,
             first_name: req.body.first_name,
             last_name: req.body.last_name,
             dob: req.body.dob,
@@ -57,9 +56,9 @@ router.put('/user', authenticateToken, (req, res) => {
             country: req.body.country,
             city: req.body.city,
             primary_phone: req.body.primary_phone,
-            address: req.body.address,
+            state: req.body.state,
         }
-        const updatedUser = userService.updateUserProfile(user)
+        const updatedUser = await userService.updateUserProfile(user)
         return res.status(200).json(updatedUser)
     }
     catch (e : any) {
@@ -79,15 +78,6 @@ router.put('/user/password', authenticateToken, (req, res) => {
     }
 })
 
-router.put('/user/active', authenticateToken, (req, res) => {
-    try {
-        const updatedUser = userService.setAciveStatus(req.user_id, req.body.is_active)
-        return res.status(200).json(updatedUser)     
-    }
-    catch (e : any) {
-        res.status(400).json({"error": e.message})
-    }
-})
 
 
 module.exports = router

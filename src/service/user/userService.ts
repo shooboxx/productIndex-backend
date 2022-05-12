@@ -1,12 +1,10 @@
 import { User } from "./userType";
 import AppError from "../../utils/appError.js";
 const bcrypt = require("bcrypt");
-const util = require("../../utils/utils.js");
 const userRepo = require("./userRepo");
 
 const getUserByEmail = async (emailAddress: string) => {
   if (!emailAddress) throw new AppError("Email address is required", 400);
-
   return await userRepo.findUser(null, emailAddress.toLowerCase())
     .then(user => user)
     .catch(err => {throw new AppError(err, 400)});
@@ -29,6 +27,9 @@ const getUserByVerificationToken = async (token: string) => {
     .then((user) => {
       if (!user) {
         throw new AppError("No user found with that verification token", 400);
+      }
+      if (user.is_verified) {
+        throw new AppError("User is already verified", 304)
       }
       return user;
     })
@@ -66,16 +67,16 @@ const createUser = async (user: User) => {
   }
 };
 const updateUserProfile = async (user: User) => {
-  // TODO: Implement this
   try {
     await getUserById(user.id); 
-    _validate_user_profile_completeness(user)
+    return await userRepo.updateUser(user);
   }
-  catch (e) {
-    throw e
+  catch (err) {
+   throw err;
   }
-  return userRepo.updateUser(user);
+  
 };
+
 const updateResetToken = async (emailAddress, resetToken, resetTokenExpiry) => {
   try {
     const user = await getUserByEmail(emailAddress);
@@ -114,11 +115,9 @@ const verifyUser = async (token: string) => {
   try {
     if (!token) throw new Error("Verification token is required");
     const user: User = await getUserByVerificationToken(token);
-    // TODO: Send error with error code
-    // if (user.is_verified) throw new Error('User is already verified')
-    // if (user.verify_expires && user.verify_expires.toDateString() > Date.now().toString()) throw new Error('Verification token expired')
 
     user.is_verified = true;
+    user.verify_token = '';
     return userRepo.updateUser(user);
   } catch (e) {
     throw e;
@@ -129,16 +128,6 @@ const deleteUser = async (userId: number) => {
   try {
     const user = await getUserById(userId);
     user.deleted_date = Date.now();
-    return await userRepo.updateUser(user);
-  } catch (e) {
-    throw e;
-  }
-};
-
-const setAciveStatus = async (userId, active) => {
-  try {
-    const user = await getUserById(userId);
-    user.active = active;
     return await userRepo.updateUser(user);
   } catch (e) {
     throw e;
@@ -175,7 +164,6 @@ module.exports = {
   deleteUser,
   updateUserProfile,
   verifyUser,
-  setAciveStatus,
   storeRefreshToken,
   findRefreshToken,
 };
