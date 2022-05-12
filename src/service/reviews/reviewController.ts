@@ -32,8 +32,8 @@ router.post('/review', authenticateToken, async (req, res) => {
         const newReview: Review = {
             store_id: req.body.store_id,
             user_id: req.user_id,
-            star_rating: req.body.star_rating,
-            comment: req.body.review_comment
+            rating_number: req.body.rating_number,
+            comment: req.body.comment
         }
 
         return res.status(200).json(await reviewService.createReview(newReview))
@@ -48,7 +48,7 @@ router.put('/review', authenticateToken, async (req, res) => {
         const updatedReview: Review = {
             store_id: req.body.store_id,
             user_id: req.user_id,
-            star_rating: req.body.star_rating,
+            rating_number: req.body.rating_number,
             comment: req.body.review_comment
         }
 

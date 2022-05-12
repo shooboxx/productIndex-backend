@@ -1,7 +1,10 @@
 import { Review } from "./reviewType"
 import db from "../../models";
 
-
+// TODO: Implement this
+const findReviewById = async (reviewId) => {
+    return
+}
 const findReviewsByStoreId = async (store_id: number) => {
     const review = await db.Review.findAll({ where: { store_id: store_id } })
     if (!review) {
@@ -13,9 +16,8 @@ const findReviewsByStoreId = async (store_id: number) => {
 
 const findUserStoreReview = async (userId: number, store_id: number) => {
     const review = await db.Review.findOne({ where: { store_id: store_id, user_id: userId }})
-    
     if (!review) {
-        return
+        return 
     }
     return review
 }
@@ -25,7 +27,7 @@ const createReview = async (newReview: Review) => {
     const {dataValues} = await db.Review.create({
         user_id: newReview.user_id,
         store_id: newReview.store_id,
-        rating_number: newReview.star_rating,
+        rating_number: newReview.rating_number,
         comment: newReview.comment,
         insert_date: Date.now(),
     })
@@ -40,9 +42,10 @@ const updateReview = async (updatedReview: Review) => {
     }
     review.update({
         comment: updatedReview.comment,
-        inappropriate_comment: updatedReview.inappropriate_comment,
-        inappropriate_flag: updatedReview.flagged,
-        rating_number: updatedReview.star_rating,
+        flag_reason: updatedReview.flag_reason,
+        inappropriate_flag: updatedReview.inappropriate_flag,
+        rating_number: updatedReview.rating_number,
+        deleted_date: updatedReview.deleted_date,
         update_date: Date.now()
     })
 
@@ -58,4 +61,4 @@ const deleteReview = async (review_id: number) => {
     return review
 
 }
-module.exports = { findReviewsByStoreId, findUserStoreReview, createReview, updateReview, deleteReview }
+module.exports = { findReviewsByStoreId, findUserStoreReview, createReview, updateReview, deleteReview, findReviewById }
