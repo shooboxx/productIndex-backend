@@ -1,5 +1,3 @@
-const businessService = require('../business/businessService');
-const userService = require('../user/userService')
 let reviewsRepo = require('./reviewRepo')
 const { exist } = require('../../utils/utils.js')
 
@@ -9,9 +7,9 @@ if (process.env.NODE_ENV == 'test') {
 
 import { Review } from './reviewType'
 
-const getReviewsByBusinessId = async (businessId: number) => {
+const getReviewsByStoreId = async (storeId: number) => {
     try {
-        const reviews = await reviewsRepo.findReviewsByBusinessId(businessId)
+        const reviews = await reviewsRepo.findReviewsByStoreId(storeId)
 
         if (reviews.length === 0) throw new Error('No reviews for this business')
         return reviews
@@ -22,7 +20,7 @@ const getReviewsByBusinessId = async (businessId: number) => {
 
 }
 
-const getReview = async (userId: number, store_id: number) => {
+const getUserStoreReview = async (userId: number, store_id: number) => {
     try {
         const review = await reviewsRepo.findReview(userId, store_id)
         if (!exist(review)) throw new Error('User has not left a review for this business')
@@ -38,7 +36,7 @@ const createReview = async (newReview: Review) => {
         const found = await reviewsRepo.findReview(newReview.user_id, newReview.store_id)
 
         if (found) throw new Error('You cannot review a business more than once. Please update preview review instead')
-        _validReview(newReview)
+        _validateReview(newReview)
 
         await reviewsRepo.createReview(newReview)
         return
@@ -47,17 +45,13 @@ const createReview = async (newReview: Review) => {
         throw e
     }
 }
-
+// #TODO: Do some testing for this to ensure all columns are being updated
 const updateReview = async (updatedReview: Review) => {
     try {
-        // businessService.getBusinessById(updatedReview.store_id)
-        const currReview: Review = await getReview(updatedReview.user_id, updatedReview.store_id)
+        const currReview: Review = await getUserStoreReview(updatedReview.user_id, updatedReview.store_id)
         currReview.comment = updatedReview.comment || currReview.comment
         currReview.star_rating = updatedReview.star_rating || currReview.star_rating
-        currReview.update_date = Date.now()
-        currReview.flagged = updatedReview.flagged || currReview.flagged
-        currReview.inappropriate_comment = updatedReview.inappropriate_comment || currReview.inappropriate_comment
-        _validReview(currReview)
+        _validateReview(currReview)
 
         return await reviewsRepo.updateReview(currReview)
 
@@ -67,23 +61,21 @@ const updateReview = async (updatedReview: Review) => {
     }
 }
 
-
+// TODO: Add inappropriate reason
 const markReviewAsInappropriate = async (userId: number, businessId: number) => {
     try {
         const review: Review = await reviewsRepo.findReview(userId, businessId)
         review.inappropriate_comment = true
-        return await updateReview(review)
+        return await reviewsRepo.updateReview(review)
     }
     catch (e) {
         throw e
     }
 }
 
-const deleteReview = async (userId: number, businessId: number) => {
+const deleteReview = async (userId: number, storeId: number) => {
     try {
-        // businessService.getBusinessById(businessId)
-        // userService.getUserById(userId)
-        const review = await getReview(userId, businessId)
+        const review = await getUserStoreReview(userId, storeId)
         return await reviewsRepo.deleteReview(review.id)
     }
     catch (e) {
@@ -91,18 +83,7 @@ const deleteReview = async (userId: number, businessId: number) => {
     }
 }
 
-const getUserReviews = async (userId: number) => {
-    try {
-        const reviews = await reviewsRepo.findReviewsByUserId(userId)
-        if (reviews.length === 0) throw new Error('No reviews for this user')
-        return reviews
-    }
-    catch (e) {
-        throw e
-    }
-}
-
-const _validReview = (review: Review) => {
+const _validateReview = (review: Review) => {
     if (review.star_rating < 1 && review.star_rating > 6) throw new Error('Star rating value must be between 1 and 5');
     if (!review.star_rating) throw new Error('Star rating is required')
     if (!review.comment) throw new Error('Review comment is required')
@@ -111,4 +92,4 @@ const _validReview = (review: Review) => {
     return true
 }
 
-module.exports = { getReviewsByBusinessId, createReview, updateReview, deleteReview,  getReview,  markReviewAsInappropriate, getUserReviews }
+module.exports = { getReviewsByStoreId, createReview, updateReview, deleteReview,  getUserStoreReview,  markReviewAsInappropriate }
