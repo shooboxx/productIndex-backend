@@ -4,8 +4,7 @@ import { User } from "./userType";
 const { Op } = require("sequelize");
 // TODO: Create a CreateUser interface for a minimized object
 const addUser = async (user: User) => {
-    // TODO: Return db user object
-  await db.Users.create({
+  const {dataValues} = await db.Users.create({
     email_address: user.email_address,
     password: user.password,
     system_role_id: user.role_id,
@@ -20,13 +19,12 @@ const addUser = async (user: User) => {
     primary_phone_contact: user.primary_phone,
     insert_date: Date.now(),
   }).catch(() => null)
-
-  return user;
+  return dataValues;
 };
 
 const findUser = async (userId: number, emailAddress: string) => {
   const user = await db.Users.findOne({ where: {
-      [Op.or]: [{email_address: emailAddress}, { id: userId}]}
+      [Op.or]: [{email_address: emailAddress, deleted_date: null}, { id: userId, deleted_date: null}]}
   });  
   if (!user) {
     return null;
@@ -35,14 +33,14 @@ const findUser = async (userId: number, emailAddress: string) => {
 };
 
 const findUserByResetToken = async (resetToken: string) => {
-  const user = await db.Users.findOne({ where: { reset_token: resetToken } });
+  const user = await db.Users.findOne({ where: { reset_token: resetToken, deleted_date: null } });
   if (!user) return null;
 
   return user.dataValues;
 };
 
 const findUserByVerificationToken = async (verifyToken: string) => {
-  const user = await db.Users.findOne({ where: { verify_token: verifyToken } });
+  const user = await db.Users.findOne({ where: { verify_token: verifyToken, deleted_date: null } });
   if (!user) return null;
 
   return user.dataValues;
@@ -50,7 +48,7 @@ const findUserByVerificationToken = async (verifyToken: string) => {
 
 const updateUser = async (user: User) => {
   // TODO: Return db user object
-  await db.Users.update(
+  const updatedUser = await db.Users.update(
     {
       first_name: user.first_name,
       last_name: user.last_name,
@@ -72,10 +70,11 @@ const updateUser = async (user: User) => {
     {
       where: {
         id: user.id,
+        deleted_date: null
       },
     }
   );
-  return user;
+  return updatedUser.dataValues;
 };
 
 const storeRefreshToken = async (user_id: number, refreshToken: string) => {
@@ -88,7 +87,7 @@ const storeRefreshToken = async (user_id: number, refreshToken: string) => {
 
 const findRefreshToken = async (userId: number, refreshToken: string) => {
   const token = await db.UserTokens.findOne({
-    where: { user_id: userId, refresh_token: refreshToken },
+    where: { user_id: userId, refresh_token: refreshToken, deleted_date: null },
   });
   if (!token) {
     return;

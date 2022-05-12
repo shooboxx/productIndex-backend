@@ -47,11 +47,11 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
             verify_token: crypto.randomBytes(32).toString('hex')
 
         }
-        const newUser : User = await userService.createUser(user)
+        const newUser = await userService.createUser(user)
         const verificationLink = `${req.headers.origin}/verify?token=${newUser.verify_token}`
         await sendVerificationEmail({first_name: newUser.first_name, verify_link: verificationLink, email_to: newUser.email_address})
 
-        return res.status(200).json({email_address: newUser.email_address})
+        return res.status(200).json(newUser)
     }
     catch (err: any) {
         return res.status(400).json({ error: err.message })

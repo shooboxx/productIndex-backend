@@ -51,7 +51,14 @@ const createUser = async (user: User) => {
     _validate_user_profile_completeness(user)
     const found = await getUserByEmail(user.email_address);
     if (!found) {
-      return await userRepo.addUser(user);
+      let createdUser = await userRepo.addUser(user);
+      const newUser = {
+        id: createdUser.id,
+        email_address: createdUser.email_address,
+        first_name: createdUser.first_name,
+        last_name: createdUser.last_name
+      }
+      return newUser
     }
     throw new AppError("User already exist", 400);
   } catch (e: any) {
