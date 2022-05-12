@@ -1,55 +1,34 @@
 export {}
 const express = require('express');
 const router = express.Router()
-const businessService = require('../business/businessService')
-const reviewService = require('../reviews/reviewService')
 const userService = require('../user/userService')
 const {authenticateToken} = require('../auth/user/userAuthorization.ts')
 
-//TODO: ADD THIS TO BUSINESS PROJECT
-//Get User Businesses
-// router.get('/user/businesses', (req, res) => {
-//     try {
-//         return res.status(200).json(businessService.getUserBusinesses(req.user_id))
-//     }
-//     catch(e : any) {
-//         res.status(200).json({"error": e.message})
-//     }
-// })
-
-//TODO: ADD THIS TO Admin PROJECT
-// Get user reviews
-
-router.get('/users/:userid/reviews', (req, res) => {
-    try {
-        return res.status(200).json(reviewService.getUserReviews(req.params.userId))
-    }
-    catch(e : any) {
-        res.status(200).json({"error": e.message})
-    }
-})
-router.get('/user', authenticateToken, async (req, res) => {
-    try {
-        const user = await userService.getUserById(req.user_id)
-        return res.status(200).json(user)
-    }
-    catch (e : any) {
-        res.status(400).json({"error": e.message})
-    }
-})
 router.get('/users', async (req, res) => {
     let user = {}
     try {
         const {id, email} = req.query
         if (id) {
             user = await userService.getUserById(id)
+            if (user) user['password'] = undefined
             return res.status(200).json(user)
         }
         if (email) {
             user = await userService.getUserByEmail(email)
+            if (user) user['password'] = undefined
             return res.status(200).json(user)
         }
-        user['password'] = undefined
+        if (user) user['password'] = undefined
+        return res.status(200).json(user)
+    }
+    catch (e : any) {
+        res.status(400).json({"error": e.message})
+    }
+})
+
+router.get('/user', authenticateToken, async (req, res) => {
+    try {
+        const user = await userService.getUserById(req.user_id)
         return res.status(200).json(user)
     }
     catch (e : any) {
@@ -73,20 +52,12 @@ router.put('/user', authenticateToken, (req, res) => {
             role_id: 0,
             first_name: req.body.first_name,
             last_name: req.body.last_name,
-            email_address: '',
-            password: '',
             dob: req.body.dob,
             gender: req.body.gender,
-            profile_picture_url: req.body.profile_picture_url,
             country: req.body.country,
             city: req.body.city,
             primary_phone: req.body.primary_phone,
             address: req.body.address,
-            is_verified: false,
-            active: false,
-            deleted_date: 0,
-            insert_date: 0,
-            update_date: 0,  
         }
         const updatedUser = userService.updateUserProfile(user)
         return res.status(200).json(updatedUser)
@@ -95,20 +66,12 @@ router.put('/user', authenticateToken, (req, res) => {
         res.status(400).json({"error": e.message})
     }
 })
+// TODO: Add an upload profile photo route
+// TODO: Add a Remove profile photo route
 
 router.put('/user/password', authenticateToken, (req, res) => {
     try {
         const updatedUser = userService.updatePassword(req.user_id, req.body.email_address, req.body.password, req.body.password_confirm)
-        return res.status(200).json(updatedUser)
-    }
-    catch (e : any) {
-        res.status(400).json({"error": e.message})
-    }
-})
-
-router.put('/user/verify', authenticateToken, async (req, res) => {
-    try {
-        const updatedUser = await userService.verifyUser(req.user_id)
         return res.status(200).json(updatedUser)
     }
     catch (e : any) {

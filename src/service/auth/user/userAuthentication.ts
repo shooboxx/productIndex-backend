@@ -178,7 +178,7 @@ function generateAccessToken(user) {
     // expiration time should be 15m in prod
     return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.NODE_ENV == 'development' ? '1440m' : '15m' })
 }
-
+// TODO: get the refresh token from the cookies and validate. Add this function to the token refresh route
 function validUserRefreshToken(userId, refreshToken): Boolean {
     const hashedRefreshToken = crypto.createHash('sha256').update(refreshToken).digest('hex')
     const found = userService.validUserRefreshToken(userId, hashedRefreshToken)

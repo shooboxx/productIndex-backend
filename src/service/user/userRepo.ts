@@ -2,8 +2,9 @@ export {};
 import db from "../../models";
 import { User } from "./userType";
 const { Op } = require("sequelize");
-
+// TODO: Create a CreateUser interface for a minimized object
 const addUser = async (user: User) => {
+    // TODO: Return db user object
   await db.Users.create({
     email_address: user.email_address,
     password: user.password,
@@ -18,18 +19,17 @@ const addUser = async (user: User) => {
     date_of_birth: user.dob,
     primary_phone_contact: user.primary_phone,
     insert_date: Date.now(),
-    update_date: null,
-  }).catch(err => null)
+  }).catch(() => null)
 
   return user;
 };
 
 const findUser = async (userId: number, emailAddress: string) => {
-  const user = await db.Users.findOne({ where:{
+  const user = await db.Users.findOne({ where: {
       [Op.or]: [{email_address: emailAddress}, { id: userId}]}
   });  
   if (!user) {
-    return;
+    return null;
   }
   return user.dataValues;
 };
@@ -49,6 +49,7 @@ const findUserByVerificationToken = async (verifyToken: string) => {
 };
 
 const updateUser = async (user: User) => {
+  // TODO: Return db user object
   await db.Users.update(
     {
       first_name: user.first_name,
