@@ -102,7 +102,6 @@ const clearRefreshTokens = async (userId) => {
   });
 };
 const deleteRefreshToken = async (user_id, token) => {
-  console.log('Repo refresh', user_id, token)
   await db.UserTokens.destroy({
     where: {
       user_id: user_id,
