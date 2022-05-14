@@ -110,7 +110,7 @@ router.post('/auth/forgot-password', checkNotAuthenticated, async (req: any, res
 
         userService.updateResetToken(user.email_address, hashedResetToken, userResetTokenExpiry);
         const resetPasswordLink = `${req.headers.origin}/reset-password/{user.reset_token}`
-        await sendResetEmail({first_name: user.first_name, verify_link: resetPasswordLink, email_to: user.email_address})
+        await sendResetEmail({first_name: user.first_name, reset_link: resetPasswordLink, email_to: user.email_address})
 
         return res.status(200).json({ reset_token: resetToken, reset_token_expires: userResetTokenExpiry })
     }
