@@ -1,6 +1,6 @@
 import { User } from "../../user/userType";
 import { sendEmail } from '../../../utils/email';
-import {sendVerificationEmail} from '../../email/emailService'
+import {sendVerificationEmail, sendResetEmail} from '../../email/emailService'
 
 export { };
 const bcrypt = require('bcrypt')
@@ -109,14 +109,8 @@ router.post('/auth/forgot-password', checkNotAuthenticated, async (req: any, res
         const userResetTokenExpiry = new Date(new Date().getTime() + 10 * 60000);
 
         userService.updateResetToken(user.email_address, hashedResetToken, userResetTokenExpiry);
-        const msg = {
-            to: user.email_address, // Change to your recipient
-            from: 'noreply@theproductindex.io', // Change to your verified sender
-            subject: 'Password reset request',
-            text: '',
-            html: `<strong>${req.headers.origin}/reset-password?token=${user.reset_token}</strong>`,
-        }
-        if (!sendEmail(msg)) return res.status(400).json({error: "Email not sent"})
+        const resetPasswordLink = `${req.headers.origin}/reset-password/{user.reset_token}`
+        await sendResetEmail({first_name: user.first_name, verify_link: resetPasswordLink, email_to: user.email_address})
 
         return res.status(200).json({ reset_token: resetToken, reset_token_expires: userResetTokenExpiry })
     }
