@@ -19,9 +19,9 @@ const findUserByResetToken = (resetToken: string) => {
   for (let i = 0; i < users.length; i++) {
     console.log(
       "Passed in:" + resetToken,
-      "available" + users[i].password_reset_token
+      "available" + users[i].reset_token
     );
-    if (users[i].password_reset_token == resetToken) {
+    if (users[i].reset_token == resetToken) {
       return users[i];
     }
   }
@@ -40,13 +40,12 @@ const updateUser = (user: User) => {
       users[i].country = user.country;
       users[i].city = user.city;
       users[i].primary_phone = user.primary_phone;
-      users[i].address = user.address;
+      users[i].state = user.state;
       users[i].is_verified = user.is_verified;
-      users[i].password_reset_expires_in = user.password_reset_expires_in;
-      users[i].password_reset_token = user.password_reset_token;
+      users[i].reset_expires = user.reset_expires;
+      users[i].reset_token = user.reset_token;
       users[i].active = user.active;
       users[i].deleted_date = user.deleted_date;
-      users[i].update_date = Date.now();
 
       return users[i];
     }

@@ -33,7 +33,6 @@ const getUserStoreReview = async (userId: number, store_id: number) => {
 const createReview = async (newReview: Review) => {
     try {
         _validateReview(newReview)
-        console.log(newReview)
         const found = await reviewsRepo.findUserStoreReview(newReview.user_id, newReview.store_id)
 
         if (found) throw new Error('You cannot review a business more than once. Please update preview review instead')

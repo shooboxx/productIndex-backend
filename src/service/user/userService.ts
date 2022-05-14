@@ -15,8 +15,8 @@ const getUserById = async (userId: number) => {
   if (!userId)  throw AppError("user_id is required", 400);
   const user = (await userRepo.findUser(userId, null));
 
-  if (user.length === 0) {
-    throw new AppError("User not found with that Id", 404);
+  if (!user) {
+    throw new AppError("User not found", 404);
   }
   return user;
 };
@@ -53,13 +53,9 @@ const createUser = async (user: User) => {
     const found = await getUserByEmail(user.email_address);
     if (!found) {
       let createdUser = await userRepo.addUser(user);
-      const newUser = {
-        id: createdUser.id,
-        email_address: createdUser.email_address,
-        first_name: createdUser.first_name,
-        last_name: createdUser.last_name
-      }
-      return newUser
+      createdUser['password'] = undefined
+      createdUser['deleted_date'] = undefined
+      return createdUser
     }
     throw new AppError("User already exist", 400);
   } catch (e: any) {
@@ -81,8 +77,9 @@ const updateResetToken = async (emailAddress, resetToken, resetTokenExpiry) => {
   try {
     const user = await getUserByEmail(emailAddress);
     if (!user) throw AppError('User not found with that email address', 404)
-    user.password_reset_token = resetToken;
-    user.password_reset_expires_in = resetTokenExpiry;
+    user.reset_token = resetToken;
+    console.log(resetTokenExpiry)
+    user.reset_expires = resetTokenExpiry;
 
     return userRepo.updateUser(user);
   } catch (err) {
@@ -103,9 +100,9 @@ const updatePassword = async (
     throw AppError("Passwords do not match", 400);
   }
   user.password = await bcrypt.hash(newPassword, 10);
-  user.password_reset_token = "";
-  user.password_reset_expires_in = 0;
-  user.password_last_updated = Date.now();
+  user.reset_token = null;
+  user.reset_expires = null;
+  user.password_last_updated = new Date();
   const found = userRepo.updateUser(user);
   if (found) userRepo.clearRefreshTokens(userId);
   return found;
@@ -127,7 +124,8 @@ const verifyUser = async (token: string) => {
 const deleteUser = async (userId: number) => {
   try {
     const user = await getUserById(userId);
-    user.deleted_date = Date.now();
+
+    user.deleted_date = new Date();
     return await userRepo.updateUser(user);
   } catch (e) {
     throw e;

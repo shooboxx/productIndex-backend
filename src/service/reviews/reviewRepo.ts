@@ -29,7 +29,6 @@ const createReview = async (newReview: Review) => {
         store_id: newReview.store_id,
         rating_number: newReview.rating_number,
         comment: newReview.comment,
-        insert_date: Date.now(),
     })
     return dataValues
 
@@ -46,7 +45,6 @@ const updateReview = async (updatedReview: Review) => {
         inappropriate_flag: updatedReview.inappropriate_flag,
         rating_number: updatedReview.rating_number,
         deleted_date: updatedReview.deleted_date,
-        update_date: Date.now()
     })
 
     return updatedReview

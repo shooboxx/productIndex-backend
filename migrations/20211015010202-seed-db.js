@@ -8,8 +8,8 @@ module.exports = {
    create table "public".business_item (id serial not null, product_id int4 not null, business_id int4 not null, product_key int4 not null, description int4, price int4, "tag" text, insert_date timestamp, update_date timestamp, primary key (id));
    create table "public".business_portfolio (id serial not null, business_id int4 not null, media_url text, media_type varchar(255), title varchar(255), description text, insert_date timestamp, update_date timestamp, primary key (id));
    create table "public".business_store (id serial not null, business_id int4 not null, unique_name varchar(255) not null unique, email text, phone varchar(255), phone_2 varchar(255), phone_3 varchar(255), address_line_1 varchar(255), address_line_2 varchar(255), latitude float4, longitude float4, country varchar(255), city varchar(255), state varchar(255), postal_code varchar(255), is_primary bool, temp_or_perm_closure char(4), reopen_date date, insert_date timestamp not null, update_date timestamp not null, primary key (id));
-   create table "public".business_store_hours (Id serial not null, business_store_id int4 not null, monday_open varchar(255), monday_closed varchar(255), tuesday_open varchar(255), tuesday_closed varchar(255), wednesday_open varchar(255), wednedsay_closed varchar(255), thursday_open varchar(255), thursday_closed varchar(255), friday_open varchar(255), friday_closed varchar(255), saturday_open varchar(255), saturday_closed varchar(255), sunday_open varchar(255), sunday_closed varchar(255), insert_date timestamp not null, update_date timestamp not null, primary key (Id));
-   create table "public".business_tags (id serial not null, business_id int4 not null, "tag" int4, insert_date date, update_date date, primary key (id));
+   create table "public".business_store_hours (Id serial not null, business_store_id int4 not null, monday_open time, monday_closed time, tuesday_open time, tuesday_closed time, wednesday_open time, wednedsay_closed time, thursday_open time, thursday_closed time, friday_open time, friday_closed time, saturday_open time, saturday_closed time, sunday_open time, sunday_closed int4, insert_date timestamp not null, update_date timestamp, primary key (Id));
+   create table "public".business_tags (id serial not null, business_id int4 not null, "tag" varchar(255), insert_date timestamp, update_date timestamp, primary key (id));
    create table "public".inventory_item (id serial not null, business_item_id int4 not null, business_store_id int4 not null, quantity int4, insert_date timestamp, update_date timestamp, available bool, show_price bool, primary key (id));
    create table "public".product (id serial not null, business_id int4 not null, product_name varchar(255) not null, product_type varchar(255), image_url text, insert_date timestamp not null, update_date timestamp not null, primary key (id));
    create table "public".review (id serial not null, user_id int4 not null, store_id int4 not null, rating_number int4 not null, comment text not null, inappropriate_flag bool, flag_reason varchar(255), insert_date timestamp not null, update_date timestamp, deleted_date timestamp, primary key (id));
@@ -17,7 +17,7 @@ module.exports = {
    create table "public".single_sign_on_user_link (id serial not null, single_sign_onid int4 not null, user_id int4 not null, sso_token varchar(255) not null, insert_date timestamp not null, update_date timestamp, primary key (id));
    create table "public".system_role (id serial not null, role_name varchar(100) not null, access_level int4 not null, insert_date timestamp not null, update_date timestamp, primary key (id));
    create table "public".user_tokens (id serial not null, user_id int4 not null, refresh_token text not null, insert_date timestamp not null, primary key (id));
-   create table "public".users (id serial not null, system_role_id int4 not null, email_address text not null, password varchar(100) not null, first_name varchar(50), last_name varchar(50), date_of_birth date, gender varchar(255), country varchar(255), city varchar(255), state varchar(255), profile_pic_url text, active bool, is_verified bool, verify_token text, verify_expires date, verify_changes date, reset_token text, reset_expires date, primary_phone_contact varchar(255), deleted_date date, insert_date timestamp not null, update_date timestamp, primary key (id));
+   create table "public".users (id serial not null, system_role_id int4 not null, email_address text not null, password varchar(100) not null, first_name varchar(50), last_name varchar(50), date_of_birth date, gender varchar(255), country varchar(255), city varchar(255), state varchar(255), profile_pic_url text, active bool, is_verified bool, verify_token text, verify_expires timestamp, verify_changes timestamp, reset_token text, reset_expires timestamp, primary_phone_contact varchar(255), deleted_date timestamp, insert_date timestamp not null, update_date timestamp, primary key (id));
    alter table "public".business_tags add constraint FKbusiness_t471537 foreign key (business_id) references "public".business (Id);
    alter table "public".users add constraint FKusers419884 foreign key (system_role_id) references "public".system_role (id);
    alter table "public".review add constraint FKreview377146 foreign key (store_id) references "public".business_store (id);
@@ -33,7 +33,8 @@ module.exports = {
    alter table "public".business_portfolio add constraint FKbusiness_p3027 foreign key (business_id) references "public".business (Id);
    alter table "public".business_store add constraint FKbusiness_s784049 foreign key (business_id) references "public".business (Id);
    alter table "public".review add constraint FKreview900863 foreign key (user_id) references "public".users (id);
-   alter table "public".business add constraint review foreign key (created_by) references "public".users (id);   
+   alter table "public".business add constraint review foreign key (created_by) references "public".users (id);
+     
 
    `);
   },
@@ -70,6 +71,7 @@ drop table if exists "public".single_sign_on_user_link cascade;
 drop table if exists "public".system_role cascade;
 drop table if exists "public".user_tokens cascade;
 drop table if exists "public".users cascade;
+
 
 
 `

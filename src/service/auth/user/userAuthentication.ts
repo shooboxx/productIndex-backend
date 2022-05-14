@@ -41,7 +41,6 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
             country: req.body.country,
             primary_phone: req.body.primary_phone,
             gender: req.body.gender,
-            insert_date: Date.now(),
             active: true,
             is_verified: false,
             verify_token: crypto.randomBytes(32).toString('hex')
@@ -107,7 +106,7 @@ router.post('/auth/forgot-password', checkNotAuthenticated, async (req: any, res
         let user: User = await userService.getUserByEmail(req.body.email_address)
         const resetToken = crypto.randomBytes(32).toString('hex');
         const hashedResetToken = crypto.createHash('sha256').update(resetToken).digest('hex')
-        const userResetTokenExpiry = Date.now() * 10 * 60 * 1000;
+        const userResetTokenExpiry = new Date(new Date().getTime() + 10 * 60000);
 
         userService.updateResetToken(user.email_address, hashedResetToken, userResetTokenExpiry);
         const msg = {
@@ -115,7 +114,7 @@ router.post('/auth/forgot-password', checkNotAuthenticated, async (req: any, res
             from: 'noreply@theproductindex.io', // Change to your verified sender
             subject: 'Password reset request',
             text: '',
-            html: `<strong>${req.headers.origin}/reset-password?token=${user.password_reset_token}</strong>`,
+            html: `<strong>${req.headers.origin}/reset-password?token=${user.reset_token}</strong>`,
         }
         if (!sendEmail(msg)) return res.status(400).json({error: "Email not sent"})
 
@@ -133,16 +132,15 @@ router.post('/auth/reset-password/:resetToken', checkNotAuthenticated, async (re
         // Should check if we're saving and getting an encrypted resetToken from the database for comparison
         const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex')
         const user: User = await userService.getUserByResetToken(hashedToken)
-
         const newPassword = req.body.password
         const newPasswordConfirm = req.body.password_confirm
         if (user) {
-            if (user.password_reset_expires_in && user.password_reset_expires_in < Date.now()) {
+            if (user.reset_expires && user.reset_expires < new Date()) {
                 res.status(401).json({ "error": "Token expired" })
             }
             await userService.updatePassword(user.id, user.email_address, newPassword, newPasswordConfirm)
 
-            return res.status(200).send('success')
+            return res.status(200).send({'success': true})
         }
 
         return res.status(400).json({ error: 'Invalid token' })

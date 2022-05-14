@@ -39,7 +39,6 @@ router.put('/product/:productId', (req: any, res: any) => {
             type: req.body.product_type,
             image_url: req.body.image_url,
             created_by: req.user.id,
-            update_date: Date.now()
         }
         const updatedProduct = productService.updateProduct(product)
         res.status(200).json({updatedProduct})
@@ -57,7 +56,6 @@ router.post('/product', (req: any, res: any) => {
             type: req.body.product_type,
             image_url: req.body.image_url,
             created_by: req.user.id,
-            insert_date: Date.now()
         }
         const newProduct = productService.createProduct(product)
         res.status(200).json({newProduct})
