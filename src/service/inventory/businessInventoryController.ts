@@ -48,7 +48,6 @@ router.put('/inventory/:itemId', (req, res) => {
             product: product,
             tag: req.body.tag,
             description: req.body.description,
-            update_date: Date.now()
         }
 
         const updatedItem = inventoryService.updateInventoryItem(item)
@@ -71,7 +70,6 @@ router.post('/inventory', (req, res) => {
             product: product,
             tag: req.body.tag,
             description: req.body.description,
-            update_date: Date.now()
         }
 
         const newItem = inventoryService.updateInventoryItem(item)

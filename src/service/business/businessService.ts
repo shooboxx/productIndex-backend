@@ -89,7 +89,6 @@ const updateBusiness = async (
         businesses[i].description =
           updatedBusiness.description || businesses[i].description;
         businesses[i].name = updatedBusiness.name || businesses[i].name;
-        businesses[i].update_date = Date.now();
 
         return businessRepo.updateBusiness(businessId, updatedBusiness);
       }

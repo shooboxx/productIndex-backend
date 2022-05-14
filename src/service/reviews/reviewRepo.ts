@@ -41,6 +41,14 @@ const findReview = async (userId: number, store_id: number) => {
   return review;
 };
 
+const findUserStoreReview = async (userId: number, store_id: number) => {
+    const review = await db.Review.findOne({ where: { store_id: store_id, user_id: userId }})
+    if (!review) {
+        return 
+    }
+    return review
+}
+
 const createReview = async (newReview: Review) => {
   await db.Review.create({
     user_id: newReview.user_id,
@@ -67,15 +75,17 @@ const updateReviewByUserId = async (updatedReview: Review) => {
 };
 
 const updateReview = async (updatedReview: Review) => {
-  const review = await db.Review.findByPk(updatedReview.id);
-  if (!review) {
-    return;
-  }
-  review.update({
-    comment: updatedReview.comment,
-    inappropriate_comment: updatedReview.inappropriate_comment,
-    inappropriate_flag: updatedReview.flagged,
-  });
+    const review = await db.Review.findByPk(updatedReview.id)
+    if (!review) {
+        return
+    }
+    review.update({
+        comment: updatedReview.comment,
+        flag_reason: updatedReview.flag_reason,
+        inappropriate_flag: updatedReview.inappropriate_flag,
+        rating_number: updatedReview.rating_number,
+        deleted_date: updatedReview.deleted_date,
+    })
 
   return updatedReview;
 };

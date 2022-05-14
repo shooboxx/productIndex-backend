@@ -12,7 +12,7 @@ export interface BusinessAttributes {
   category?: string;
   insert_date: Date;
   update_date?: Date;
-  delete_date?: Date;
+  deleted_date?: Date;
 }
 
 module.exports = (sequelize, DataTypes) => {
@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
     category?: string;
     insert_date!: Date;
     update_date?: Date;
-    delete_date?: Date;
+    deleted_date?: Date;
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -93,7 +93,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: true,
       },
-      delete_date: {
+      deleted_date: {
         type: DataTypes.DATE,
         allowNull: true,
       },

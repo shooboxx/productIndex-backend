@@ -51,7 +51,6 @@ const createBusiness = async (newBusiness: Business) => {
     active: true,
     email_address: newBusiness,
     created_by: newBusiness.created_by,
-    // insert_date: Date.now(),
   }).catch((err) => console.log(err));
 
   return newBusiness;
@@ -64,7 +63,7 @@ const removeBusiness = async (businessId) => {
     return;
   }
   business.update({
-    delete_date: Date.now(),
+    delete_date: new Date(),
   });
 
   return business;
@@ -78,7 +77,6 @@ const setBusinessActiveStatus = async (businessId, status) => {
   }
   business.update({
     active: status,
-    update_date: Date.now(),
   });
 
   return business;
@@ -91,7 +89,6 @@ const updateBusiness = async (businessId, updatedBusiness: Business) => {
       category: updatedBusiness.category,
       profile_picture_url: updatedBusiness.profile_picture_url,
       active: updatedBusiness.active,
-      update_date: Date.now(),
     },
     {
       where: {

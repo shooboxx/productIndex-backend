@@ -5,8 +5,9 @@ export interface BusinessItemAttributes {
   id: number;
   product_id: number;
   business_id: number;
-  product_key: number;
-  description?: number;
+  product_key: string;
+  description?: string;
+  price: number;
   tag?: string;
   insert_date?: Date;
   update_date?: Date;
@@ -20,8 +21,9 @@ module.exports = (sequelize, DataTypes) => {
     id!: number;
     product_id!: number;
     business_id!: number;
-    product_key!: number;
-    description?: number;
+    product_key!: string;
+    description?: string;
+    price!: number;
     tag?: string;
     insert_date?: Date;
     update_date?: Date;
@@ -63,6 +65,10 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      price: {
         type: DataTypes.INTEGER,
         allowNull: true,
       },

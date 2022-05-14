@@ -16,12 +16,12 @@ export interface User {
     verify_token?: string,
     verify_expires?: Date,
     active: boolean,
-    password_reset_token?: string,
-    password_reset_expires_in?: number
+    reset_token?: string,
+    reset_expires?: Date
     password_last_updated?: number
     deleted_date?: number
-    insert_date: number,
-    update_date?: number,
+    insert_date?: Date,
+    update_date?: Date,
 }
 
 // Super details about a user

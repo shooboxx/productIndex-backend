@@ -71,7 +71,6 @@ const createBusinessRole = (businessId : number, role : BusinessRole) : Business
             key: role.name.trim().toUpperCase(),
             name: role.name,
             permissions: role.permissions,
-            insert_date: Date.now(),
         }
         return businessAuthRepo.createBusinessRole(businessId, newRole)
         
@@ -100,7 +99,6 @@ const updateBusinessRole = (role) : BusinessRole => {
                 name: role.name || bizRoles[i].name,
                 permissions: role.permissions || bizRoles[i].permissions,
                 insert_date: bizRoles[i].insert_date,
-                update_date: Date.now()
             }
             return businessAuthRepo.updateBusinessRole(updatedRole)
         }

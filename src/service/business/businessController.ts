@@ -26,7 +26,6 @@ router.post("/business", authenticateToken, async (req: any, res: any) => {
       category: req.body.business_category,
       active: true,
       created_by: req.user_id,
-      insert_date: Date.now(),
     };
     const createdBiz = await businessService.createBusiness(biz);
     return res.status(200).json(createdBiz);
