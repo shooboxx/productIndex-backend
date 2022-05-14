@@ -1,6 +1,5 @@
 import { BusinessStore } from "./storeTypes";
 
-
 import db from "../../models";
 
 const findStoreByBusinessId = async (businessId: number) => {
@@ -28,7 +27,10 @@ const createBusinessStore = async (store: BusinessStore) => {
   const business_store = await db.BusinessStore.findAll({
     where: {
       unique_name: db.sequelize.where(
-        db.sequelize.fn("UPPER", db.sequelize.fn("REPLACE", db.sequelize.col("unique_name"), " ", "")),
+        db.sequelize.fn(
+          "UPPER",
+          db.sequelize.fn("REPLACE", db.sequelize.col("unique_name"), " ", "")
+        ),
         "like",
         `%${store_name}%`
       ),
@@ -91,12 +93,12 @@ const deleteStore = async (storeId) => {};
 const getStoreDetails = async (storeId: number) => {
   const storeSearch = await db.BusinessStore.findAll({
     include: [
-      {model: db.StoreHours},
+      { model: db.StoreHours },
       {
         model: db.Business,
         attributes: ["id"],
         include: [{ model: db.BusinessTags }],
-      }
+      },
     ],
     where: { id: storeId },
   });
@@ -111,12 +113,20 @@ const getInventoryByStoreId = async (storeId: number) => {
         model: db.InventoryItem,
         attributes: ["id"],
         include: [{ model: db.BusinessItem }],
-      }
+      },
     ],
     where: { id: storeId },
   });
   return storeSearch;
-}
+};
+
+const getStoreHours = async (storeId: number) => {
+  const hours = await db.StoreHours.findAll({ where: { store_id: storeId } });
+  if (!hours) {
+    return;
+  }
+  return hours;
+};
 
 module.exports = {
   findStoreByBusinessId,
@@ -125,5 +135,6 @@ module.exports = {
   updateStore,
   deleteStore,
   getStoreDetails,
-  getInventoryByStoreId
+  getInventoryByStoreId,
+  getStoreHours,
 };

@@ -22,7 +22,7 @@ const {authenticateToken} = require('../auth/user/userAuthorization.ts')
 
 router.get('/users/:userid/reviews', (req, res) => {
     try {
-        return res.status(200).json(reviewService.getUserReviews(req.params.userId))
+        return res.status(200).json(reviewService.getUserReviews(req.params.user_id))
     }
     catch(e : any) {
         res.status(200).json({"error": e.message})

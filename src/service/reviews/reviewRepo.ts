@@ -1,68 +1,111 @@
-import { Review } from "./reviewType"
+import { Review } from "./reviewType";
 import db from "../../models";
 
+const findReviewsByBusinessId = async (business_id: number) => {
+  const review = await db.Review.findAll({ include:[{model: db.Business}], where: { id: business_id } });
+  if (!review) {
+    return;
+  }
+  return review.dataValues;
+};
 
-const findReviewsByBusinessId = async (store_id: number) => {
-    const review = await db.Review.findAll({ where: { store_id: store_id } })
+const findReviewsByStoreId = async (store_id: number) => {
+    const review = await db.Review.findAll({ where: { store_id: store_id } });
     if (!review) {
-        return
+      return;
     }
-    return review.dataValues
-}
+    return review.dataValues;
+  };
 
 const findReviewsByUserId = async (userId: number) => {
-    const reviews = await db.Review.findAll({ where: { user_id: userId }, raw: true })
-    if (!reviews) {
-        return
-    }
+  const reviews = await db.Review.findAll({
+    where: { user_id: userId },
+    raw: true,
+  });
+  if (!reviews) {
+    return;
+  }
 
-    return reviews
-}
+  return reviews;
+};
 
 const findReview = async (userId: number, store_id: number) => {
-    console.log(db.Review)
-    const review = await db.Review.findOne({ where: { store_id: store_id, user_id: userId }})
-    
-    if (!review) {
-        return
-    }
-    return review
-}
+  console.log(db.Review);
+  const review = await db.Review.findOne({
+    where: { store_id: store_id, user_id: userId },
+  });
+
+  if (!review) {
+    return;
+  }
+  return review;
+};
 
 const createReview = async (newReview: Review) => {
+  await db.Review.create({
+    user_id: newReview.user_id,
+    store_id: newReview.store_id,
+    rating_number: newReview.star_rating,
+    comment: newReview.comment,
+    insert_date: Date.now(),
+  });
+  return newReview;
+};
 
-    await db.Review.create({
-        user_id: newReview.user_id,
-        store_id: newReview.store_id,
-        rating_number: newReview.star_rating,
-        comment: newReview.comment,
-        insert_date: Date.now(),
-    })
-    return newReview
+const updateReviewByUserId = async (updatedReview: Review) => {
+  const review = await db.Review.findOne({where: {user_id:updatedReview.user_id, store_id:updatedReview.store_id}});
+  if (!review) {
+    return;
+  }
+  review.update({
+    comment: updatedReview.comment,
+    inappropriate_comment: updatedReview.inappropriate_comment,
+    inappropriate_flag: updatedReview.flagged,
+  });
 
-}
+  return updatedReview;
+};
 
 const updateReview = async (updatedReview: Review) => {
-    const review = await db.Review.findByPk(updatedReview.id)
-    if (!review) {
-        return
-    }
-    review.update({
-        comment: updatedReview.comment,
-        inappropriate_comment: updatedReview.inappropriate_comment,
-        inappropriate_flag: updatedReview.flagged
-    })
+  const review = await db.Review.findByPk(updatedReview.id);
+  if (!review) {
+    return;
+  }
+  review.update({
+    comment: updatedReview.comment,
+    inappropriate_comment: updatedReview.inappropriate_comment,
+    inappropriate_flag: updatedReview.flagged,
+  });
 
-    return updatedReview
-}
+  return updatedReview;
+};
 
 const deleteReview = async (review_id: number) => {
-    const review = await db.Review.findByPk(review_id)
-    if (!review) {
-        return
-    }
-    review.destroy()
-    return review
+  const review = await db.Review.findByPk(review_id);
+  if (!review) {
+    return;
+  }
+  review.destroy();
+  return review;
+};
 
-}
-module.exports = { findReviewsByBusinessId, findReview, createReview, updateReview, deleteReview, findReviewsByUserId }
+const deleteReviewByUserId = async (user_id: number, store_id: number) => {
+    const review = await db.Review.findOne({where: {user_id:user_id, store_id:store_id}});
+    if (!review) {
+      return;
+    }
+    review.destroy();
+    return review;
+  };
+
+module.exports = {
+  findReviewsByBusinessId,
+  findReview,
+  createReview,
+  updateReview,
+  deleteReview,
+  findReviewsByUserId,
+  updateReviewByUserId,
+  deleteReviewByUserId,
+  findReviewsByStoreId
+};
