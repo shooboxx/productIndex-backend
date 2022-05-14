@@ -151,10 +151,9 @@ router.post('/auth/token', async (req, res) => {
 
     const hashed_token = crypto.createHash('sha256').update(refreshToken).digest('hex')
     const token = await userService.findRefreshToken(hashed_token).catch((err)=>res.status(403).json({error: err.message}))
-    res.clearCookie("access_token");
-    
     if (!token) return res.sendStatus(403)
-
+    
+    res.clearCookie("access_token");
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
         if (err) return res.status(403).json({error: err.message})
         const accessToken = generateAccessToken({ user_id: user.user_id })
@@ -168,6 +167,6 @@ router.post('/auth/token', async (req, res) => {
 
 function generateAccessToken(user) {
     // expiration time should be 15m in prod
-    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.NODE_ENV == 'development' ? '1440m' : '120m' })
+    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.NODE_ENV == 'development' ? '1440m' : '1m' })
 }
 module.exports = router
