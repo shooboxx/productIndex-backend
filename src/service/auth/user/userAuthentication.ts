@@ -104,6 +104,7 @@ router.delete('/auth/logout', (req: any, res: any) => {
 router.post('/auth/forgot-password', checkNotAuthenticated, async (req: any, res: any) => {
     try {
         let user: User = await userService.getUserByEmail(req.body.email_address)
+        if (!user) return res.status(200).json({})
         const resetToken = crypto.randomBytes(32).toString('hex');
         const hashedResetToken = crypto.createHash('sha256').update(resetToken).digest('hex')
         const userResetTokenExpiry = new Date(new Date().getTime() + 10 * 60000);

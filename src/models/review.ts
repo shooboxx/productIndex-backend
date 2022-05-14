@@ -86,9 +86,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
+      modelName: "Review",
       tableName: "review",
       schema: "public",
-      timestamps: false,
+      timestamps: true,
+      createdAt: 'insert_date',
+      updatedAt: 'update_date',
       indexes: [
         {
           name: "review_pkey",

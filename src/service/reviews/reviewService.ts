@@ -5,12 +5,13 @@ if (process.env.NODE_ENV == 'test') {
 }
 
 import { Review } from './reviewType'
+const storeService = require('../store/businessStoreService')
 
 const getReviewsByStoreId = async (storeId: number) => {
     try {
         const reviews = await reviewsRepo.findReviewsByStoreId(storeId)
         
-        if (!reviews) throw new Error('No reviews for this business')
+        if (!reviews) throw new Error('No reviews for this store')
         return reviews
     }
     catch (e) {
@@ -22,7 +23,7 @@ const getReviewsByStoreId = async (storeId: number) => {
 const getUserStoreReview = async (userId: number, store_id: number) => {
     try {
         const review = await reviewsRepo.findUserStoreReview(userId, store_id)
-        if (!review) throw new Error('User has not left a review for this business')
+        if (!review) throw new Error('User has not left a review for this store')
         return review
     }
     catch (e) {
@@ -33,6 +34,7 @@ const getUserStoreReview = async (userId: number, store_id: number) => {
 const createReview = async (newReview: Review) => {
     try {
         _validateReview(newReview)
+        await storeService.getStoreById(newReview.store_id)
         const found = await reviewsRepo.findUserStoreReview(newReview.user_id, newReview.store_id)
 
         if (found) throw new Error('You cannot review a business more than once. Please update preview review instead')
