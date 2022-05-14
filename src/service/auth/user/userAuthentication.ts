@@ -91,12 +91,12 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
     }
 })
 
-router.delete('/auth/logout', authenticateToken, async (req: any, res: any) => {
+router.delete('/auth/logout', async (req: any, res: any) => {
     const hashed_token = crypto.createHash('sha256').update(req.cookies.refresh_token).digest('hex')
-    await userService.deleteRefreshToken(req.user_id, hashed_token).catch((err)=>res.status(400).json({erro: err.message}))
+    await userService.deleteRefreshToken(hashed_token).catch((err)=>{ res.status(400).json({error: err.message})})
     res.clearCookie("access_token");
     res.clearCookie("refresh_token");
-    res.sendStatus(204)
+    res.sendStatus(204).json({})
 });
 
 // Works with database
@@ -152,7 +152,6 @@ router.post('/auth/token', async (req, res) => {
     const hashed_token = crypto.createHash('sha256').update(refreshToken).digest('hex')
     const token = await userService.findRefreshToken(hashed_token).catch((err)=>res.status(403).json({error: err.message}))
     res.clearCookie("access_token");
-    res.clearCookie("refresh_token");
     
     if (!token) return res.sendStatus(403)
 
