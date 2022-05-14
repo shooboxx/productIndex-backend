@@ -78,7 +78,6 @@ const updateResetToken = async (emailAddress, resetToken, resetTokenExpiry) => {
     const user = await getUserByEmail(emailAddress);
     if (!user) throw AppError('User not found with that email address', 404)
     user.reset_token = resetToken;
-    console.log(resetTokenExpiry)
     user.reset_expires = resetTokenExpiry;
 
     return userRepo.updateUser(user);
@@ -134,11 +133,12 @@ const deleteUser = async (userId: number) => {
 
 const storeRefreshToken = async (userId: number, refreshToken: string) => {
   if (!refreshToken) throw new AppError("refresh_token is required", 400);
+  if (!userId) throw new AppError("user_id is required", 400);
   return await userRepo.storeRefreshToken(userId, refreshToken);
 };
 
-const findRefreshToken = async (userId: number, refreshToken: string) => {
-  return await userRepo.findRefreshToken(userId, refreshToken);
+const findRefreshToken = async (refreshToken: string) => {
+  return await userRepo.findRefreshToken(refreshToken);
 };
 
 const _validate_user_profile_completeness = (user) => {

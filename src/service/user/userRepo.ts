@@ -75,18 +75,21 @@ const updateUser = async (user: User) => {
 };
 
 const storeRefreshToken = async (user_id: number, refreshToken: string) => {
-  await db.UserTokens.create({
+  const { dataValues } = await db.UserTokens.create({
     user_id: user_id,
     refresh_token: refreshToken,
-  });
+    insert_date: new Date()
+  }).catch((e)=> {throw e});
+
+  return dataValues
 };
 
-const findRefreshToken = async (userId: number, refreshToken: string) => {
+const findRefreshToken = async (refreshToken: string) => {
   const token = await db.UserTokens.findOne({
-    where: { user_id: userId, refresh_token: refreshToken, deleted_date: null },
+    where: {refresh_token: refreshToken },
   });
   if (!token) {
-    return;
+    return null;
   }
   return token.dataValues;
 };

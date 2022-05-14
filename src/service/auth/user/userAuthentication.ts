@@ -63,13 +63,13 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
         
         const user = await userService.getUserByEmail(req.body.email_address.toLowerCase())
         if (!user) res.status(400).json({ "error": "Email address or password is incorrect" })
-        await bcrypt.compare(req.body.password, user.password, (err, resp) => {
+        await bcrypt.compare(req.body.password, user.password, async (err, resp) => {
             if (err) res.status(404)
             if (resp) {
                 const accessToken = generateAccessToken({ user_id: user.id })
                 const refreshToken = jwt.sign({ user_id: user.id }, process.env.REFRESH_TOKEN_SECRET)
                 const hashed_token = crypto.createHash('sha256').update(refreshToken).digest('hex')
-                userService.storeRefreshToken(user.id, hashed_token)
+                await userService.storeRefreshToken(user.id, hashed_token).catch((e)=> {res.status(400).json({error: e.message})})
                 res.cookie("access_token", accessToken, {
                     httpOnly: true,
                     Secure: true
@@ -154,16 +154,17 @@ router.post('/auth/reset-password/:resetToken', checkNotAuthenticated, async (re
 
 router.post('/auth/token', async (req, res) => {
     const refreshToken = req.cookies.refresh_token
-    const userId = req.user_id
     if (refreshToken == null) return res.sendStatus(403)
-    if (userId == null) return res.sendStatus(400)
 
     const hashed_token = crypto.createHash('sha256').update(refreshToken).digest('hex')
-    const token = await userService.findRefreshToken(userId, hashed_token)
+    const token = await userService.findRefreshToken(hashed_token).catch((err)=>res.status(403).json({error: err.message}))
+    res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
+    
     if (!token) return res.sendStatus(403)
 
-    jwt.verify(token.refresh_token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403)
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+        if (err) return res.status(403).json({error: err.message})
         const accessToken = generateAccessToken({ user_id: user.user_id })
         res.cookie("access_token", accessToken, {
             httpOnly: true,
@@ -175,14 +176,6 @@ router.post('/auth/token', async (req, res) => {
 
 function generateAccessToken(user) {
     // expiration time should be 15m in prod
-    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.NODE_ENV == 'development' ? '1440m' : '15m' })
-}
-// TODO: get the refresh token from the cookies and validate. Add this function to the token refresh route
-function validUserRefreshToken(userId, refreshToken): Boolean {
-    const hashedRefreshToken = crypto.createHash('sha256').update(refreshToken).digest('hex')
-    const found = userService.validUserRefreshToken(userId, hashedRefreshToken)
-    if (found) return true
-
-    return false
+    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.NODE_ENV == 'development' ? '1440m' : '120m' })
 }
 module.exports = router
