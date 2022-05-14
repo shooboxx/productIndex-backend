@@ -14,7 +14,7 @@ const addUser = async (user: User) => {
     gender: user.gender,
     country: user.country,
     city: user.city,
-    address: user.state,
+    state: user.state,
     date_of_birth: user.dob,
     primary_phone_contact: user.primary_phone,
     insert_date: Date.now(),
@@ -58,7 +58,7 @@ const updateUser = async (user: User) => {
       country: user.country,
       city: user.city,
       primary_phone_contact: user.primary_phone,
-      address: user.state,
+      state: user.state,
       is_verified: user.is_verified,
       reset_expires: user.password_reset_expires_in, // TODO: Change dates to dates and not a number
       reset_token: user.password_reset_token,

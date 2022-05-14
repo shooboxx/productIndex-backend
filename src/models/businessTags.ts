@@ -4,9 +4,9 @@ const { Model } = require("sequelize");
 export interface BusinessTagsAttributes {
   id: number;
   business_id: number;
-  tag?: number;
-  insert_date?: string;
-  update_date?: string;
+  tag?: string;
+  insert_date?: Date;
+  update_date?: Date;
 }
 
 module.exports = (sequelize, DataTypes) => {
@@ -16,9 +16,9 @@ module.exports = (sequelize, DataTypes) => {
   {
     id!: number;
     business_id!: number;
-    tag?: number;
-    insert_date?: string;
-    update_date?: string;
+    tag?: string;
+    insert_date?: Date;
+    update_date?: Date;
     static associate(models) {
       BusinessTags.belongsTo(models.Business, { foreignKey: "business_id" });
     }
@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       tag: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.TEXT,
         allowNull: true,
       },
       insert_date: {
