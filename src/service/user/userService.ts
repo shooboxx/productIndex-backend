@@ -141,6 +141,9 @@ const findRefreshToken = async (refreshToken: string) => {
   return await userRepo.findRefreshToken(refreshToken);
 };
 
+const deleteRefreshToken = async(user_id, token) => {
+  return await userRepo.deleteRefreshToken(user_id, token)
+}
 const _validate_user_profile_completeness = (user) => {
   if (!user.email_address) throw new AppError("Email address is required", 400);
   if (!user.password) throw new AppError("Password is required", 400);
@@ -164,4 +167,5 @@ module.exports = {
   verifyUser,
   storeRefreshToken,
   findRefreshToken,
+  deleteRefreshToken
 };

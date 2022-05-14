@@ -94,12 +94,21 @@ const findRefreshToken = async (refreshToken: string) => {
   return token.dataValues;
 };
 
-const clearRefreshTokens = (userId) => {
-  db.UserTokens.destroy({
+const clearRefreshTokens = async (userId) => {
+  await db.UserTokens.destroy({
     where: {
       user_id: userId,
     },
   });
+};
+const deleteRefreshToken = async (user_id, token) => {
+  console.log('Repo refresh', user_id, token)
+  await db.UserTokens.destroy({
+    where: {
+      user_id: user_id,
+      refresh_token: token
+    },
+  }).catch((e)=> {throw e});
 };
 
 module.exports = {
@@ -111,4 +120,5 @@ module.exports = {
   storeRefreshToken,
   findRefreshToken,
   clearRefreshTokens,
+  deleteRefreshToken
 };

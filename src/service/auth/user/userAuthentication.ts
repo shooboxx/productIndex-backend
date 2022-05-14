@@ -9,7 +9,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken')
 const userService = require('../../user/userService')
 let refreshTokens: any = []
-const { checkNotAuthenticated } = require('./userAuthorization')
+const { checkNotAuthenticated, authenticateToken } = require('./userAuthorization')
 const crypto = require('crypto')
 
 const systemRoleService = require('./systemRole/systemRoleService')
@@ -91,10 +91,9 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
     }
 })
 
-router.delete('/auth/logout', (req: any, res: any) => {
-
-    refreshTokens = refreshTokens.filter(token => token !== req.cookies.refresh_token)
-    // TODO: Remove refresh token from database
+router.delete('/auth/logout', authenticateToken, async (req: any, res: any) => {
+    const hashed_token = crypto.createHash('sha256').update(req.cookies.refresh_token).digest('hex')
+    await userService.deleteRefreshToken(req.user_id, hashed_token).catch((err)=>res.status(400).json({erro: err.message}))
     res.clearCookie("access_token");
     res.clearCookie("refresh_token");
     res.sendStatus(204)
