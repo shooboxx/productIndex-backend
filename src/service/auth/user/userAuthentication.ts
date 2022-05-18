@@ -167,6 +167,6 @@ router.post('/auth/token', async (req, res) => {
 
 function generateAccessToken(user) {
     // expiration time should be 15m in prod
-    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.NODE_ENV == 'development' ? '1440m' : '1m' })
+    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.NODE_ENV == 'development' ? '1440m' : '120m' })
 }
 module.exports = router
