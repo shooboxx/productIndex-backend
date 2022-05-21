@@ -128,6 +128,16 @@ const getStoreHours = async (storeId: number) => {
   return hours;
 };
 
+const getStoreContacts = async (StoreId: number) => {
+  const storeContact = await db.BusinessStore.findByPk(StoreId, {
+    attributes: ["email", "phone", "phone_2", "phone_3", "address_line_1", "address_line_2"],
+  });
+  if (!storeContact) {
+    return;
+  }
+  return storeContact;
+}
+
 module.exports = {
   findStoreByBusinessId,
   findStoreById,
@@ -137,4 +147,5 @@ module.exports = {
   getStoreDetails,
   getInventoryByStoreId,
   getStoreHours,
+  getStoreContacts
 };

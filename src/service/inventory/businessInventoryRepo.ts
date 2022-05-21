@@ -25,14 +25,15 @@ const findAllStoreItems = async (storeId: number) => {
   return inventory;
 };
 
-const findInventoryItemById = (itemId) => {
-  for (let i = 0; i < inventoryItem.length; i++) {
-    if (inventoryItem[i].id === itemId) {
-      return inventoryItem[i];
-    }
+const findInventoryItemById = async (itemId) => {
+  const inventory = await db.InventoryItem.findByPk(itemId);
+  if (!inventory) {
+    return;
   }
-  return null;
+  return inventory;
 };
+
+
 const addInventoryItem = (item: InventoryItem) => {
   inventoryItem.push(item);
 };

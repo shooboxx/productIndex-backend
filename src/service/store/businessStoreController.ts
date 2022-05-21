@@ -41,6 +41,16 @@ router.get("/store/:storeId/inventory", async (req, res) => {
     }
   });
 
+router.get("/store/:storeId/contact", async (req, res) => {
+  try {
+    const storeId = req.params.storeId;
+    const store = await businessStoreService.getStoreContact(storeId);
+
+    res.status(200).json({ store });
+  } catch (e: any) {
+    res.status(200).json({ error: e.message });
+  }
+});
 
 router.put("/store/:storeId", async (req, res) => {
   try {

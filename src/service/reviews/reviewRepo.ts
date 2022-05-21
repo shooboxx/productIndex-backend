@@ -53,7 +53,7 @@ const createReview = async (newReview: Review) => {
   await db.Review.create({
     user_id: newReview.user_id,
     store_id: newReview.store_id,
-    rating_number: newReview.star_rating,
+    rating_number: newReview.rating_number,
     comment: newReview.comment,
     insert_date: Date.now(),
   });
@@ -67,8 +67,8 @@ const updateReviewByUserId = async (updatedReview: Review) => {
   }
   review.update({
     comment: updatedReview.comment,
-    inappropriate_comment: updatedReview.inappropriate_comment,
-    inappropriate_flag: updatedReview.flagged,
+    flag_reason: updatedReview.flag_reason,
+    inappropriate_flag: updatedReview.inappropriate_flag,
   });
 
   return updatedReview;

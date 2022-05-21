@@ -25,7 +25,7 @@ const deleteBusinessItem = (bItemId : number) => {
 }
 
 
-const getAllStoreItems = (storeId : number) : InventoryItem[] =>  {
+const getAllStoreItems = async (storeId : number) =>  {
     try {
         storeService.getStoreById(storeId)
         const items : InventoryItem[] = inventoryRepo.findAllStoreItems(storeId)

@@ -103,6 +103,16 @@ const getStoreInventory = async (storeId: number) => {
     }
 }
 
+const getStoreContact = async (storeId: number) => {
+    try {
+        const store = await businessStoreRepo.getStoreContacts(storeId)
+        return store
+    }
+    catch (e) {
+        throw e
+    }
+}
+
 module.exports = {
   getStoresByBusinessId,
   getStoreById,
@@ -110,5 +120,6 @@ module.exports = {
   updateStore,
   deleteStore,
   getStoreDetails,
-  getStoreInventory
+  getStoreInventory,
+  getStoreContact
 };
