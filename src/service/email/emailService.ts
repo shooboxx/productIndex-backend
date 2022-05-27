@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export const sendVerificationEmail = async (data) => {
+const sendVerificationEmail = async (data) => {
    return await axios.post('https://api.sendgrid.com/v3/mail/send', {
         "from":{
            "email":"noreply@theproductindex.io",
@@ -29,7 +29,7 @@ export const sendVerificationEmail = async (data) => {
     
 }
 
-export const sendResetEmail = async (data) => {
+const sendResetEmail = async (data) => {
    return await axios.post('https://api.sendgrid.com/v3/mail/send', {
         "from":{
            "email":"noreply@theproductindex.io",
@@ -56,4 +56,9 @@ export const sendResetEmail = async (data) => {
          }
      })
     
+}
+
+export const EmailSendService = {
+   verifyEmail: sendVerificationEmail,
+   resetEmail: sendResetEmail
 }

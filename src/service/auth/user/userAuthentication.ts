@@ -1,6 +1,5 @@
 import { User } from "../../user/userType";
-import { sendEmail } from '../../../utils/email';
-import {sendVerificationEmail, sendResetEmail} from '../../email/emailService'
+import { EmailSendService } from '../../email/emailService'
 
 export { };
 const bcrypt = require('bcrypt')
@@ -8,7 +7,6 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken')
 const userService = require('../../user/userService')
-let refreshTokens: any = []
 const { checkNotAuthenticated, authenticateToken } = require('./userAuthorization')
 const crypto = require('crypto')
 
@@ -48,7 +46,7 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
         }
         const newUser = await userService.createUser(user)
         const verificationLink = `${req.headers.origin}/verify?token=${newUser.verify_token}`
-        await sendVerificationEmail({first_name: newUser.first_name, verify_link: verificationLink, email_to: newUser.email_address})
+        await EmailSendService.verifyEmail({first_name: newUser.first_name, verify_link: verificationLink, email_to: newUser.email_address})
 
         return res.status(200).json(newUser)
     }
@@ -110,7 +108,7 @@ router.post('/auth/forgot-password', checkNotAuthenticated, async (req: any, res
 
         userService.updateResetToken(user.email_address, hashedResetToken, userResetTokenExpiry);
         const resetPasswordLink = `${req.headers.origin}/reset-password/{user.reset_token}`
-        await sendResetEmail({first_name: user.first_name, reset_link: resetPasswordLink, email_to: user.email_address})
+        await EmailSendService.resetEmail({first_name: user.first_name, reset_link: resetPasswordLink, email_to: user.email_address})
 
         return res.status(200).json({ reset_token: resetToken, reset_token_expires: userResetTokenExpiry })
     }
