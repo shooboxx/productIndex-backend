@@ -91,12 +91,12 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
     }
 })
 
-router.delete('/auth/logout', authenticateToken, async (req: any, res: any) => {
+router.delete('/auth/logout', async (req: any, res: any) => {
     const hashed_token = crypto.createHash('sha256').update(req.cookies.refresh_token).digest('hex')
-    await userService.deleteRefreshToken(req.user_id, hashed_token).catch((err)=>res.status(400).json({erro: err.message}))
+    await userService.deleteRefreshToken(hashed_token).catch((err)=>{ res.status(400).json({error: err.message})})
     res.clearCookie("access_token");
     res.clearCookie("refresh_token");
-    res.sendStatus(204)
+    res.sendStatus(204).json({})
 });
 
 // Works with database
@@ -110,7 +110,7 @@ router.post('/auth/forgot-password', checkNotAuthenticated, async (req: any, res
 
         userService.updateResetToken(user.email_address, hashedResetToken, userResetTokenExpiry);
         const resetPasswordLink = `${req.headers.origin}/reset-password/{user.reset_token}`
-        await sendResetEmail({first_name: user.first_name, verify_link: resetPasswordLink, email_to: user.email_address})
+        await sendResetEmail({first_name: user.first_name, reset_link: resetPasswordLink, email_to: user.email_address})
 
         return res.status(200).json({ reset_token: resetToken, reset_token_expires: userResetTokenExpiry })
     }
@@ -151,11 +151,9 @@ router.post('/auth/token', async (req, res) => {
 
     const hashed_token = crypto.createHash('sha256').update(refreshToken).digest('hex')
     const token = await userService.findRefreshToken(hashed_token).catch((err)=>res.status(403).json({error: err.message}))
-    res.clearCookie("access_token");
-    res.clearCookie("refresh_token");
-    
     if (!token) return res.sendStatus(403)
-
+    
+    res.clearCookie("access_token");
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
         if (err) return res.status(403).json({error: err.message})
         const accessToken = generateAccessToken({ user_id: user.user_id })

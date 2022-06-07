@@ -44,7 +44,7 @@ export const sendResetEmail = async (data) => {
               ],
               "dynamic_template_data":{
                  "first_name":data.first_name,
-                 "reset_link": data.verify_link
+                 "reset_link": data.reset_link
              }
            }
         ],

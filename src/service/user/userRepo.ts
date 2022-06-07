@@ -101,10 +101,9 @@ const clearRefreshTokens = async (userId) => {
     },
   });
 };
-const deleteRefreshToken = async (user_id, token) => {
+const deleteRefreshToken = async (token) => {
   await db.UserTokens.destroy({
     where: {
-      user_id: user_id,
       refresh_token: token
     },
   }).catch((e)=> {throw e});
