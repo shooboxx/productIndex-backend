@@ -4,6 +4,7 @@ const productService = require('./productService')
 const express = require('express');
 const router = express.Router();
 import { Product } from './productType'
+const { authenticateToken } = require("../auth/user/userAuthorization.ts");
 
 router.get('business/:businessId/products', (req: any, res: any) => {
     try {
@@ -17,10 +18,10 @@ router.get('business/:businessId/products', (req: any, res: any) => {
 });
 
 
-router.get('/product/:productId', (req: any, res: any) => {
+router.get('/product/:productId', async (req: any, res: any) => {
     try {
         const pId = req.params.productId
-        const products = productService.getProductById(pId)
+        const products = await productService.getProductById(pId)
         res.status(200).json({products})
     }
     catch (e : any) {
@@ -35,8 +36,8 @@ router.put('/product/:productId', (req: any, res: any) => {
 
         const product : Product = {
             id: pId,
-            name: req.body.product_name,
-            type: req.body.product_type,
+            product_name: req.body.product_name,
+            product_type: req.body.product_type,
             image_url: req.body.image_url,
             created_by: req.user.id,
         }
@@ -49,22 +50,26 @@ router.put('/product/:productId', (req: any, res: any) => {
 
 });
 
-router.post('/product', (req: any, res: any) => {
-    try {
-        const product : Product = {
-            name: req.body.product_name,
-            type: req.body.product_type,
-            image_url: req.body.image_url,
-            created_by: req.user.id,
-        }
-        const newProduct = productService.createProduct(product)
-        res.status(200).json({newProduct})
-    }
-    catch (e : any) {
-        res.status(200).json({"error": e.message})
-    }
 
-});
+router.post("/product", authenticateToken, async (req: any, res: any) => {
+    try {
+        const product = {
+            product_name: req.body.product_name,
+            business_id: req.body.business_id,
+            product_type: req.body.product_type,
+            image_url: req.body.image_url,
+            product_key: req.body.product_key,
+            created_by: req.user_id,
+        }
+        const newProduct = await productService.createProduct(product)
+        return res.status(200).json({newProduct})
+    }
+    catch (e) {
+        throw e
+    }
+  });
+
+
 
 router.delete('/product/:productId', (req: any, res: any) => {
     try {
