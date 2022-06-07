@@ -5,7 +5,8 @@ export interface ProductAttributes {
   id: number;
   business_id: number;
   product_name: string;
-  product_type?: string;
+  product_type: string;
+  product_key: string;
   image_url?: string;
   insert_date: Date;
   update_date: Date;
@@ -16,14 +17,15 @@ module.exports = (sequelize, DataTypes) => {
     id!: number;
     business_id!: number;
     product_name!: string;
-    product_type?: string;
+    product_type!: string;
+    product_key!: string;
     image_url?: string;
     insert_date!: Date;
     update_date!: Date;
 
     static associate(models) {
-        Product.hasMany(models.BusinessItem, { as: "business_items", foreignKey: "product_id"});
-        Product.belongsTo(models.Business, { as: "business", foreignKey: "business_id"});
+        Product.hasMany(models.InventoryItem, {foreignKey: "product_id"});
+        Product.belongsTo(models.Business, {foreignKey: "business_id"});
     }
   }
 
@@ -51,6 +53,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(255),
         allowNull: true,
       },
+      product_key: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+      },
       image_url: {
         type: DataTypes.TEXT,
         allowNull: true,
@@ -68,7 +74,9 @@ module.exports = (sequelize, DataTypes) => {
       sequelize,
       tableName: "product",
       schema: "public",
-      timestamps: false,
+      timestamps: true,
+      createdAt: 'insert_date',
+      updatedAt: 'update_date',
       indexes: [
         {
           name: "product_pkey",

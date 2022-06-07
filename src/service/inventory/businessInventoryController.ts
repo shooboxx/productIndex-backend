@@ -11,10 +11,10 @@ const NoItemsErr = 'No items available at this store'
 const NoItemsFoundErr = 'No items were found that matches that search'
 
 
-router.get('/store/:storeId/inventory', (req, res) => {
+router.get('/inventory/store/:storeId', async (req, res) => {
     try {
         const storeId = req.params.storeId 
-        const inventory_items = inventoryService.getStoreInventory(storeId)
+        const inventory_items = await inventoryService.getStoreInventory(storeId)
         return res.status(200).json({inventory_items})
     }
     catch (e : any) {
@@ -24,10 +24,11 @@ router.get('/store/:storeId/inventory', (req, res) => {
 });
 
 
-router.get('/inventory/:itemId', (req, res) => {
+router.get('/inventory/:itemId', async(req, res) => {
     try {
         const itemId = req.params.itemId
-        const item = inventoryService.getInventoryItemById(itemId)
+        const item = await inventoryService.getInventoryItemById(itemId)
+        console.log(item)
         return res.status(200).json({item})
     }
     catch (e : any) {

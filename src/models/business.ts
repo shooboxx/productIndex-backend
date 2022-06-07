@@ -40,7 +40,6 @@ module.exports = (sequelize, DataTypes) => {
       Business.belongsTo(models.Users, { foreignKey: "created_by" });
       Business.hasMany(models.BusinessStore, { foreignKey: "business_id" });
       Business.hasMany(models.BusinessTags, { foreignKey: "business_id" });
-      Business.hasMany(models.BusinessItem, { foreignKey: "business_id"});
       Business.hasMany(models.Product, {foreignKey: "business_id"});
 
     }
