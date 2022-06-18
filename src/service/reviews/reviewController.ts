@@ -2,15 +2,14 @@ export { }
 
 const express = require('express');
 const router = express.Router()
-const reviewService = require('./reviewService')
+import { ReviewService } from './reviewService';
 const { authenticateToken } = require('../auth/user/userAuthorization')
-import { Review } from './reviewType'
+import { Review, ReportedReview } from './reviewType'
 
-//TODO:  Retest all review routes
 router.get('/reviews', authenticateToken, async (req, res) => {
     try {
         const {storeId} = req.query
-        return res.status(200).json(await reviewService.getReviewsByStoreId(storeId))
+        return res.status(200).json(await ReviewService.getReviewsByStoreId(storeId))
     }
     catch (e: any) {
         res.status(200).json({ "error": e.message })
@@ -20,7 +19,7 @@ router.get('/reviews', authenticateToken, async (req, res) => {
 router.get('/review', authenticateToken, async (req, res) => {
     try {
         const {storeId} = req.query
-        return res.status(200).json(await reviewService.getUserStoreReview(req.user_id, storeId))
+        return res.status(200).json(await ReviewService.getUserStoreReview(req.user_id, storeId))
     }
     catch (e: any) {
         res.status(200).json({ "error": e.message })
@@ -36,10 +35,26 @@ router.post('/review', authenticateToken, async (req, res) => {
             comment: req.body.comment
         }
 
-        return res.status(200).json(await reviewService.createReview(newReview))
+        return res.status(200).json(await ReviewService.createReview(newReview))
     }
     catch (e: any) {
         res.status(200).json({ "error": e.message })
+    }
+})
+router.post('/store/:storeId/reviews/:reviewId', authenticateToken, async (req, res) => {
+    try {
+        const storeId = req.params.storeId
+        const reviewId = parseInt(req.params.reviewId)
+        const inappropriateReview : ReportedReview = {
+            review_id: reviewId,
+            reported_by: req.user_id,
+            reported_reason: req.body.reported_reason,
+
+        }
+        return res.status(200).json(await ReviewService.markReviewAsInappropriate(storeId, inappropriateReview))
+    }
+    catch (e: any) {
+        res.status(e.statusCode).json({ "error": e.message })
     }
 })
 
@@ -52,7 +67,7 @@ router.put('/review', authenticateToken, async (req, res) => {
             comment: req.body.review_comment
         }
 
-        return res.status(200).json(await reviewService.updateReview(updatedReview))
+        return res.status(200).json(await ReviewService.updateReview(updatedReview))
     }
     catch (e: any) {
         res.status(200).json({ "error": e.message })
@@ -61,7 +76,7 @@ router.put('/review', authenticateToken, async (req, res) => {
 
 router.delete('/review', authenticateToken, async (req, res) => {
     try {
-        return res.status(200).json(await reviewService.deleteReview(req.user_id, req.body.store_id))
+        return res.status(200).json(await ReviewService.deleteReview(req.user_id, req.body.store_id))
     }
     catch (e: any) {
         res.status(200).json({ "error": e.message })

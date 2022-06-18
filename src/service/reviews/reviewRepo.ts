@@ -1,62 +1,108 @@
-import { Review } from "./reviewType"
+import { Review, ReportedReview } from "./reviewType"
 import db from "../../models";
 
-// TODO: Implement this
-const findReviewById = async (reviewId) => {
-    return
+const findReviewById = async (reviewId : number) : Promise<Review> => {
+    return await db.Review.findOne({
+        where: {
+            id: reviewId,
+            deleted_date: null
+        },
+        attributes: {
+            exclude: ['deleted_date', 'insert_date', 'update_date']
+        }
+    })
 }
-const findReviewsByStoreId = async (store_id: number) => {
-    const review = await db.Review.findAll({ where: { store_id: store_id } })
-    if (!review) {
-        return
-    }
-    return review.dataValues
+
+const findReviewsByStoreId = async (storeId : number) : Promise<Review[]> => {
+    return await db.Review.findAll({
+        where: {
+            store_id: storeId,
+            deleted_date: null
+        },
+        attributes: {
+            exclude: ['deleted_date', 'insert_date', 'update_date']
+        }
+    })
 }
 
 
-const findUserStoreReview = async (userId: number, store_id: number) => {
-    const review = await db.Review.findOne({ where: { store_id: store_id, user_id: userId }})
-    if (!review) {
-        return 
-    }
-    return review
+const findUserStoreReview = async (userId: number, storeId: number) => {
+    return await db.Review.findOne({ 
+        where: { 
+            store_id: storeId, 
+            user_id: userId, 
+            deleted_date: null 
+        },
+        attributes: {
+            exclude: ['deleted_date', 'insert_date', 'update_date']
+        }
+    }).catch(e => {throw new Error(e.message)})
+}
+
+const findUserReportedReview = async (reviewId : number, userId : number) => {
+    return await db.ReportedReview.findOne({
+        where: {
+            review_id: reviewId,
+            reported_by: userId,
+        }
+    })
 }
 
 const createReview = async (newReview: Review) => {
-
     const {dataValues} = await db.Review.create({
         user_id: newReview.user_id,
         store_id: newReview.store_id,
         rating_number: newReview.rating_number,
         comment: newReview.comment,
-    })
+    }).catch(e => {throw new Error(e.message)})
     return dataValues
 
 }
 
 const updateReview = async (updatedReview: Review) => {
-    const review = await db.Review.findByPk(updatedReview.id)
-    if (!review) {
-        return
-    }
-    review.update({
+    await db.Review.update({
         comment: updatedReview.comment,
-        flag_reason: updatedReview.flag_reason,
-        inappropriate_flag: updatedReview.inappropriate_flag,
         rating_number: updatedReview.rating_number,
-        deleted_date: updatedReview.deleted_date,
-    })
+    }, {
+        where: {
+            store_id: updatedReview.store_id,
+            user_id: updatedReview.user_id
+        }
+    }).catch(e => {throw new Error(e.message)})
 
     return updatedReview
 }
 
-const deleteReview = async (review_id: number) => {
-    const review = await db.Review.findByPk(review_id)
-    if (!review) {
-        return
-    }
-    review.destroy()
+const markReviewAsInappropriate = async (reportedReview : ReportedReview) => {
+    return await db.ReportedReview.create({
+        review_id: reportedReview.review_id,
+        reported_by: reportedReview.reported_by,
+        reported_reason: reportedReview.reported_reason
+
+    })
+}
+
+const deleteReview = async (storeId: number, userId : number) => {
+    const review = await db.Review.update({
+        deleted_date: new Date()
+    }, { 
+        where: {
+            store_id: storeId,
+            user_id: userId
+        } 
+    })
     return review
 
 }
-module.exports = { findReviewsByStoreId, findUserStoreReview, createReview, updateReview, deleteReview, findReviewById }
+
+
+export const ReviewRepo = {
+    findReviewsByStoreId, 
+    findUserStoreReview, 
+    createReview, 
+    updateReview, 
+    deleteReview, 
+    findReviewById,
+    markReviewAsInappropriate,
+    findUserReportedReview
+}

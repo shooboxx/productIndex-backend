@@ -8,8 +8,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken')
 const userService = require('../../user/userService')
-let refreshTokens: any = []
-const { checkNotAuthenticated, authenticateToken } = require('./userAuthorization')
+const { checkNotAuthenticated } = require('./userAuthorization')
 const crypto = require('crypto')
 
 const systemRoleService = require('./systemRole/systemRoleService')
@@ -96,7 +95,7 @@ router.delete('/auth/logout', async (req: any, res: any) => {
     await userService.deleteRefreshToken(hashed_token).catch((err)=>{ res.status(400).json({error: err.message})})
     res.clearCookie("access_token");
     res.clearCookie("refresh_token");
-    res.sendStatus(204).json({})
+    return res.sendStatus(204).json({})
 });
 
 // Works with database
@@ -166,7 +165,6 @@ router.post('/auth/token', async (req, res) => {
 })
 
 function generateAccessToken(user) {
-    // expiration time should be 15m in prod
     return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.NODE_ENV == 'development' ? '1440m' : '120m' })
 }
 module.exports = router
