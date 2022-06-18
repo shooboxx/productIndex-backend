@@ -1,122 +1,22 @@
 import { BusinessErrors } from "./businessErrors";
-const businessRepo = require("./businessRepo");
-const userService = require("../user/userService");
-import { Business } from "./businessType";
-
-const getUserBusinesses = async (userId: number) => {
-  try {
-    await userService.getUserById(userId);
-    const biz = await businessRepo.findUserBusinesses(userId);
-    return biz;
-  } catch (e) {
-    throw e;
-  }
-};
+import { BusinessRepo } from "./businessRepo";
+import AppError from '../../utils/appError.js'
 
 const getBusinessById = async (businessId: number) => {
-  if (!businessId) throw Error(BusinessErrors.BusinessIdRequired);
   try {
-    const business = await businessRepo.findBusinessById(businessId);
+    if (!businessId) throw Error(BusinessErrors.BusinessIdRequired);
+    
+    const business = await BusinessRepo.findBusinessById(businessId);
     if (!business) {
-      throw Error(BusinessErrors.NoBusinessFound);
+      throw AppError(BusinessErrors.NoBusinessFound, 404);
     }
     return business;
-  } catch (e) {
-    throw e;
+  } 
+  catch (e : any) {
+    throw new AppError(e.message, e.statusCode || 400)
   }
 };
 
-
-const createBusiness = async (newBusiness: Business) => {
-  try {
-    if (!newBusiness.category) throw new Error("Business category is required");
-    if (!newBusiness.name) throw new Error("Business name is required");
-    // do a check to see if business exists
-    const business = await businessRepo.createBusiness(newBusiness);
-
-    if (!business) throw new Error("This business already exist!");
-
-    return business;
-  } catch (e) {
-    throw e;
-  }
-};
-
-// const deleteBusiness = (userId : number, businessId : number) => {
-//     try {
-//         const businesses = getUserBusinesses(userId)
-//         for (let i = 0; i <= businesses.length; i++) {
-//             if (businesses[i].business_role.business_id == businessId ) {
-//                 return businessRepo.removeBusiness(businessId)
-//             }
-//         }
-//         throw Error(BusinessErrors.NoBusinessFound)
-
-//     }
-//     catch (e) {
-//         throw e
-//     }
-
-// }
-
-// const setBusinessActiveStatus = (userId : number, businessId : number, status : boolean) : Business => {
-//     try {
-//         const businesses = getUserBusinesses(userId)
-//         for (let i = 0; i <= businesses.length; i++) {
-//             if (businesses[i].business_role.business_id== businessId ) {
-//                 return businessRepo.setBusinessActiveStatus(businessId, status)
-//             }
-//         }
-//         throw Error(BusinessErrors.NoBusinessFound)
-//     }
-//     catch (e) {
-//         throw e
-//     }
-// }
-
-const updateBusiness = async (
-  userId: number,
-  businessId: number,
-  updatedBusiness: Business
-): Promise<Business> => {
-  try {
-    const businesses = await getUserBusinesses(userId);
-    for (let i = 0; i < businesses.length; i++) {
-      if (businesses[i].id == businessId) {
-        businesses[i].active = updatedBusiness.active || businesses[i].active;
-        businesses[i].category =
-          updatedBusiness.category || businesses[i].category;
-        businesses[i].description =
-          updatedBusiness.description || businesses[i].description;
-        businesses[i].name = updatedBusiness.name || businesses[i].name;
-
-        return businessRepo.updateBusiness(businessId, updatedBusiness);
-      }
-    }
-    throw Error(BusinessErrors.NoBusinessFound);
-  } catch (e) {
-    throw e;
-  }
-};
-
-// const isBusinessActive = (businessId : number) : Boolean => {
-//     try {
-//         const business = getBusinessById(businessId)
-//         return business.active || false
-//     }
-//     catch (e) {
-//         throw e
-//     }
-
-// }
-
-// const getBusinessMasterDetail = () => {
-
-// }
-
-module.exports = {
-  getBusinessById,
-  getUserBusinesses,
-  createBusiness,
-  updateBusiness,
-};
+export const BusinessService = {
+  getBusinessById
+}

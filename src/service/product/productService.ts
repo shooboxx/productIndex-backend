@@ -1,29 +1,25 @@
 import { Product } from './productType'
-const productRepo = require('./productRepo')
-const businessService = require('../business/businessService')
+import AppError from '../../utils/appError.js'
+import { ProductRepo } from './productRepo'
 
-const getBusinessProducts = (bId : number): Product[] => {
+const getBusinessProducts = async (businessId : number) : Promise<Product[]> => {
     try {
-        businessService.getBusinessById(bId)
-        const products : Product[] = productRepo.findBusinessProducts(bId)
-        if (!products) throw new Error('No products found for this business')
-        return products
+        return await ProductRepo.findBusinessProducts(businessId)
     }
-    catch (e) {
-        throw e
+    catch (e : any) {
+        throw AppError(e.message, e.statusCode || 400)
     }
 }
 
-const getProductById = (pId : number) : Product => {
+const getProducts = async (productId : number, productKey : string) : Promise<Product> => {
+    try {
+        return await ProductRepo.findProducts(productId, productKey)
+    }
+    catch (e: any) {
+        throw AppError(e.message, e.statusCode || 400)
+    }
+} 
 
-    const product : Product =  productRepo.findProductById(pId)
-    
-    if (!product) {
-        throw new Error('No product found with that id')
-    } 
-    return product
-
-}
 // const searchProducts = (productName : string, productType) : Product[] => {
 //     // Returns products that share the same name. Should reduce query count by uppercasing, trimming and returning unique values
 //     // This will use use for sharing products within inventories
@@ -47,18 +43,7 @@ const getProductById = (pId : number) : Product => {
 //     return productList 
 // }
 
-const updateProduct = (product : Product) => { 
-
-    return
+export const ProductService = {
+    getBusinessProducts,
+    getProducts
 }
-const createProduct = (product : Product) => {
-    // returns product_id
-
-    return ''
-}
-const deleteProduct = () => {
-
-    return
-}
-
-module.exports = { getBusinessProducts, getProductById }

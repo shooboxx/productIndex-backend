@@ -6,7 +6,6 @@ export interface BusinessAttributes {
   created_by: number;
   business_name: string;
   description?: string;
-  profile_banner_url?: string;
   profile_pic_url?: string;
   active: boolean;
   category?: string;
@@ -24,7 +23,6 @@ module.exports = (sequelize, DataTypes) => {
     created_by!: number;
     business_name!: string;
     description?: string;
-    profile_banner_url?: string;
     profile_pic_url?: string;
     active!: boolean;
     category?: string;
@@ -40,7 +38,6 @@ module.exports = (sequelize, DataTypes) => {
       Business.belongsTo(models.Users, { foreignKey: "created_by" });
       Business.hasMany(models.BusinessStore, { foreignKey: "business_id" });
       Business.hasMany(models.BusinessTags, { foreignKey: "business_id" });
-      Business.hasMany(models.BusinessItem, { foreignKey: "business_id"});
       Business.hasMany(models.Product, {foreignKey: "business_id"});
 
     }
@@ -66,10 +63,6 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       description: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-      },
-      profile_banner_url: {
         type: DataTypes.TEXT,
         allowNull: true,
       },

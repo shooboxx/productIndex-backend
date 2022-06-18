@@ -1,96 +1,37 @@
-import { BusinessItem, InventoryItem } from './businessInventoryType';
+import { InventoryItem } from './businessInventoryType';
+import { InventoryErrors } from './inventoryConts';
+import AppError from '../../utils/appError.js'
+import { StoreErrors } from 'service/store/storeConst';
 
-const inventoryRepo = require('./businessInventoryRepo')
-const storeService = require('../store/businessStoreService')
+import { InventoryRepo } from './businessInventoryRepo';
 
-const getBusinessItems = (bId : number) : BusinessItem[] => {
-    // not yet implemented
-    return {} as BusinessItem[]
-}
-const getBusinessItemById = (bItemId : number) : BusinessItem => {
-    // not yet implemented
-    return {} as BusinessItem
-}
-const updateBusinessItem = (bItem : number) : BusinessItem => {
-    // not yet implemented
-    return {} as BusinessItem
-}
-const createBusinessItem = (bItem : number) : BusinessItem => {
-    // not yet implemented
-    return {} as BusinessItem
-}
-const deleteBusinessItem = (bItemId : number) => {
-    // not yet implemented
-    return {} as BusinessItem
-}
-
-
-const getAllStoreItems = (storeId : number) : InventoryItem[] =>  {
+const getAllStoreItems = async (storeId : number) : Promise<InventoryItem[]> =>  {
     try {
-        storeService.getStoreById(storeId)
-        const items : InventoryItem[] = inventoryRepo.findAllStoreItems(storeId)
-        if (!items) throw new Error('No items found for this store') 
+        if (!storeId) throw new AppError(StoreErrors.StoreIdRequired, 400)
+        const items = await InventoryRepo.findStoreInventoryItems(storeId)
+        if (!items) throw new AppError(InventoryErrors.StoreInventoryItemsNotFound, 404) 
         return items
     }
-    catch (e) {
-        throw e
+    catch (e : any) {
+        throw new AppError(e.message, e.statusCode || 400)
     }
 
 };
 
-const getInventoryItemById = (itemId : number) : InventoryItem =>  {
+const getInventoryItemById = async (itemId : number) : Promise<InventoryItem> =>  {
     try {
-        const item : InventoryItem = inventoryRepo.findInventoryItemById(itemId)
-        if (!item) throw new Error('No item found with that id') 
+        if (!itemId) throw new AppError(InventoryErrors.InventoryIdRequired)
+        const item : InventoryItem = await InventoryRepo.findInventoryItem(itemId)
+        if (!item) throw new AppError(InventoryErrors.InventoryItemNotFound, 404) 
         return item
     }
-    catch (e) {
-        throw e
+    catch (e : any) {
+        throw new AppError(e.message, e.statusCode || 400)
     }
 
 };
 
-const updateInventoryItem = (item : InventoryItem) : InventoryItem => {
-    try {
-        const currItem : InventoryItem = getInventoryItemById(item.id)
-
-        currItem.store_id = item.store_id || currItem.store_id
-        currItem.price = item.price || currItem.price
-        currItem.quantity = item.quantity || currItem.quantity
-        currItem.update_date = item.update_date || currItem.quantity
-        
-        return inventoryRepo.updateInventoryItem(currItem)
-    }
-    catch (e) {
-        throw e
-    }
-};
-
-const createInventoryItem = (item : InventoryItem) : InventoryItem => {
-    try {
-        const bizItem = getBusinessItemById(item.item.id)
-        
-        if (bizItem) {
-            throw new Error('Item already exist in inventory')
-        }
-    }
-    catch {
-        return inventoryRepo.addInventoryItem(item)
-    }
-    return {} as InventoryItem
-};
-
-const deleteInventoryItem = (itemId : number) => {
-    try {
-        const exist = getInventoryItemById(itemId)
-
-        if (exist) {
-            return inventoryRepo.deleteInventoryItem(itemId)
-        }
-    }
-    catch (e) {
-        throw e
-    }
-};
-
-module.exports = { getAllStoreItems, getInventoryItemById, updateInventoryItem, createInventoryItem, deleteInventoryItem }
+export const InventoryService = {
+    getAllStoreItems,
+    getInventoryItemById
+}

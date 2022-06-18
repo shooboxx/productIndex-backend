@@ -50,7 +50,6 @@ const updateUser = async (user: User) => {
     {
       first_name: user.first_name,
       last_name: user.last_name,
-      password: user.password,
       date_of_birth: user.dob,
       gender: user.gender,
       profile_picture_url: user.profile_picture_url,
@@ -59,10 +58,7 @@ const updateUser = async (user: User) => {
       primary_phone_contact: user.primary_phone,
       state: user.state,
       is_verified: user.is_verified,
-      reset_expires: user.reset_expires, // TODO: Change dates to dates and not a number
-      reset_token: user.reset_token,
       active: user.active,
-      deleted_date: user.deleted_date,
     },
     {
       where: {
@@ -108,6 +104,12 @@ const deleteRefreshToken = async (token) => {
     },
   }).catch((e)=> {throw e});
 };
+
+
+
+//TODO: Update user password
+// TODO: Delete user account
+//TODO: Create reset token + reset expiry
 
 module.exports = {
   addUser,
