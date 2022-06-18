@@ -9,9 +9,7 @@ import AppError from '../../utils/appError'
 
 const getReviewsByStoreId = async (storeId: number) => {
     try {
-        const reviews = await ReviewRepo.findReviewsByStoreId(storeId)
-        if (!reviews) throw new AppError('No reviews for this store', 404) //TODO: Add this to a const
-        return reviews
+        return await ReviewRepo.findReviewsByStoreId(storeId)
     }
     catch (e : any) {
         throw new AppError(e.message, e.statusCode || 400)
