@@ -49,11 +49,10 @@ const updateReview = async (updatedReview: Review) => {
     }
 }
 
-const markReviewAsInappropriate = async (storeId, reportedReview : ReportedReview) => {
+const markReviewAsInappropriate = async (reportedReview : ReportedReview) => {
     try {   
         const review : Review = await ReviewRepo.findReviewById(reportedReview.review_id)
         if (!review) throw new AppError(ReviewsErrorsMessages.ReviewNotFound, 404)
-        if (review.store_id != storeId) throw new AppError(ReviewsErrorsMessages.ReviewNotFound, 404)
         const userReportedReview = await ReviewRepo.findUserReportedReview(reportedReview.review_id, reportedReview.reported_by)
         if (userReportedReview) throw new AppError(ReviewsErrorsMessages.ReviewAlreadyReported)
         reportedReview.reported_reason = `${ReviewsTriggerMessages.USER_MARKED_REVIEW_INAPPROPRIATE} ${reportedReview.reported_reason}`

@@ -54,7 +54,7 @@ app.use(helmet())
 app.use('/api/auth', limiter)
 
 app.use('/api',business)
-app.use('/api',product);
+app.use('/api',product)
 app.use('/api',store)
 app.use('/api',userAuth)
 app.use('/api',review)
