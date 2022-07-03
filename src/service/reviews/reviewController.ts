@@ -6,7 +6,7 @@ import { ReviewService } from './reviewService';
 const { authenticateToken } = require('../auth/user/userAuthorization')
 import { Review, ReportedReview } from './reviewType'
 
-router.get('/reviews', authenticateToken, async (req, res) => {
+router.get('/reviews', async (req, res) => {
     try {
         const {storeId} = req.query
         return res.status(200).json(await ReviewService.getReviewsByStoreId(storeId))

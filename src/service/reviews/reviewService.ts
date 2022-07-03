@@ -33,7 +33,9 @@ const createReview = async (newReview: Review) => {
         const found = await ReviewRepo.findUserStoreReview(newReview.user_id, newReview.store_id)
         if (found) throw new Error(ReviewsErrorsMessages.UserAlreadyReviewedStore)
         
-        return await ReviewRepo.createReview(newReview)
+        const createdReview =  await ReviewRepo.createReview(newReview)
+        createdReview.deleted_date = undefined
+        return createdReview
     }
     catch (e : any) {
         throw new AppError(e.message, e.statusCode || 400)
