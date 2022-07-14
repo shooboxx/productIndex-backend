@@ -1,14 +1,14 @@
 import { SystemRole } from "./authTypes"
-const SystemRoles = require('../../../../models/roles')
+import db from "../../../../models";
 
 const findRoleId = async (roleName : string) => {
-    const role = await SystemRoles.findOne({ where: {role_name: roleName}})
+    const role = await db.SystemRole.findOne({ where: {role_name: roleName}})
     if (!role) return null
 
     return role.dataValues.id
 }
 const findRole = async (roleId : number) => {
-    const role = await SystemRoles.findOne({ where: {id: roleId}})
+    const role = await db.SystemRole.findOne({ where: {id: roleId}})
     if (!role) return null
 
     return role.dataValues

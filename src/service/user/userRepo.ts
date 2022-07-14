@@ -1,95 +1,124 @@
-export { };
-const Users = require("../../models/users");
-const UserTokens = require("../../models/user_tokens");
-import { tokenToString } from "typescript";
+export {};
+import db from "../../models";
 import { User } from "./userType";
-
+const { Op } = require("sequelize");
+// TODO: Create a CreateUser interface for a minimized object
 const addUser = async (user: User) => {
-  await Users.create({
+  const {dataValues} = await db.Users.create({
     email_address: user.email_address,
     password: user.password,
     system_role_id: user.role_id,
     first_name: user.first_name,
     last_name: user.last_name,
     verify_token: user.verify_token,
-    insert_date: Date.now(),
-    update_date: Date.now(),
-  }).catch(err => null)
-
-  return user
+    gender: user.gender,
+    country: user.country,
+    city: user.city,
+    state: user.state,
+    date_of_birth: user.dob,
+    primary_phone_contact: user.primary_phone,
+  }).catch(() => null)
+  return dataValues;
 };
 
 const findUser = async (userId: number, emailAddress: string) => {
-  const user = await Users.findOne({ where: { email_address: emailAddress } })
+  const user = await db.Users.findOne({ where: {
+      [Op.or]: [{email_address: emailAddress, deleted_date: null}, { id: userId, deleted_date: null}]}
+  });  
   if (!user) {
-    return
+    return null;
   }
-  return user.dataValues
+  return user.dataValues;
 };
 
 const findUserByResetToken = async (resetToken: string) => {
-    const user = await Users.findOne({ where: { reset_token: resetToken } });
-    if (!user) return null
+  const user = await db.Users.findOne({ where: { reset_token: resetToken, deleted_date: null } });
+  if (!user) return null;
 
-    return user.dataValues
+  return user.dataValues;
 };
 
-const findUserByVerificationToken = async (verifyToken : string) => {
-    const user = await Users.findOne({ where: { verify_token: verifyToken } });
-    if (!user) return null
+const findUserByVerificationToken = async (verifyToken: string) => {
+  const user = await db.Users.findOne({ where: { verify_token: verifyToken, deleted_date: null } });
+  if (!user) return null;
 
-    return user.dataValues
-}
+  return user.dataValues;
+};
 
 const updateUser = async (user: User) => {
-    await Users.update({
-        first_name: user.first_name,
-        last_name: user.last_name,
-        password: user.password,
-        dob: user.dob,
-        gender: user.gender,
-        profile_picture_url: user.profile_picture_url,
-        country: user.country,
-        city: user.city,
-        primary_phone: user.primary_phone,
-        address: user.address,
-        is_verified: user.is_verified,
-        reset_expires: user.password_reset_expires_in, // TODO: Change dates to dates and not a number
-        reset_token: user.password_reset_token,
-        active: user.active,
-        deleted_date: user.deleted_date,
-        update_date: Date.now(),
-    }, {
-        where: {
-            id: user.id
-        }
-    })
-      return user;
-
+  await db.Users.update(
+    {
+      first_name: user.first_name,
+      last_name: user.last_name,
+      date_of_birth: user.dob,
+      gender: user.gender,
+      profile_picture_url: user.profile_picture_url,
+      country: user.country,
+      city: user.city,
+      primary_phone_contact: user.primary_phone,
+      state: user.state,
+      is_verified: user.is_verified,
+      active: user.active,
+    },
+    {
+      where: {
+        id: user.id,
+        deleted_date: null
+      },
+    }
+  );
+  return user;
 };
 
-const storeRefreshToken = async (user_id: number, refreshToken : string) => {
-  await UserTokens.create({
+const storeRefreshToken = async (user_id: number, refreshToken: string) => {
+  const { dataValues } = await db.UserTokens.create({
     user_id: user_id,
     refresh_token: refreshToken,
-    insert_date: Date.now()  
-  })
-}
+    insert_date: new Date()
+  }).catch((e)=> {throw e});
 
-const findRefreshToken = async (userId : number, refreshToken : string) => {
-  const token = await UserTokens.findOne({ where: {user_id: userId, refresh_token: refreshToken} });
+  return dataValues
+};
+
+const findRefreshToken = async (refreshToken: string) => {
+  const token = await db.UserTokens.findOne({
+    where: {refresh_token: refreshToken },
+  });
   if (!token) {
-    return
+    return null;
   }
-  return token.dataValues
-}
+  return token.dataValues;
+};
 
-const clearRefreshTokens = (userId) => {
-  UserTokens.destroy({
+const clearRefreshTokens = async (userId) => {
+  await db.UserTokens.destroy({
     where: {
-      user_id: userId
-    }
-  })
-}
+      user_id: userId,
+    },
+  });
+};
+const deleteRefreshToken = async (token) => {
+  await db.UserTokens.destroy({
+    where: {
+      refresh_token: token
+    },
+  }).catch((e)=> {throw e});
+};
 
-module.exports = { addUser, findUser, findUserByResetToken, updateUser, findUserByVerificationToken, storeRefreshToken, findRefreshToken, clearRefreshTokens };
+
+
+//TODO: Update user password
+// TODO: Delete user account
+//TODO: Create reset token + reset expiry
+
+module.exports = {
+  addUser,
+  findUser,
+  findUserByResetToken,
+  updateUser,
+  findUserByVerificationToken,
+  storeRefreshToken,
+  findRefreshToken,
+  clearRefreshTokens,
+  deleteRefreshToken
+};

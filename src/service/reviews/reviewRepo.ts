@@ -1,55 +1,108 @@
-import { Review } from './reviewType'
+import { Review, ReportedReview } from "./reviewType"
+import db from "../../models";
 
-let reviews : Review[] = [
-    {
-        id: 1,
-        business_id: 1,
-        user_id: 1000,
-        star_rating: 1,
-        review_comment: 'The food was terrible here.'
-    }
-]
-
-const findReviewsByBusinessId = (businessId : number) : Review[]=> {
-    let bizReviews : Review[] = []
-    for (let i = 0; i < reviews.length; i++) {
-        if (reviews[i].business_id == businessId) {
-            bizReviews.push(reviews[i])
+const findReviewById = async (reviewId : number) : Promise<Review> => {
+    return await db.Review.findOne({
+        where: {
+            id: reviewId,
+            deleted_date: null
+        },
+        attributes: {
+            exclude: ['deleted_date', 'insert_date', 'update_date']
         }
-    }
-    return bizReviews
-}
-const findReview = (userId: number, businessId : number) : Review => {
-    for (let i = 0; i < reviews.length; i++) {
-        if (reviews[i].business_id == businessId && reviews[i].user_id == userId) {
-            return reviews[i]
-        }
-    }
-    return {} as Review
+    })
 }
 
-const createReview = (newReview : Review) : Review => {
-    newReview.id = reviews.length + 1
-    reviews.push(newReview)
-    return reviews[reviews.length-1]
+const findReviewsByStoreId = async (storeId : number) : Promise<Review[]> => {
+    return await db.Review.findAll({
+        where: {
+            store_id: storeId,
+            deleted_date: null
+        },
+        attributes: {
+            exclude: ['deleted_date', 'insert_date', 'update_date']
+        }
+    })
 }
 
-const updateReview = (updatedReview : Review) : Review => {
-    for (let i = 0; i < reviews.length; i++) {
-        if (reviews[i].business_id == updatedReview.business_id && reviews[i].user_id == updatedReview.user_id) {
-            reviews[i] = updatedReview
-            return reviews[i]
+
+const findUserStoreReview = async (userId: number, storeId: number) => {
+    return await db.Review.findOne({ 
+        where: { 
+            store_id: storeId, 
+            user_id: userId, 
+            deleted_date: null 
+        },
+        attributes: {
+            exclude: ['deleted_date', 'insert_date', 'update_date']
         }
-    }
+    }).catch(e => {throw new Error(e.message)})
+}
+
+const findUserReportedReview = async (reviewId : number, userId : number) => {
+    return await db.ReportedReview.findOne({
+        where: {
+            review_id: reviewId,
+            reported_by: userId,
+        }
+    })
+}
+
+const createReview = async (newReview: Review) => {
+    const {dataValues} = await db.Review.create({
+        user_id: newReview.user_id,
+        store_id: newReview.store_id,
+        rating_number: newReview.rating_number,
+        comment: newReview.comment,
+    }).catch(e => {throw new Error(e.message)})
+    return dataValues
+
+}
+
+const updateReview = async (updatedReview: Review) => {
+    await db.Review.update({
+        comment: updatedReview.comment,
+        rating_number: updatedReview.rating_number,
+    }, {
+        where: {
+            store_id: updatedReview.store_id,
+            user_id: updatedReview.user_id
+        }
+    }).catch(e => {throw new Error(e.message)})
+
     return updatedReview
 }
 
-const deleteReview = (review_id : number) => { 
-    for (let i = 0; i <= reviews.length; i++) {
-        if (reviews[i].id == review_id) {
-            reviews.splice(i, 1)
-            return -1
-        }
-    }
+const markReviewAsInappropriate = async (reportedReview : ReportedReview) => {
+    return await db.ReportedReview.create({
+        review_id: reportedReview.review_id,
+        reported_by: reportedReview.reported_by,
+        reported_reason: reportedReview.reported_reason
+
+    })
 }
-module.exports = {findReviewsByBusinessId, findReview, createReview, updateReview, deleteReview}
+
+const deleteReview = async (storeId: number, userId : number) => {
+    const review = await db.Review.update({
+        deleted_date: new Date()
+    }, { 
+        where: {
+            store_id: storeId,
+            user_id: userId
+        } 
+    })
+    return review
+
+}
+
+
+export const ReviewRepo = {
+    findReviewsByStoreId, 
+    findUserStoreReview, 
+    createReview, 
+    updateReview, 
+    deleteReview, 
+    findReviewById,
+    markReviewAsInappropriate,
+    findUserReportedReview
+}

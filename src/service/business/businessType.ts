@@ -1,19 +1,12 @@
-import { BusinessRole } from "../auth/business/businessRoleType";
-import { BusinessStore } from '../store/storeTypes';
-import { Review } from '../reviews/reviewType';
-import {BusinessItem} from '../inventory/businessInventoryType'
-
 export interface Business {
-    id?: number,
+    id: number,
     name: string,
-    description?: string,
-    category: string,
-    profile_picture_url?: string,
-    stores?: BusinessStore[],
-    reviews?: Review[],
-    roles?: BusinessRole[],
-    items?: BusinessItem[],
+    description: string,
+    profile_pic_url?: string,
     active?: boolean,
-    update_date?: number,
-    insert_date?: number
+    category: string,
+    deleted_date?: Date,
+    insert_date?: Date,
+    update_date?: Date,
+    created_by?: number,
 }

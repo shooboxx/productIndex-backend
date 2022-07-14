@@ -1,47 +1,21 @@
-import {BusinessStore} from './storeTypes'
-import { Business } from '../business/businessType';
+import { BusinessStore } from "./storeTypes";
+const { Op } = require("sequelize");
 
-let stores : BusinessStore[]= []
+import db from "../../models";
 
-const findStoreByBusinessId = (businessId : number) : BusinessStore[] => {
-    let businessStores : BusinessStore[]= []
-    for (let i = 0; i < stores.length; i++) {
-        if (stores[i].business_id === businessId) {
-            businessStores.push(stores[i])
-        }
-    }
-    return businessStores
-}
-
-const findStoreById = (storeId : number) : BusinessStore => {
-    let businessStores : BusinessStore[]= []
-    for (let i = 0; i < stores.length; i++) {
-        if (stores[i].id === storeId) {
-            return stores[i]
-        }
-    }
-    return businessStores as any
-}
-
-const createBusinessStore = (store) : BusinessStore => {
-    stores.push(store)
-    return stores[stores.length-1]
+const findStore = async (storeId : number, storeName : string ) : Promise<BusinessStore> => {
+  return await db.BusinessStore.findOne({
+      where: {
+          //TODO: Add a like and compare by case
+          [Op.or]: [{id: storeId, deleted_date: null}, {unique_name: storeName, deleted_date: null}]
+      },
+      include: [{model: db.StoreContacts, attributes: {exclude: ['insert_date', 'update_date', 'id']}}, {model: db.StoreHours, attributes: {exclude: ['id', 'business_store_id','insert_date', 'update_date']}}],
+      attributes: {
+          exclude: ['insert_date', 'update_date', 'deleted_date']
+      }
+  }).catch(e => {throw new Error(e.message)})
 } 
 
-const updateStore = (store) : BusinessStore => {
-    for (let i = 0; i < stores.length; i++) {
-        if (stores[i].id === store.id) {
-            stores[i] = store
-            return stores[i]
-        }
-    }
-    return {} as any
+export const StoreRepo = {
+  findStore
 }
-
-const deleteStore = (storeId) : BusinessStore => {
-
-    stores = stores.filter(foundStore => foundStore.id != storeId)
-    
-    return {} as any
-}
-module.exports = {findStoreByBusinessId, findStoreById, createBusinessStore, updateStore, deleteStore}

@@ -1,117 +1,95 @@
-const businessService = require('../business/businessService');
-const userService = require('../user/userService')
-let reviewsRepo = require('./reviewRepo')
-const { exist } = require('../../utils/utils.js')
+import { ReviewRepo } from './reviewRepo'
+import { ReviewsErrorsMessages, ReviewsTriggerMessages } from './reviewConst'
+import { UserErrors } from '../user/userConst'
+import { StoreErrors } from '../store/storeConst'
 
-if (process.env.NODE_ENV == 'test') {
-   reviewsRepo  = require('./mockReviewRepo')
-}
+import { Review, ReportedReview } from './reviewType'
+import { StoreService } from '../store/businessStoreService'
+import AppError from '../../utils/appError'
 
-import { Review } from './reviewType'
-
-const getReviewsByBusinessId = (businessId : number) : Review[]=> {
+const getReviewsByStoreId = async (storeId: number) => {
     try {
-        const reviews = reviewsRepo.findReviewsByBusinessId(businessId)
+        return await ReviewRepo.findReviewsByStoreId(storeId)
+    }
+    catch (e : any) {
+        throw new AppError(e.message, e.statusCode || 400)
+    }
 
-        if (reviews.length === 0) throw new Error('No reviews for this business')
-        return reviews
-    }
-    catch (e) {
-        throw e
-    }
-    
 }
-const getReview = (userId : number, business_id : number) : Review => {
+
+const getUserStoreReview = async (userId: number, store_id: number) => {
     try {
-        const review = reviewsRepo.findReview(userId, business_id)
-        if (!exist(review)) throw new Error('User has not left a review for this business')
-        return review
+        return await ReviewRepo.findUserStoreReview(userId, store_id)
     }
-    catch (e) {
-        throw e
+    catch (e : any) {
+        throw new AppError(e.message, e.statusCode || 400)
     }
 }
-
-const createReview = (newReview : Review) : Review=> {
+const createReview = async (newReview: Review) => {
     try {
-        // businessService.getBusinessById(newReview.business_id)
-        const found = reviewsRepo.findReview(newReview.user_id, newReview.business_id)
-
-        if (exist(found)) throw new Error('You cannot review a business more than once. Please update preview review instead')
-        _validReview(newReview)
-
-        const review = reviewsRepo.createReview(newReview)
-
-        if (!review) throw new Error('No review found')
-        return review
+        _validateReview(newReview)
+        const store = await StoreService.getStore(newReview.store_id, '')
+        if (!store) throw new AppError(StoreErrors.StoreNotExist, 404)
+        const found = await ReviewRepo.findUserStoreReview(newReview.user_id, newReview.store_id)
+        if (found) throw new Error(ReviewsErrorsMessages.UserAlreadyReviewedStore)
+        
+        return await ReviewRepo.createReview(newReview)
     }
-    catch (e) {
-        throw e
+    catch (e : any) {
+        throw new AppError(e.message, e.statusCode || 400)
     }
 }
-
-const updateReview = (updatedReview : Review) : Review => {
+const updateReview = async (updatedReview: Review) => {
     try {
-        // businessService.getBusinessById(updatedReview.business_id)
-        const currReview : Review = getReview(updatedReview.user_id, updatedReview.business_id)
-        currReview.review_comment = updatedReview.review_comment || currReview.review_comment
-        currReview.star_rating = updatedReview.star_rating || currReview.star_rating 
-        currReview.update_date = Date.now()
-        currReview.flagged = updatedReview.flagged || currReview.flagged
-        currReview.inappropriate_comment = updatedReview.inappropriate_comment || currReview.inappropriate_comment
-        _validReview(currReview)
- 
-        console.log(currReview)
-        return reviewsRepo.updateReview(currReview)
-
+        _validateReview(updatedReview)
+        return await ReviewRepo.updateReview(updatedReview)
     }
-    catch (e) {
-        throw e
+    catch (e : any) {
+        throw new AppError(e.message, e.statusCode || 400)
     }
 }
-const flagReview = (userId : number, businessId : number) : Review => {
+
+const markReviewAsInappropriate = async (storeId, reportedReview : ReportedReview) => {
+    try {   
+        const review : Review = await ReviewRepo.findReviewById(reportedReview.review_id)
+        if (!review) throw new AppError(ReviewsErrorsMessages.ReviewNotFound, 404)
+        if (review.store_id != storeId) throw new AppError(ReviewsErrorsMessages.ReviewNotFound, 404)
+        const userReportedReview = await ReviewRepo.findUserReportedReview(reportedReview.review_id, reportedReview.reported_by)
+        if (userReportedReview) throw new AppError(ReviewsErrorsMessages.ReviewAlreadyReported)
+        reportedReview.reported_reason = `${ReviewsTriggerMessages.USER_MARKED_REVIEW_INAPPROPRIATE} ${reportedReview.reported_reason}`
+        return await ReviewRepo.markReviewAsInappropriate(reportedReview)
+    }
+    catch (e : any) {
+        throw new AppError(e.message, e.statusCode || 400)
+    }
+
+}
+
+const deleteReview = async (userId: number, storeId: number) => {
     try {
-        const review : Review = reviewsRepo.findReview(userId, businessId)
-        review.flagged = true
-        return updateReview(review)
+        return await ReviewRepo.deleteReview(storeId, userId)
     }
-    catch (e) {
-        throw e
-    }
-}
-const markReviewAsInappropriate = (userId : number, businessId : number) : Review => {
-    try {
-        const review : Review = reviewsRepo.findReview(userId, businessId)
-        review.inappropriate_comment = true
-        return updateReview(review)
-    }
-    catch (e) {
-        throw e
+    catch (e : any) {
+        throw new AppError(e.message, e.statusCode || 400)
     }
 }
 
-const deleteReview = (userId : number, businessId : number) => { 
-   try {
-    // businessService.getBusinessById(businessId)
-    // userService.getUserById(userId)
-    const review = getReview(userId, businessId)
-    return reviewsRepo.deleteReview(review.id)
-   }
-   catch (e) {
-       throw e
-   }
-}
-
-const getUserReviews = (userId : number) => {
-    //Todo: Implement this
-}
-
-const _validReview = (review: Review) => {
-    if (review.star_rating < 1 && review.star_rating > 6 ) throw new Error('Star rating value must be between 1 and 5');
-    if (!review.star_rating) throw new Error('Star rating is required')
-    if (!review.review_comment) throw new Error('Review comment is required')
-    if (review.review_comment.length < 12) throw new Error('Review comment must be at least 12 characters')
-    if (!review.user_id) throw new Error('user_id is required')
+const _validateReview = (review: Review) => {
+    if (review.rating_number < 1 && review.rating_number > 5) throw new AppError(ReviewsErrorsMessages.InvalidStarRating, 400);
+    if (!review.rating_number) throw new AppError(ReviewsErrorsMessages.RatingRequired, 400)
+    if (!review.comment) throw new AppError(ReviewsErrorsMessages.CommentRequired, 400)
+    if (review.comment.length < 12) throw new AppError(ReviewsErrorsMessages.CommentLengthInvalid)
+    if (!review.user_id) throw new AppError(UserErrors.UserIdRequired, 400)
+    if (!review.store_id) throw new AppError(StoreErrors.StoreIdRequired, 400)
     return true
 }
-module.exports = {getReviewsByBusinessId, createReview, updateReview, deleteReview, flagReview, markReviewAsInappropriate}
+
+
+export const ReviewService = {
+    getReviewsByStoreId,
+    getUserStoreReview,
+    createReview,
+    updateReview,
+    markReviewAsInappropriate,
+    deleteReview
+}
