@@ -11,6 +11,15 @@ const createTicket = async (userId: number, businessId: number, productId: numbe
     })
 }
 
+const getTicketById = async (ticketId: number) => {
+    return db.HelpDesk.findOne({
+        where: {
+            id: ticketId,
+        },
+    })
+}
+
 export const HelpDeskRepo = {
-    createTicket
+    createTicket,
+    getTicketById,
 }

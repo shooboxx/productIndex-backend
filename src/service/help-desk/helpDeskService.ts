@@ -10,6 +10,13 @@ const createTicket = async (userId: number, businessId: number, productId: numbe
     return await HelpDeskRepo.createTicket(userId, businessId, productId, message)
 }
 
+const getTicketById = async (ticketId: number) => {
+    ticketIdIsPresent(ticketId)
+    const ticket = await HelpDeskRepo.getTicketById(ticketId)
+    if (!ticket) throw new AppError(HelpDeskErrors.TicketNotFound)
+    return ticket
+}
+
 const userIdIsPresent = (userId: number) => {
     if (!userId) throw new AppError(HelpDeskErrors.UserIdRequired)
 }
@@ -26,6 +33,11 @@ const messageIsPresent = (message: string) => {
     if (!message) throw new AppError(HelpDeskErrors.MessageRequired)
 }
 
+const ticketIdIsPresent = (ticketId: number) => {
+    if (!ticketId) throw new AppError(HelpDeskErrors.TicketIdRequired)
+}
+
 export const HelpDeskService = {
-    createTicket
+    createTicket,
+    getTicketById,
 }
