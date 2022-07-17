@@ -25,6 +25,7 @@ let business = require('./service/business/businessController')
 let review = require('./service/reviews/reviewController')
 let user = require('./service/user/userController')
 let search = require('./service/search/searchController')
+let helpDesk = require('./service/help-desk/helpDeskController')
 
 
 // Setup server port
@@ -60,6 +61,7 @@ app.use('/api',userAuth)
 app.use('/api',review)
 app.use('/api',user)
 app.use('/api',search)
+app.use('/api',helpDesk)
 
 
 app.use(hpp())
