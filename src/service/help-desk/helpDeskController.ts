@@ -6,8 +6,8 @@ const router = express.Router();
 
 router.post("/help-desk/tickets", authenticateToken, async (req: any, res: any) => {
     try {
-        const { userId, businessId, productId, message } = req.body
-        await HelpDeskService.createTicket(userId, businessId, productId, message)
+        const { businessId, productId, message } = req.body
+        await HelpDeskService.createTicket(req.user_id, businessId, productId, message)
         return res.status(200).json({ message: "Ticket successfully created." })
     } catch (e: any) {
         res.status(e.statusCode || 400).json({ "error": e.message })
