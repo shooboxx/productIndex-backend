@@ -1,9 +1,10 @@
 import { HelpDeskService } from "./helpDeskService";
+const { authenticateToken } = require('../auth/user/userAuthorization')
 const express = require('express');
 const router = express.Router();
 
 
-router.post("/help-desk/tickets", async (req: any, res: any) => {
+router.post("/help-desk/tickets", authenticateToken, async (req: any, res: any) => {
     try {
         const { userId, businessId, productId, message } = req.body
         await HelpDeskService.createTicket(userId, businessId, productId, message)
