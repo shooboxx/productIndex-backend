@@ -1,4 +1,5 @@
 import db from '../../models'
+import { TicketStatus } from './ticketStatus'
 
 const createTicket = async (userId: number, businessId: number, productId: number, message: string) => {
     return db.HelpDesk.create({
@@ -6,7 +7,7 @@ const createTicket = async (userId: number, businessId: number, productId: numbe
         business_id: businessId,
         product_id: productId,
         message: message,
-        status: 'open',
+        status: TicketStatus.Open,
     })
 }
 
