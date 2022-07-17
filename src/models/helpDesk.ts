@@ -1,4 +1,7 @@
 "use strict";
+
+import { TicketStatus } from "service/help-desk/ticketStatus";
+
 const { Model } = require("sequelize");
 
 export interface HelpDeskAttributes {
@@ -71,7 +74,7 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
             },
             status: {
-                type: DataTypes.STRING,
+                type: DataTypes.ENUM(TicketStatus.Open, TicketStatus.Closed),
                 allowNull: false,
             },
             insert_date: {
