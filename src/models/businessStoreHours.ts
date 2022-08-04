@@ -9,7 +9,7 @@ export interface StoreHoursAttributes {
     tuesday_open?: string;
     tuesday_closed?: string;
     wednesday_open?: string;
-    wednedsay_closed?: string;
+    wednesday_closed?: string;
     thursday_open?: string;
     thursday_closed?: string;
     friday_open?: string;
@@ -30,7 +30,7 @@ export interface StoreHoursAttributes {
     tuesday_open?: string;
     tuesday_closed?: string;
     wednesday_open?: string;
-    wednedsay_closed?: string;
+    wednesday_closed?: string;
     thursday_open?: string;
     thursday_closed?: string;
     friday_open?: string;
@@ -63,59 +63,59 @@ export interface StoreHoursAttributes {
         }
       },
       monday_open: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.TIME,
         allowNull: true
       },
       monday_closed: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.TIME,
         allowNull: true
       },
       tuesday_open: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.TIME,
         allowNull: true
       },
       tuesday_closed: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.TIME,
         allowNull: true
       },
       wednesday_open: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.TIME,
         allowNull: true
       },
-      wednedsay_closed: {
-        type: DataTypes.STRING(255),
+      wednesday_closed: {
+        type: DataTypes.TIME,
         allowNull: true
       },
       thursday_open: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.TIME,
         allowNull: true
       },
       thursday_closed: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.TIME,
         allowNull: true
       },
       friday_open: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.TIME,
         allowNull: true
       },
       friday_closed: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.TIME,
         allowNull: true
       },
       saturday_open: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.TIME,
         allowNull: true
       },
       saturday_closed: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.TIME,
         allowNull: true
       },
       sunday_open: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.TIME,
         allowNull: true
       },
       sunday_closed: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.TIME,
         allowNull: true
       },
       insert_date: {

@@ -1,7 +1,6 @@
 import { User } from "../../user/userType";
-const { authenticateToken } = require('./userAuthorization')
-import { AppError } from '../../../utils/appError.js';
 import { sendEmail } from '../../../utils/email';
+import {sendVerificationEmail, sendResetEmail} from '../../email/emailService'
 
 export { };
 const bcrypt = require('bcrypt')
@@ -9,7 +8,6 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken')
 const userService = require('../../user/userService')
-let refreshTokens: any = []
 const { checkNotAuthenticated } = require('./userAuthorization')
 const crypto = require('crypto')
 
@@ -17,7 +15,7 @@ const systemRoleService = require('./systemRole/systemRoleService')
 router.get('/auth/verify', async (req: any, res: any) => {
     try {
         const user : User = await userService.verifyUser(req.query.token)
-        if (user) return res.send(`Verification successful`)
+        if (user) return res.status(200).json({success: true})
     }
     catch (err : any){
         return res.status(400).json({ error: err.message })
@@ -34,26 +32,24 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
             role_id: await systemRoleService.getRoleId('USER'),
             first_name: req.body.first_name,
             last_name: req.body.last_name,
-            email_address: req.body.email_address,
+            email_address: req.body.email_address.toLowerCase(),
             password: hashedPass,
-            dob: '',
-            insert_date: Date.now(),
+            dob: req.body.dob,
+            state: req.body.state,
+            city: req.body.city,
+            country: req.body.country,
+            primary_phone: req.body.primary_phone,
+            gender: req.body.gender,
             active: true,
             is_verified: false,
             verify_token: crypto.randomBytes(32).toString('hex')
 
         }
-        const newUser : User = await userService.createUser(user)
-        const msg = {
-            to: newUser.email_address, // Change to your recipient
-            from: 'noreply@theproductindex.io', // Change to your verified sender
-            subject: 'Welcome to ProductIndex!',
-            text: newUser.first_name + ', Thank you for registering with us! We\'re happy that you\'re here. To complete your registration, verify your email address by clicking the button below',
-            html: `<strong>${req.headers.host}/api/auth/verify?token=${newUser.verify_token}</strong>`,
-        }
-        if (!sendEmail(msg)) return res.status(400).json({error: "Email not sent"})
+        const newUser = await userService.createUser(user)
+        const verificationLink = `${req.headers.origin}/verify?token=${newUser.verify_token}`
+        await sendVerificationEmail({first_name: newUser.first_name, verify_link: verificationLink, email_to: newUser.email_address})
 
-        return res.status(200).json({email_address: newUser.email_address})
+        return res.status(200).json(newUser)
     }
     catch (err: any) {
         return res.status(400).json({ error: err.message })
@@ -63,15 +59,26 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
 // Works with database
 router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
     try {
-        const user = await userService.getUserByEmail(req.body.email_address)
+        
+        const user = await userService.getUserByEmail(req.body.email_address.toLowerCase())
         if (!user) res.status(400).json({ "error": "Email address or password is incorrect" })
-        await bcrypt.compare(req.body.password, user.password, (err, resp) => {
+        await bcrypt.compare(req.body.password, user.password, async (err, resp) => {
             if (err) res.status(404)
             if (resp) {
                 const accessToken = generateAccessToken({ user_id: user.id })
                 const refreshToken = jwt.sign({ user_id: user.id }, process.env.REFRESH_TOKEN_SECRET)
                 const hashed_token = crypto.createHash('sha256').update(refreshToken).digest('hex')
-                userService.storeRefreshToken(user.id, hashed_token)
+                await userService.storeRefreshToken(user.id, hashed_token).catch((e)=> {res.status(400).json({error: e.message})})
+                res.cookie("access_token", accessToken, {
+                    httpOnly: true,
+                    Secure: true
+                })
+                res.cookie("refresh_token", refreshToken, {
+                    httpOnly: true,
+                    Secure: true
+                })
+                res.setHeader('Access-Control-Allow-Credentials', true);
+                
                 return res.status(200).json({ access_token: accessToken, refresh_token: refreshToken })
             }
             return res.status(400).json({ "error": "Email address or password is incorrect" })
@@ -83,22 +90,26 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
     }
 })
 
-router.delete('/auth/logout', authenticateToken, (req: any, res: any) => {
-
-    refreshTokens = refreshTokens.filter(token => token !== req.body.token)
-    res.sendStatus(204)
+router.delete('/auth/logout', async (req: any, res: any) => {
+    const hashed_token = crypto.createHash('sha256').update(req.cookies.refresh_token).digest('hex')
+    await userService.deleteRefreshToken(hashed_token).catch((err)=>{ res.status(400).json({error: err.message})})
+    res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
+    return res.sendStatus(204).json({})
 });
 
 // Works with database
 router.post('/auth/forgot-password', checkNotAuthenticated, async (req: any, res: any) => {
     try {
         let user: User = await userService.getUserByEmail(req.body.email_address)
-
+        if (!user) return res.status(200).json({})
         const resetToken = crypto.randomBytes(32).toString('hex');
         const hashedResetToken = crypto.createHash('sha256').update(resetToken).digest('hex')
-        const userResetTokenExpiry = Date.now() * 10 * 60 * 1000;
+        const userResetTokenExpiry = new Date(new Date().getTime() + 10 * 60000);
 
         userService.updateResetToken(user.email_address, hashedResetToken, userResetTokenExpiry);
+        const resetPasswordLink = `${req.headers.origin}/reset-password/{user.reset_token}`
+        await sendResetEmail({first_name: user.first_name, reset_link: resetPasswordLink, email_to: user.email_address})
 
         return res.status(200).json({ reset_token: resetToken, reset_token_expires: userResetTokenExpiry })
     }
@@ -114,16 +125,15 @@ router.post('/auth/reset-password/:resetToken', checkNotAuthenticated, async (re
         // Should check if we're saving and getting an encrypted resetToken from the database for comparison
         const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex')
         const user: User = await userService.getUserByResetToken(hashedToken)
-
         const newPassword = req.body.password
         const newPasswordConfirm = req.body.password_confirm
         if (user) {
-            if (user.password_reset_expires_in && user.password_reset_expires_in < Date.now()) {
-                res.status(400).json({ "error": "Token expired" })
+            if (user.reset_expires && user.reset_expires < new Date()) {
+                res.status(401).json({ "error": "Token expired" })
             }
             await userService.updatePassword(user.id, user.email_address, newPassword, newPasswordConfirm)
 
-            return res.status(200).send('success')
+            return res.status(200).send({'success': true})
         }
 
         return res.status(400).json({ error: 'Invalid token' })
@@ -135,30 +145,26 @@ router.post('/auth/reset-password/:resetToken', checkNotAuthenticated, async (re
  
 
 router.post('/auth/token', async (req, res) => {
-    const refreshToken = req.body.refresh_token
-    const userId = req.body.user_id
-    if (refreshToken == null) return res.sendStatus(401)
-    if (userId == null) return res.sendStatus(401)
+    const refreshToken = req.cookies.refresh_token
+    if (refreshToken == null) return res.sendStatus(403)
+
     const hashed_token = crypto.createHash('sha256').update(refreshToken).digest('hex')
-    const token = await userService.findRefreshToken(userId, hashed_token)
+    const token = await userService.findRefreshToken(hashed_token).catch((err)=>res.status(403).json({error: err.message}))
     if (!token) return res.sendStatus(403)
-    jwt.verify(token.refresh_token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403)
+    
+    res.clearCookie("access_token");
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+        if (err) return res.status(403).json({error: err.message})
         const accessToken = generateAccessToken({ user_id: user.user_id })
+        res.cookie("access_token", accessToken, {
+            httpOnly: true,
+            Secure: true
+        })
         return res.json({ access_token: accessToken })
     })
 })
 
 function generateAccessToken(user) {
-    // expiration time should be 15m in prod
-    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.NODE_ENV == 'development' ? '1440m' : '15m' })
-}
-
-function validUserRefreshToken(userId, refreshToken): Boolean {
-    const hashedRefreshToken = crypto.createHash('sha256').update(refreshToken).digest('hex')
-    const found = userService.validUserRefreshToken(userId, hashedRefreshToken)
-    if (found) return true
-
-    return false
+    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.NODE_ENV == 'development' ? '1440m' : '120m' })
 }
 module.exports = router

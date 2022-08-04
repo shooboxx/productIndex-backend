@@ -6,7 +6,9 @@ const rateLimit = require('express-rate-limit')
 const helmet = require('helmet')
 const morgan = require('morgan')
 const AppError = require('./utils/appError.js')
-import express from 'express'
+const express = require('express')
+const cors = require('cors')
+const cookieParser = require('cookie-parser')
 // Initialize the app
 const app = express();
 const bodyParser = require('body-parser')
@@ -37,7 +39,15 @@ const limiter = rateLimit({
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-
+const corsConfig = {
+     "origin": process.env.ALLOWED_CORS_URLS,
+     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+     "preflightContinue": false,
+     "optionsSuccessStatus": 204,
+     "credentials": true
+   }
+app.use(cors(corsConfig))
+app.use(cookieParser());
 app.use(express.json())
 app.use(methodOverride('_method'))
 app.use(helmet())

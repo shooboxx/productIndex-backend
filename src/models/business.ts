@@ -6,13 +6,12 @@ export interface BusinessAttributes {
   created_by: number;
   business_name: string;
   description?: string;
-  profile_banner_url?: string;
   profile_pic_url?: string;
   active: boolean;
   category?: string;
   insert_date: Date;
   update_date?: Date;
-  delete_date?: Date;
+  deleted_date?: Date;
 }
 
 module.exports = (sequelize, DataTypes) => {
@@ -24,13 +23,12 @@ module.exports = (sequelize, DataTypes) => {
     created_by!: number;
     business_name!: string;
     description?: string;
-    profile_banner_url?: string;
     profile_pic_url?: string;
     active!: boolean;
     category?: string;
     insert_date!: Date;
     update_date?: Date;
-    delete_date?: Date;
+    deleted_date?: Date;
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -40,7 +38,6 @@ module.exports = (sequelize, DataTypes) => {
       Business.belongsTo(models.Users, { foreignKey: "created_by" });
       Business.hasMany(models.BusinessStore, { foreignKey: "business_id" });
       Business.hasMany(models.BusinessTags, { foreignKey: "business_id" });
-      Business.hasMany(models.BusinessItem, { foreignKey: "business_id"});
       Business.hasMany(models.Product, {foreignKey: "business_id"});
 
     }
@@ -69,10 +66,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
         allowNull: true,
       },
-      profile_banner_url: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-      },
       profile_pic_url: {
         type: DataTypes.TEXT,
         allowNull: true,
@@ -93,7 +86,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: true,
       },
-      delete_date: {
+      deleted_date: {
         type: DataTypes.DATE,
         allowNull: true,
       },

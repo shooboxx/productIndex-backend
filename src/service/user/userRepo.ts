@@ -2,41 +2,44 @@ export {};
 import db from "../../models";
 import { User } from "./userType";
 const { Op } = require("sequelize");
-
+// TODO: Create a CreateUser interface for a minimized object
 const addUser = async (user: User) => {
-  await db.Users.create({
+  const {dataValues} = await db.Users.create({
     email_address: user.email_address,
     password: user.password,
     system_role_id: user.role_id,
     first_name: user.first_name,
     last_name: user.last_name,
     verify_token: user.verify_token,
-    insert_date: Date.now(),
-    update_date: Date.now(),
-  }).catch((err) => null);
-
-  return user;
+    gender: user.gender,
+    country: user.country,
+    city: user.city,
+    state: user.state,
+    date_of_birth: user.dob,
+    primary_phone_contact: user.primary_phone,
+  }).catch(() => null)
+  return dataValues;
 };
 
 const findUser = async (userId: number, emailAddress: string) => {
-  const user = await db.Users.findOne({ where:{
-      [Op.or]: [{email_address: emailAddress}, { id: userId}]}
+  const user = await db.Users.findOne({ where: {
+      [Op.or]: [{email_address: emailAddress, deleted_date: null}, { id: userId, deleted_date: null}]}
   });  
   if (!user) {
-    return;
+    return null;
   }
   return user.dataValues;
 };
 
 const findUserByResetToken = async (resetToken: string) => {
-  const user = await db.Users.findOne({ where: { reset_token: resetToken } });
+  const user = await db.Users.findOne({ where: { reset_token: resetToken, deleted_date: null } });
   if (!user) return null;
 
   return user.dataValues;
 };
 
 const findUserByVerificationToken = async (verifyToken: string) => {
-  const user = await db.Users.findOne({ where: { verify_token: verifyToken } });
+  const user = await db.Users.findOne({ where: { verify_token: verifyToken, deleted_date: null } });
   if (!user) return null;
 
   return user.dataValues;
@@ -47,24 +50,20 @@ const updateUser = async (user: User) => {
     {
       first_name: user.first_name,
       last_name: user.last_name,
-      password: user.password,
-      dob: user.dob,
+      date_of_birth: user.dob,
       gender: user.gender,
       profile_picture_url: user.profile_picture_url,
       country: user.country,
       city: user.city,
-      primary_phone: user.primary_phone,
-      address: user.address,
+      primary_phone_contact: user.primary_phone,
+      state: user.state,
       is_verified: user.is_verified,
-      reset_expires: user.password_reset_expires_in, // TODO: Change dates to dates and not a number
-      reset_token: user.password_reset_token,
       active: user.active,
-      deleted_date: user.deleted_date,
-      update_date: Date.now(),
     },
     {
       where: {
         id: user.id,
+        deleted_date: null
       },
     }
   );
@@ -72,30 +71,45 @@ const updateUser = async (user: User) => {
 };
 
 const storeRefreshToken = async (user_id: number, refreshToken: string) => {
-  await db.UserTokens.create({
+  const { dataValues } = await db.UserTokens.create({
     user_id: user_id,
     refresh_token: refreshToken,
-    insert_date: Date.now(),
-  });
+    insert_date: new Date()
+  }).catch((e)=> {throw e});
+
+  return dataValues
 };
 
-const findRefreshToken = async (userId: number, refreshToken: string) => {
+const findRefreshToken = async (refreshToken: string) => {
   const token = await db.UserTokens.findOne({
-    where: { user_id: userId, refresh_token: refreshToken },
+    where: {refresh_token: refreshToken },
   });
   if (!token) {
-    return;
+    return null;
   }
   return token.dataValues;
 };
 
-const clearRefreshTokens = (userId) => {
-  db.UserTokens.destroy({
+const clearRefreshTokens = async (userId) => {
+  await db.UserTokens.destroy({
     where: {
       user_id: userId,
     },
   });
 };
+const deleteRefreshToken = async (token) => {
+  await db.UserTokens.destroy({
+    where: {
+      refresh_token: token
+    },
+  }).catch((e)=> {throw e});
+};
+
+
+
+//TODO: Update user password
+// TODO: Delete user account
+//TODO: Create reset token + reset expiry
 
 module.exports = {
   addUser,
@@ -106,4 +120,5 @@ module.exports = {
   storeRefreshToken,
   findRefreshToken,
   clearRefreshTokens,
+  deleteRefreshToken
 };

@@ -1,33 +1,45 @@
 "use strict";
 const { Model } = require("sequelize");
 
-export interface ProductAttributes {
+export interface storeContactsAttributes {
   id: number;
-  business_id: number;
-  product_name: string;
-  product_type?: string;
-  image_url?: string;
+  business_store_id : number;
+  email?: string;
+  phone?: string;
+  phone_2?: string;
+  phone_3?: string;
+  facebook_url?: string;
+  twitter_url?: string;
+  instagram_url?: string;
+  business_website?: string;
   insert_date: Date;
   update_date: Date;
 }
 
 module.exports = (sequelize, DataTypes) => {
-  class Product extends Model<ProductAttributes> implements ProductAttributes {
+  class StoreContacts
+    extends Model<storeContactsAttributes>
+    implements storeContactsAttributes
+  {
     id!: number;
-    business_id!: number;
-    product_name!: string;
-    product_type?: string;
-    image_url?: string;
+    business_store_id!: number;
+    email?: string;
+    phone?: string;
+    phone_2?: string;
+    phone_3?: string;
+    facebook_url?: string;
+    twitter_url?: string;
+    instagram_url?: string;
+    business_website?: string;
     insert_date!: Date;
     update_date!: Date;
-
+    
     static associate(models) {
-        Product.hasMany(models.InventoryItem, { as: "inventory_items", foreignKey: "product_id"});
-        Product.belongsTo(models.Business, { as: "business", foreignKey: "business_id"});
+      StoreContacts.belongsTo(models.BusinessStore, {foreignKey: "business_store_id"});
+
     }
   }
-
-  Product.init(
+  StoreContacts.init(
     {
       id: {
         autoIncrement: true,
@@ -35,35 +47,43 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         primaryKey: true,
       },
-      business_id: {
+      business_store_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "business",
+          model: "business_store",
           key: "id",
         },
       },
-      product_name: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-      },
-      product_type: {
-        type: DataTypes.STRING(255),
-        allowNull: true,
-      },
-      product_key: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-      },
-      image_url: {
+      email: {
         type: DataTypes.TEXT,
         allowNull: true,
       },
-      description: {
+      phone: {
         type: DataTypes.STRING(255),
         allowNull: true,
       },
-      tag: {
+      phone_2: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
+      phone_3: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
+      facebook_url: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
+      twitter_url: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
+      instagram_url: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
+      business_website: {
         type: DataTypes.STRING(255),
         allowNull: true,
       },
@@ -75,26 +95,22 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: false,
       },
-      deleted_date: {
-        type: DataTypes.DATE,
-        allowNull: true,
-      }
     },
     {
       sequelize,
-      tableName: "product",
+      tableName: "store_contact",
       schema: "public",
       timestamps: true,
       createdAt: 'insert_date',
       updatedAt: 'update_date',
       indexes: [
         {
-          name: "product_pkey",
+          name: "store_contact_pkey",
           unique: true,
           fields: [{ name: "id" }],
-        },
+        }
       ],
     }
   );
-  return Product;
+  return StoreContacts;
 };

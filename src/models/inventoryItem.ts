@@ -3,10 +3,11 @@ const { Model } = require("sequelize");
 
 export interface InventoryItemAttributes {
   id: number;
-  business_item_id: number;
+  product_id: number;
   business_store_id: number;
-  price?: number;
   quantity?: number;
+  available: boolean;
+  show_price: boolean;
   insert_date?: Date;
   update_date?: Date;
 }
@@ -17,16 +18,17 @@ module.exports = (sequelize, DataTypes) => {
     implements InventoryItemAttributes
   {
     id!: number;
-    business_item_id!: number;
+    product_id!: number;
     business_store_id!: number;
-    price?: number;
     quantity?: number;
+    available!: boolean;
+    show_price!: boolean;
     insert_date?: Date;
     update_date?: Date;
 
     static associate(models) {
-      InventoryItem.belongsTo(models.BusinessItem, {
-        foreignKey: "business_item_id",
+      InventoryItem.belongsTo(models.Product, {
+        foreignKey: "product_id",
       });
       InventoryItem.belongsTo(models.BusinessStore, {
         foreignKey: "business_store_id",
@@ -42,11 +44,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         primaryKey: true,
       },
-      business_item_id: {
+      product_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "business_item",
+          model: "product",
           key: "id",
         },
       },
@@ -58,12 +60,20 @@ module.exports = (sequelize, DataTypes) => {
           key: "id",
         },
       },
+      quantity: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
       price: {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
-      quantity: {
-        type: DataTypes.INTEGER,
+      available: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+      },
+      show_price: {
+        type: DataTypes.BOOLEAN,
         allowNull: true,
       },
       insert_date: {

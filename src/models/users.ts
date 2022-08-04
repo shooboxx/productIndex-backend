@@ -14,13 +14,13 @@ export interface UsersAttributes {
   gender?: string;
   country?: string;
   city?: string;
-  address?: string;
+  state?: string;
   profile_pic_url?: string;
   active?: boolean;
   is_verified?: boolean;
   verify_token?: string;
   verify_expires?: string;
-  verify_changes?: string;
+  verify_changes?: Date;
   reset_token?: string;
   reset_expires?: string;
   primary_phone_contact?: string;
@@ -41,13 +41,13 @@ module.exports = (sequelize : any, DataTypes : any) => {
     gender?: string;
     country?: string;
     city?: string;
-    address?: string;
+    state?: string;
     profile_pic_url?: string;
     active?: boolean;
     is_verified?: boolean;
     verify_token?: string;
     verify_expires?: string;
-    verify_changes?: string;
+    verify_changes?: Date;
     reset_token?: string;
     reset_expires?: string;
     primary_phone_contact?: string;
@@ -62,7 +62,6 @@ module.exports = (sequelize : any, DataTypes : any) => {
      */
     static associate(models : any) {
       // define association here
-      // console.log(models)
     }
   }
   Users.init({
@@ -112,7 +111,7 @@ module.exports = (sequelize : any, DataTypes : any) => {
       type: DataTypes.STRING(255),
       allowNull: true
     },
-    address: {
+    state: {
       type: DataTypes.STRING(255),
       allowNull: true
     },
@@ -137,7 +136,7 @@ module.exports = (sequelize : any, DataTypes : any) => {
       allowNull: true
     },
     verify_changes: {
-      type: DataTypes.TEXT,
+      type: DataTypes.DATE,
       allowNull: true
     },
     reset_token: {
