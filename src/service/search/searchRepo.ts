@@ -1,83 +1,79 @@
 import db from "../../models";
 const { Op } = require("sequelize");
 
-const businessSearch = async (searchCriteria: string, location: string) => { 
-  const businesses = await db.Business.findAll({
+const businessSearch = async (searchCriteria: string, location: string) => {
+  const store_location = location.toLocaleUpperCase()
+  const businesses = await db.BusinessStore.findAll({
+    attributes: {
+      include: [
+        [
+          db.sequelize.literal(`(
+            select
+              round(avg(review.rating_number),1)
+            from
+              review as review
+            where
+              review.store_id = "BusinessStore".id
+                )`),
+            "avg_star_rating",
+        ],
+        [
+          db.sequelize.literal(`(
+            select
+              count(review.rating_number)
+            from
+              review as review
+            where
+              review.store_id = "BusinessStore".id
+                )`),
+            "review_count",
+        ],
+      ],
+      where: { city: store_location, temp_or_perm_closure: { [Op.is]: null } },
+    },
     include: [
       {
-        model: db.BusinessTags,
+        model: db.StoreHours,
+        attributes: { exclude: ["id", "insert_date", "update_date"] },
       },
       {
-        model: db.BusinessStore,
-        attributes: [
-          [
-            db.sequelize.literal(`(
-                select
-                  round(avg(review.rating_number),1)
-                from
-                  review as review
-                where
-                  review.store_id = "BusinessStores".id
-                    )`),
-            "avg_star_rating",
+        model: db.Business,
+        where: {
+          [Op.or]: [
+            {
+              business_name: db.sequelize.where(
+                db.sequelize.fn("METAPHONE", db.sequelize.col("business_name"), 10),
+                Op.like,
+                db.sequelize.fn(
+                  "CONCAT",
+                  "%",
+                  db.sequelize.fn("METAPHONE", searchCriteria, 10),
+                  "%"
+                )
+              ),
+            },
+            {
+              category: db.sequelize.where(
+                db.sequelize.fn("METAPHONE", db.sequelize.col("category"), 10),
+                Op.like,
+                db.sequelize.fn(
+                  "CONCAT",
+                  "%",
+                  db.sequelize.fn("METAPHONE", searchCriteria, 10),
+                  "%"
+                )
+              ),
+            },
           ],
-          [
-            db.sequelize.literal(`(
-                select
-                  count(review.rating_number)
-                from
-                  review as review
-                where
-                  review.store_id = "BusinessStores".id
-                    )`),
-            "review_count",
-          ],
-          "id",
-          "unique_name",
-          "country",
-          "city",
-          "temp_or_perm_closure",
-          "address_line_1",
-          "address_line_2",
-        ],
-        where: { city: location, temp_or_perm_closure: { [Op.is]: null } },
+          [Op.and]: [{ deleted_date: { [Op.is]: null } }],
+        },
         include: [
           {
-            model: db.StoreHours,
-            attributes: { exclude: ["id", "insert_date", "update_date"] },
+            model: db.BusinessTags,
           },
-        ],
-      },
-    ],
-    where: {
-      [Op.or]: [
-        {
-          business_name: db.sequelize.where(
-            db.sequelize.fn("METAPHONE", db.sequelize.col("business_name"), 10),
-            Op.like,
-            db.sequelize.fn(
-              "CONCAT",
-              "%",
-              db.sequelize.fn("METAPHONE", searchCriteria, 10),
-              "%"
-            )
-          ),
-        },
-        {
-          category: db.sequelize.where(
-            db.sequelize.fn("METAPHONE", db.sequelize.col("category"), 10),
-            Op.like,
-            db.sequelize.fn(
-              "CONCAT",
-              "%",
-              db.sequelize.fn("METAPHONE", searchCriteria, 10),
-              "%"
-            )
-          ),
-        },
-      ],
-      [Op.and]: [{ delete_date: { [Op.is]: null } }],
-    },
+        ]
+      }
+    ]
   });
   if (!businesses) {
     return null;
@@ -85,88 +81,84 @@ const businessSearch = async (searchCriteria: string, location: string) => {
   return businesses;
 };
 
-const productSearch = async (searchCriteria: string,product_type: string,location: string) => {
-  const businesses = await db.Business.findAll({
+const productSearch = async (searchCriteria: string, product_type: string, location: string) => {
+  const type = product_type.toLocaleUpperCase()
+  const store_location = location.toLocaleUpperCase()
+  const businesses = await db.BusinessStore.findAll({
+    attributes: {
+      include: [
+        [
+          db.sequelize.literal(`(
+            select
+              round(avg(review.rating_number),1)
+            from
+              review as review
+            where
+              review.store_id = "BusinessStore".id
+                )`),
+            "avg_star_rating",
+        ],
+        [
+          db.sequelize.literal(`(
+            select
+              count(review.rating_number)
+            from
+              review as review
+            where
+              review.store_id = "BusinessStore".id
+                )`),
+            "review_count",
+        ],
+      ],
+      where: { city: store_location, temp_or_perm_closure: { [Op.is]: null } },
+    },
     include: [
       {
-        model: db.BusinessTags,
+        model: db.StoreHours,
+        attributes: { exclude: ["id", "insert_date", "update_date"] },
       },
       {
-        model: db.BusinessStore,
-        attributes: [
-          [
-            db.sequelize.literal(`(
-                select
-                  round(avg(review.rating_number),1)
-                from
-                  review as review
-                where
-                  review.store_id = "BusinessStores".id
-                    )`),
-            "avg_star_rating",
+        model: db.Business,
+        where: {
+          [Op.or]: [
+            {
+              product_name: db.sequelize.where(
+                db.sequelize.fn("METAPHONE", db.sequelize.col("product_name"), 10),
+                Op.like,
+                db.sequelize.fn(
+                  "CONCAT",
+                  "%",
+                  db.sequelize.fn("METAPHONE", searchCriteria, 10),
+                  "%"
+                )
+              ),
+            },
+            {
+              tag: db.sequelize.where(
+                db.sequelize.fn("METAPHONE", db.sequelize.col("tag"), 10),
+                Op.like,
+                db.sequelize.fn(
+                  "CONCAT",
+                  "%",
+                  db.sequelize.fn("METAPHONE", searchCriteria, 10),
+                  "%"
+                )
+              ),
+            },
           ],
-          [
-            db.sequelize.literal(`(
-                select
-                  count(review.rating_number)
-                from
-                  review as review
-                where
-                  review.store_id = "BusinessStores".id
-                    )`),
-            "review_count",
-          ],
-          "id",
-          "unique_name",
-          "country",
-          "city",
-          "temp_or_perm_closure",
-          "address_line_1",
-          "address_line_2",
-        ],
-        where: { city: location, temp_or_perm_closure: { [Op.is]: null } },
+          [Op.and]: [{ deleted_date: { [Op.is]: null } }],
+        },
         include: [
           {
-            model: db.StoreHours,
-            attributes: { exclude: ["id", "insert_date", "update_date"] },
+            model: db.BusinessTags,
           },
-        ],
-      },
-      {
-        model: db.Product,
-        attributes: [],
-        where: { product_type: product_type },
-      },
-    ],
-    where: {
-      [Op.or]: [
-        {
-          product_name: db.sequelize.where(
-            db.sequelize.fn("METAPHONE", db.sequelize.col("product_name"), 10),
-            Op.like,
-            db.sequelize.fn(
-              "CONCAT",
-              "%",
-              db.sequelize.fn("METAPHONE", searchCriteria, 10),
-              "%"
-            )
-          ),
-        },
-        {
-          tag: db.sequelize.where(
-            db.sequelize.fn("METAPHONE", db.sequelize.col("tag"), 10),
-            Op.like,
-            db.sequelize.fn(
-              "CONCAT",
-              "%",
-              db.sequelize.fn("METAPHONE", searchCriteria, 10),
-              "%"
-            )
-          ),
-        },
-      ],
-      [Op.and]: [{ delete_date: { [Op.is]: null } }],
-    },
+          {
+            model: db.Product,
+            attributes: [],
+            where: { product_type: type },
+          },
+        ]
+      }]
   });
   if (!businesses) {
     return null;
