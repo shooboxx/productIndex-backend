@@ -1,7 +1,7 @@
 import { InventoryItem } from './businessInventoryType';
 import { InventoryErrors } from './inventoryConts';
 import AppError from '../../utils/appError.js'
-import { StoreErrors } from 'service/store/storeConst';
+import { StoreErrors } from '../store/storeConst';
 
 import { InventoryRepo } from './businessInventoryRepo';
 

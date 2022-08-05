@@ -25,6 +25,7 @@ let business = require('./service/business/businessController')
 let review = require('./service/reviews/reviewController')
 let user = require('./service/user/userController')
 let search = require('./service/search/searchController')
+let inventory = require('./service/inventory/businessInventoryController')
 
 
 // Setup server port
@@ -54,12 +55,13 @@ app.use(helmet())
 app.use('/api/auth', limiter)
 
 app.use('/api',business)
-app.use('/api',product);
+app.use('/api',product)
 app.use('/api',store)
 app.use('/api',userAuth)
 app.use('/api',review)
 app.use('/api',user)
 app.use('/api',search)
+app.use('/api',inventory)
 
 
 app.use(hpp())

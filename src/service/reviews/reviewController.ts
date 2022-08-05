@@ -6,7 +6,7 @@ import { ReviewService } from './reviewService';
 const { authenticateToken } = require('../auth/user/userAuthorization')
 import { Review, ReportedReview } from './reviewType'
 
-router.get('/reviews', authenticateToken, async (req, res) => {
+router.get('/reviews', async (req, res) => {
     try {
         const {storeId} = req.query
         return res.status(200).json(await ReviewService.getReviewsByStoreId(storeId))
@@ -41,9 +41,8 @@ router.post('/review', authenticateToken, async (req, res) => {
         res.status(200).json({ "error": e.message })
     }
 })
-router.post('/store/:storeId/reviews/:reviewId', authenticateToken, async (req, res) => {
+router.post('/reviews/:reviewId', authenticateToken, async (req, res) => {
     try {
-        const storeId = req.params.storeId
         const reviewId = parseInt(req.params.reviewId)
         const inappropriateReview : ReportedReview = {
             review_id: reviewId,
@@ -51,7 +50,7 @@ router.post('/store/:storeId/reviews/:reviewId', authenticateToken, async (req, 
             reported_reason: req.body.reported_reason,
 
         }
-        return res.status(200).json(await ReviewService.markReviewAsInappropriate(storeId, inappropriateReview))
+        return res.status(200).json(await ReviewService.markReviewAsInappropriate(inappropriateReview))
     }
     catch (e: any) {
         res.status(e.statusCode).json({ "error": e.message })
