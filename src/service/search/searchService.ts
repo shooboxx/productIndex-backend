@@ -16,7 +16,7 @@ const productFuzzySearch = async (searchCriteria: string, product_type: string, 
     if (!searchCriteria) throw Error("Business name is required");
     try {
       return await searchRepo.productSearch(
-        searchCriteria.trim().toLocaleUpperCase(), product_type
+        searchCriteria.trim().toLocaleUpperCase(), product_type, location
       );
     } catch (e) {
       throw e;
