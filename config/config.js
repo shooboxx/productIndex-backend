@@ -20,6 +20,13 @@ module.exports = {
     "password": process.env.PROD_POSTGRES_PASSWORD,
     "database": process.env.PROD_POSTGRES_DB,
     "host": process.env.PROD_DB_HOST,
-    "dialect": "postgres"
+    "dialect": "postgres",
+    "port": process.env.PROD_POSTGRES_PORT,
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false 
+      }
+    }
   }
 }
