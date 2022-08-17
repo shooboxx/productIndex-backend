@@ -77,6 +77,7 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
                     httpOnly: true,
                     Secure: true
                 })
+                res.cookie("isLoggedIn", true)
                 res.setHeader('Access-Control-Allow-Credentials', true);
                 
                 return res.status(200).json({ access_token: accessToken, refresh_token: refreshToken })
@@ -95,6 +96,7 @@ router.delete('/auth/logout', async (req: any, res: any) => {
     await userService.deleteRefreshToken(hashed_token).catch((err)=>{ res.status(400).json({error: err.message})})
     res.clearCookie("access_token");
     res.clearCookie("refresh_token");
+    res.clearCookie("isLoggedIn")
     return res.sendStatus(204).json({})
 });
 
