@@ -87,7 +87,6 @@ const deleteUser = async (userId: number) => {
 };
 
 const storeRefreshToken = async (userId: number, refreshToken: string) => {
-  console.log(userId, refreshToken)
   if (!refreshToken) throw new AppError(UserErrors.RefreshTokenRequired, 400);
   if (!userId) throw new AppError(UserErrors.UserIdRequired, 400);
   return await userRepo.storeRefreshToken(userId, refreshToken);

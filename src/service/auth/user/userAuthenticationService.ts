@@ -73,6 +73,11 @@ const resetPassword = async (resetToken : string, newPassword : string, newPassw
     return true
 }
 
+const changePassword = async (userId : number, newPassword : string, newPasswordConfirm : string) => {
+    await userService.updatePassword(userId, newPassword, newPasswordConfirm).catch(err => {throw err})
+    return true
+}
+
 const refreshAccessToken = async (refreshToken : string) : Promise<String>=> {
     let accessToken = ''
     if (!refreshToken) return accessToken
@@ -83,7 +88,7 @@ const refreshAccessToken = async (refreshToken : string) : Promise<String>=> {
     if (!token) return accessToken
 
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-        if (err) console.log(err.message)
+        if (err) return accessToken
         accessToken =  _generateAccessToken({ user_id: user.user_id })
     })
     return accessToken
@@ -114,5 +119,6 @@ export const UserAuthentication = {
     forgotPasswordRequest,
     resetPassword,
     refreshAccessToken,
-    logout
+    logout,
+    changePassword
 }

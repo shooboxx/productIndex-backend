@@ -6,7 +6,7 @@ export { };
 const express = require('express');
 const router = express.Router();
 const userService = require('../../user/userService')
-const { checkNotAuthenticated } = require('./userAuthorization')
+const { checkNotAuthenticated, authenticateToken } = require('./userAuthorization')
 
 router.get('/auth/verify', async (req: any, res: any) => {
     try {
@@ -101,7 +101,26 @@ router.post('/auth/token', async (req, res) => {
         httpOnly: true,
         Secure: true
     })
-    return res.json({ access_token: accessToken })
+    return res.json({ success: true })
+})
+
+router.put('/auth/password', authenticateToken, async (req, res) => {
+    try {
+    const currentPassword = req.body.current_password
+    const newPassword = req.body.new_password
+    const newPasswordConfirm = req.body.new_password_confirm
+    
+    const foundUser = await userService.getUserById(req.user_id)
+    const user = await UserAuthentication.login(foundUser.email_address, currentPassword)
+    await UserAuthentication.changePassword(user.id, newPassword, newPasswordConfirm)
+    return res.json({ success: true })
+    
+}
+    catch (e : any) {
+        return res.status(400).send(e.message)
+    }
+
+
 })
 
 module.exports = router
