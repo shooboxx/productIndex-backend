@@ -6,19 +6,12 @@ const {authenticateToken} = require('../auth/user/userAuthorization.ts')
 
 router.get('/users', async (req, res) => {
     let user = {}
+    const {id, email} = req.query
     try {
-        const {id, email} = req.query
-        if (id) {
-            user = await userService.getUserById(id)
-            if (user) user['password'] = undefined
-            return res.status(200).json(user)
-        }
-        if (email) {
-            user = await userService.getUserByEmail(email)
-            if (user) user['password'] = undefined
-            return res.status(200).json(user)
-        }
-        if (user) user['password'] = undefined
+        if (id) user = await userService.getUserById(id)
+        if (email) user = await userService.getUserByEmail(email)
+        user['password'] = undefined
+        user['deleted_date'] = undefined
         return res.status(200).json(user)
     }
     catch (e : any) {
