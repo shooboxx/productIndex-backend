@@ -101,7 +101,7 @@ router.post('/auth/token', async (req, res) => {
         httpOnly: true,
         Secure: true
     })
-    return res.json({ success: true })
+    return res.status(204).json({ success: true })
 })
 
 router.put('/auth/password', authenticateToken, async (req, res) => {
@@ -109,6 +109,7 @@ router.put('/auth/password', authenticateToken, async (req, res) => {
     const currentPassword = req.body.current_password
     const newPassword = req.body.new_password
     const newPasswordConfirm = req.body.new_password_confirm
+    if ((currentPassword === newPassword) || (currentPassword === newPasswordConfirm) ) return res.json({ success: true })
     
     const foundUser = await userService.getUserById(req.user_id)
     const user = await UserAuthentication.login(foundUser.email_address, currentPassword)
@@ -117,7 +118,7 @@ router.put('/auth/password', authenticateToken, async (req, res) => {
     
 }
     catch (e : any) {
-        return res.status(400).send(e.message)
+        return res.status(400).send({error: e.message})
     }
 
 

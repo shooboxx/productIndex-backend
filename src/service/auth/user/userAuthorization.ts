@@ -1,7 +1,7 @@
 // Define roles and create middlewares that control authorization within the application
 const jwt = require('jsonwebtoken')
 import AppError from '../../../utils/appError.js'
-import { AuthErrors } from './authConst.js'
+import { AuthErrors } from './authConst'
 
 function authenticateToken (req, res, next) {
     const token = req.cookies.access_token
