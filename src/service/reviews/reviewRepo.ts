@@ -1,6 +1,5 @@
 import { Review, ReportedReview } from "./reviewType"
 import db from "../../models";
-import { User } from '../user/userType';
 
 const findReviewById = async (reviewId : number) : Promise<Review> => {
     return await db.Review.findOne({
