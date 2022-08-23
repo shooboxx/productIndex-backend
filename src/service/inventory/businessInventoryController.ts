@@ -8,7 +8,7 @@ router.get('/store/:storeId/inventory', async (req, res) => {
     try {
         const storeId = req.params.storeId 
         const inventory_items = await InventoryService.getAllStoreItems(storeId)
-        return res.status(200).json({inventory_items})
+        return res.status(200).json(inventory_items)
     }
     catch (e : any) {
         return res.status(200).json({"error": e.message})

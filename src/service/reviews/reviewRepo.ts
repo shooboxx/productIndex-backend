@@ -8,8 +8,9 @@ const findReviewById = async (reviewId : number) : Promise<Review> => {
             deleted_date: null
         },
         attributes: {
-            exclude: ['deleted_date', 'insert_date', 'update_date']
-        }
+            exclude: ['deleted_date', 'user_id']
+        },
+        include: [{model: db.Users, attributes: ['first_name', 'last_name', 'profile_pic_url']}]
     })
 }
 
@@ -20,8 +21,9 @@ const findReviewsByStoreId = async (storeId : number) : Promise<Review[]> => {
             deleted_date: null
         },
         attributes: {
-            exclude: ['deleted_date', 'insert_date', 'update_date']
-        }
+            exclude: ['deleted_date', 'user_id']
+        },
+        include: [{model: db.Users, attributes: ['first_name', 'last_name', 'profile_pic_url']}]
     })
 }
 
@@ -34,8 +36,9 @@ const findUserStoreReview = async (userId: number, storeId: number) => {
             deleted_date: null 
         },
         attributes: {
-            exclude: ['deleted_date', 'insert_date', 'update_date']
-        }
+            exclude: ['deleted_date', 'user_id']
+        },
+        include: [{model: db.Users, attributes: ['first_name', 'last_name', 'profile_pic_url']}]
     }).catch(e => {throw new Error(e.message)})
 }
 

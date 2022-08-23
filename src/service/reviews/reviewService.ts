@@ -33,7 +33,9 @@ const createReview = async (newReview: Review) => {
         const found = await ReviewRepo.findUserStoreReview(newReview.user_id, newReview.store_id)
         if (found) throw new Error(ReviewsErrorsMessages.UserAlreadyReviewedStore)
         
-        return await ReviewRepo.createReview(newReview)
+        const createdReview =  await ReviewRepo.createReview(newReview)
+        createdReview.deleted_date = undefined
+        return createdReview
     }
     catch (e : any) {
         throw new AppError(e.message, e.statusCode || 400)
@@ -49,11 +51,10 @@ const updateReview = async (updatedReview: Review) => {
     }
 }
 
-const markReviewAsInappropriate = async (storeId, reportedReview : ReportedReview) => {
+const markReviewAsInappropriate = async (reportedReview : ReportedReview) => {
     try {   
         const review : Review = await ReviewRepo.findReviewById(reportedReview.review_id)
         if (!review) throw new AppError(ReviewsErrorsMessages.ReviewNotFound, 404)
-        if (review.store_id != storeId) throw new AppError(ReviewsErrorsMessages.ReviewNotFound, 404)
         const userReportedReview = await ReviewRepo.findUserReportedReview(reportedReview.review_id, reportedReview.reported_by)
         if (userReportedReview) throw new AppError(ReviewsErrorsMessages.ReviewAlreadyReported)
         reportedReview.reported_reason = `${ReviewsTriggerMessages.USER_MARKED_REVIEW_INAPPROPRIATE} ${reportedReview.reported_reason}`

@@ -1,6 +1,6 @@
-if (process.env.NODE_ENV !== 'production') {
+// if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
-}
+// }
 import db from './models';
 const rateLimit = require('express-rate-limit')
 const helmet = require('helmet')
@@ -55,7 +55,7 @@ app.use(helmet())
 app.use('/api/auth', limiter)
 
 app.use('/api',business)
-app.use('/api',product);
+app.use('/api',product)
 app.use('/api',store)
 app.use('/api',userAuth)
 app.use('/api',review)
@@ -82,14 +82,13 @@ app.use((err, req, res, next) => {
        message: err.message
   })
 })
-
 db.sequelize
 .authenticate()
 .then(() => {
     app.listen(port, function () {
         console.log("Running RestHub on port " + port);
       })
-}).catch((err : any) => console.log(err));
+}).catch((err : any) => {console.log(err.message)});
 
 // Launch app to listen to specified port
 

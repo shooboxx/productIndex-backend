@@ -19,7 +19,7 @@ export interface User {
     reset_token?: string,
     reset_expires?: Date
     password_last_updated?: number
-    deleted_date?: number
+    deleted_date?: Date
     insert_date?: Date,
     update_date?: Date,
 }

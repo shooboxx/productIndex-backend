@@ -1,21 +1,17 @@
 import { User } from "../../user/userType";
-import { sendEmail } from '../../../utils/email';
 import {sendVerificationEmail, sendResetEmail} from '../../email/emailService'
+import { UserAuthentication } from './userAuthenticationService';
 
 export { };
-const bcrypt = require('bcrypt')
 const express = require('express');
 const router = express.Router();
-const jwt = require('jsonwebtoken')
 const userService = require('../../user/userService')
-const { checkNotAuthenticated } = require('./userAuthorization')
-const crypto = require('crypto')
+const { checkNotAuthenticated, authenticateToken } = require('./userAuthorization')
 
-const systemRoleService = require('./systemRole/systemRoleService')
 router.get('/auth/verify', async (req: any, res: any) => {
     try {
-        const user : User = await userService.verifyUser(req.query.token)
-        if (user) return res.status(200).json({success: true})
+        const verified : User = await userService.verifyUser(req.query.token)
+        if (verified) return res.status(200).json({success: true})
     }
     catch (err : any){
         return res.status(400).json({ error: err.message })
@@ -23,29 +19,9 @@ router.get('/auth/verify', async (req: any, res: any) => {
     res.sendStatus(400)
 })
 
-// Works with database
 router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) => {
     try {
-        const hashedPass = await bcrypt.hash(req.body.password, 10)
-        const user: User = {
-            id: 1,
-            role_id: await systemRoleService.getRoleId('USER'),
-            first_name: req.body.first_name,
-            last_name: req.body.last_name,
-            email_address: req.body.email_address.toLowerCase(),
-            password: hashedPass,
-            dob: req.body.dob,
-            state: req.body.state,
-            city: req.body.city,
-            country: req.body.country,
-            primary_phone: req.body.primary_phone,
-            gender: req.body.gender,
-            active: true,
-            is_verified: false,
-            verify_token: crypto.randomBytes(32).toString('hex')
-
-        }
-        const newUser = await userService.createUser(user)
+        const newUser = await UserAuthentication.register(req.body)
         const verificationLink = `${req.headers.origin}/verify?token=${newUser.verify_token}`
         await sendVerificationEmail({first_name: newUser.first_name, verify_link: verificationLink, email_to: newUser.email_address})
 
@@ -56,34 +32,24 @@ router.post('/auth/register', checkNotAuthenticated, async (req: any, res: any) 
     }
 
 });
-// Works with database
+
 router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
     try {
-        
-        const user = await userService.getUserByEmail(req.body.email_address.toLowerCase())
-        if (!user) res.status(400).json({ "error": "Email address or password is incorrect" })
-        await bcrypt.compare(req.body.password, user.password, async (err, resp) => {
-            if (err) res.status(404)
-            if (resp) {
-                const accessToken = generateAccessToken({ user_id: user.id })
-                const refreshToken = jwt.sign({ user_id: user.id }, process.env.REFRESH_TOKEN_SECRET)
-                const hashed_token = crypto.createHash('sha256').update(refreshToken).digest('hex')
-                await userService.storeRefreshToken(user.id, hashed_token).catch((e)=> {res.status(400).json({error: e.message})})
-                res.cookie("access_token", accessToken, {
-                    httpOnly: true,
-                    Secure: true
-                })
-                res.cookie("refresh_token", refreshToken, {
-                    httpOnly: true,
-                    Secure: true
-                })
-                res.setHeader('Access-Control-Allow-Credentials', true);
-                
-                return res.status(200).json({ access_token: accessToken, refresh_token: refreshToken })
-            }
-            return res.status(400).json({ "error": "Email address or password is incorrect" })
-        })
 
+        const user = await UserAuthentication.login(req.body.email_address, req.body.password)
+        await userService.storeRefreshToken(user.id, user.hashed_refresh_token).catch((e)=> {throw e})
+        res.cookie("access_token", user.access_token, {
+            httpOnly: true,
+            Secure: true
+        })
+        res.cookie("refresh_token", user.refresh_token, {
+            httpOnly: true,
+            Secure: true
+        })
+        res.cookie("isLoggedIn", true)
+        res.setHeader('Access-Control-Allow-Credentials', true);   
+        
+        return res.status(200).json({ "success" : true })
     }
     catch (e: any) {
         return res.status(200).json({ "error": e.message })
@@ -91,80 +57,71 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
 })
 
 router.delete('/auth/logout', async (req: any, res: any) => {
-    const hashed_token = crypto.createHash('sha256').update(req.cookies.refresh_token).digest('hex')
-    await userService.deleteRefreshToken(hashed_token).catch((err)=>{ res.status(400).json({error: err.message})})
+    await UserAuthentication.logout(req.cookies.refresh_token)
     res.clearCookie("access_token");
     res.clearCookie("refresh_token");
-    return res.sendStatus(204).json({})
+    res.clearCookie("isLoggedIn")
+    return res.status(204).json({"success": true})
 });
 
-// Works with database
 router.post('/auth/forgot-password', checkNotAuthenticated, async (req: any, res: any) => {
     try {
-        let user: User = await userService.getUserByEmail(req.body.email_address)
-        if (!user) return res.status(200).json({})
-        const resetToken = crypto.randomBytes(32).toString('hex');
-        const hashedResetToken = crypto.createHash('sha256').update(resetToken).digest('hex')
-        const userResetTokenExpiry = new Date(new Date().getTime() + 10 * 60000);
+        const user = await UserAuthentication.forgotPasswordRequest(req.body.email_address)
+        if (!user?.resetToken) return res.status(200).json({})
 
-        userService.updateResetToken(user.email_address, hashedResetToken, userResetTokenExpiry);
-        const resetPasswordLink = `${req.headers.origin}/reset-password/{user.reset_token}`
-        await sendResetEmail({first_name: user.first_name, reset_link: resetPasswordLink, email_to: user.email_address})
+        const resetPasswordLink = `${req.headers.origin}/reset-password/${user.resetToken}`
+        await sendResetEmail({first_name: user.firstName, reset_link: resetPasswordLink, email_to: user.emailAddress})
 
-        return res.status(200).json({ reset_token: resetToken, reset_token_expires: userResetTokenExpiry })
+        return res.status(200).json({success: true})
     }
     catch (err: any) {
         return res.status(400).json({ "error": err.message })
     }
 
 });
-// Works with database
+
 router.post('/auth/reset-password/:resetToken', checkNotAuthenticated, async (req: any, res: any) => {
     try {
-        const resetToken = req.params.resetToken
-        // Should check if we're saving and getting an encrypted resetToken from the database for comparison
-        const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex')
-        const user: User = await userService.getUserByResetToken(hashedToken)
-        const newPassword = req.body.password
-        const newPasswordConfirm = req.body.password_confirm
-        if (user) {
-            if (user.reset_expires && user.reset_expires < new Date()) {
-                res.status(401).json({ "error": "Token expired" })
-            }
-            await userService.updatePassword(user.id, user.email_address, newPassword, newPasswordConfirm)
-
-            return res.status(200).send({'success': true})
-        }
-
-        return res.status(400).json({ error: 'Invalid token' })
+        UserAuthentication.resetPassword(req.params.resetToken, req.body.password, req.body.password_confirm)
+        return res.status(200).send({success: true})
     }
     catch (e: any) {
         return res.status(400).send(e.message)
     }
 });
- 
 
 router.post('/auth/token', async (req, res) => {
     const refreshToken = req.cookies.refresh_token
-    if (refreshToken == null) return res.sendStatus(403)
-
-    const hashed_token = crypto.createHash('sha256').update(refreshToken).digest('hex')
-    const token = await userService.findRefreshToken(hashed_token).catch((err)=>res.status(403).json({error: err.message}))
-    if (!token) return res.sendStatus(403)
-    
-    res.clearCookie("access_token");
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-        if (err) return res.status(403).json({error: err.message})
-        const accessToken = generateAccessToken({ user_id: user.user_id })
-        res.cookie("access_token", accessToken, {
-            httpOnly: true,
-            Secure: true
-        })
-        return res.json({ access_token: accessToken })
+    const accessToken = await UserAuthentication.refreshAccessToken(refreshToken)
+    if (!accessToken) {
+        UserAuthentication.logout(refreshToken)
+        return res.sendStatus(403)
+    }
+    res.cookie("access_token", accessToken, {
+        httpOnly: true,
+        Secure: true
     })
+    return res.status(204).json({ success: true })
 })
 
-function generateAccessToken(user) {
-    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.NODE_ENV == 'development' ? '1440m' : '120m' })
+router.put('/auth/password', authenticateToken, async (req, res) => {
+    try {
+    const currentPassword = req.body.current_password
+    const newPassword = req.body.new_password
+    const newPasswordConfirm = req.body.new_password_confirm
+    if ((currentPassword === newPassword) || (currentPassword === newPasswordConfirm) ) return res.json({ success: true })
+    
+    const foundUser = await userService.getUserById(req.user_id)
+    const user = await UserAuthentication.login(foundUser.email_address, currentPassword)
+    await UserAuthentication.changePassword(user.id, newPassword, newPasswordConfirm)
+    return res.json({ success: true })
+    
 }
+    catch (e : any) {
+        return res.status(400).send({error: e.message})
+    }
+
+
+})
+
 module.exports = router
