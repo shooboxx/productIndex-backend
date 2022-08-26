@@ -22,7 +22,7 @@ module.exports = {
     ALTER TABLE business_store_hours ALTER COLUMN tuesday_open TYPE VARCHAR(100);
     ALTER TABLE business_store_hours ALTER COLUMN tuesday_closed TYPE VARCHAR(100);
     ALTER TABLE business_store_hours ALTER COLUMN wednesday_open TYPE VARCHAR(100);
-    ALTER TABLE business_store_hours ALTER COLUMN wednedsay_closed TYPE VARCHAR(100);
+    ALTER TABLE business_store_hours ALTER COLUMN wednesday_closed TYPE VARCHAR(100);
     ALTER TABLE business_store_hours ALTER COLUMN thursday_open TYPE VARCHAR(100);
     ALTER TABLE business_store_hours ALTER COLUMN thursday_closed TYPE VARCHAR(100);
     ALTER TABLE business_store_hours ALTER COLUMN friday_open TYPE VARCHAR(100);
