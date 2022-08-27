@@ -52,7 +52,7 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
         return res.status(200).json({ "success" : true })
     }
     catch (e: any) {
-        return res.status(200).json({ "error": e.message })
+        return res.status(e.statusCode || 400).json({ "error": e.message })
     }
 })
 

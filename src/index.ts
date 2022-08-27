@@ -42,10 +42,10 @@ if (process.env.NODE_ENV === 'development') {
 }
 const corsConfig = {
      "origin": process.env.ALLOWED_CORS_URLS,
-     "methods": "POST",
-     "preflightContinue": false,
+     "methods": ["POST", "GET", "PUT", "DELETE", "PATCH"],
+     "preflightContinue": true,
      "optionsSuccessStatus": 204,
-     "withCredentials": true
+     "credentials": true
    }
 app.use(cors(corsConfig))
 app.use(cookieParser());
