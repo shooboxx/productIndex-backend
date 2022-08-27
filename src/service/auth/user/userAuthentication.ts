@@ -40,19 +40,15 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
         await userService.storeRefreshToken(user.id, user.hashed_refresh_token).catch((e)=> {throw e})
         res.cookie("access_token", user.access_token, {
             httpOnly: true,
-            secure: true,
-            sameSite: 'None',
+            Secure: true,
+            SameSite: 'None',
         })
         res.cookie("refresh_token", user.refresh_token, {
             httpOnly: true,
-            secure: true,
-            sameSite: 'None',
+            Secure: true,
+            SameSite: 'None',
         })
-        res.cookie("isLoggedIn", true, {
-            httpOnly: false,
-            secure: false,
-            sameSite: 'None'
-        })
+        res.cookie("isLoggedIn", true)
         res.setHeader('Access-Control-Allow-Credentials', true);   
         
         return res.status(200).json({ "success" : true })
