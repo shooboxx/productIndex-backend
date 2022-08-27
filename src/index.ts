@@ -45,7 +45,7 @@ const corsConfig = {
      "methods": ["POST", "GET", "PUT", "DELETE", "PATCH"],
      "preflightContinue": true,
      "optionsSuccessStatus": 204,
-     "credentials": true
+     "withCredentials": true
    }
 app.use(cors(corsConfig))
 app.use(cookieParser());
