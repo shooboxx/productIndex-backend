@@ -61,7 +61,6 @@ router.delete('/auth/logout', async (req: any, res: any) => {
     await UserAuthentication.logout(req.cookies.refresh_token)
     res.clearCookie("access_token");
     res.clearCookie("refresh_token");
-    res.clearCookie("isLoggedIn")
     return res.status(204).json({"success": true})
 });
 
