@@ -46,7 +46,7 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
         res.cookie("refresh_token", user.refresh_token, {
             httpOnly: true,
             secure: true,
-            SameSite: 'None',
+            sameSite: 'None',
         })
         res.cookie("isLoggedIn", true)
         res.setHeader('Access-Control-Allow-Credentials', true);   
