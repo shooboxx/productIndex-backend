@@ -42,8 +42,8 @@ if (process.env.NODE_ENV === 'development') {
 }
 const corsConfig = {
      "origin": process.env.ALLOWED_CORS_URLS,
-     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-     "preflightContinue": true,
+     "methods": "POST",
+     "preflightContinue": false,
      "optionsSuccessStatus": 204,
      "withCredentials": true
    }
