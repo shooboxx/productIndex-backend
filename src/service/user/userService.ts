@@ -7,43 +7,29 @@ import { UserErrors } from "./userConst";
 const getUserByEmail = async (emailAddress: string) => {
   if (!emailAddress) throw new AppError(UserErrors.EmailAddressRequired, 400);
   return await userRepo.findUser(null, emailAddress.toLowerCase())
-    .then(user => user)
     .catch(err => {throw new AppError(err, 400)});
 };
 
 // Returns user without password (for internal use)
 const getUserById = async (userId: number) => {
   if (!userId)  throw AppError(UserErrors.UserIdRequired, 400);
-  const user = (await userRepo.findUser(userId, null));
-
-  if (!user) {
-    throw new AppError(UserErrors.UserNotFound, 404);
-  }
-  return user;
+  return await userRepo.findUser(userId, null)
+    .catch(err => {throw new AppError(err.message, err.statusCode || 400) })
 };
+
 // Returns user
 const getUserByVerificationToken = async (token: string) => {
   if (!token) throw new AppError(UserErrors.VerificationTokenRequired, 400);
   const foundUser = await userRepo.findUserByVerificationToken(token)
-    .then((user) => {
-      if (!user) {
-        throw new AppError(UserErrors.InvalidVerificationToken, 400);
-      }
-      if (user.is_verified) {
-        throw new AppError(UserErrors.UserVerified, 304)
-      }
-      return user;
-    })
-    .catch((err) => {
-      throw new AppError(err, 400);
-    });
-  return foundUser;
+    .catch(err => {throw new AppError(err.message, err.statusCode || 400);})
+  if (!foundUser) throw new AppError(UserErrors.InvalidVerificationToken, 400);
+  if (foundUser.is_verified) throw new AppError(UserErrors.UserVerified, 304)
+  return foundUser
 };
 
 const getUserByResetToken = (resetToken: string): User => {
   if (!resetToken) throw new AppError(UserErrors.ResetTokenRequired, 400);
   const user = userRepo.findUserByResetToken(resetToken);
-
   if (!user) throw new AppError(UserErrors.UserNotFound, 404);
   return user;
 };
@@ -51,85 +37,53 @@ const getUserByResetToken = (resetToken: string): User => {
 const createUser = async (user: User) => {
   try {
     _validate_user_profile_completeness(user)
-    const found = await getUserByEmail(user.email_address);
-    if (!found) {
-      let createdUser = await userRepo.addUser(user);
-      createdUser['password'] = undefined
-      createdUser['deleted_date'] = undefined
-      return createdUser
-    }
-    throw new AppError(UserErrors.UserExist, 400);
+    const foundUser = await getUserByEmail(user.email_address);
+    if (foundUser) throw new AppError(UserErrors.UserExist, 400);
+  
+    let createdUser = await userRepo.addUser(user);
+    createdUser['password'] = undefined
+    createdUser['deleted_date'] = undefined
+    return createdUser
+  
   } catch (e: any) {
     throw e;
   }
 };
+
 const updateUserProfile = async (user: User) => {
-  try {
-    await getUserById(user.id); 
-    return await userRepo.updateUser(user);
-  }
-  catch (err) {
-   throw err;
-  }
-  
+    return await userRepo.updateUser(user).catch(err => {throw err});
 };
 
-const updateResetToken = async (emailAddress, resetToken, resetTokenExpiry) => {
-  try {
-    const user = await getUserByEmail(emailAddress);
-    if (!user) throw AppError(UserErrors.UserNotFound, 404)
-    user.reset_token = resetToken;
-    user.reset_expires = resetTokenExpiry;
-
-    return userRepo.updateUser(user);
-  } catch (err) {
-    throw err;
-  }
+const updateResetToken = async (userId : number, resetToken : string, resetTokenExpiry : Date | null) => {
+  return await userRepo.updateUserResetToken(userId, resetToken, resetTokenExpiry).catch(err => {throw err})
 };
 
-const updatePassword = async (
-  userId,
-  emailAddress,
-  newPassword,
-  newPasswordConfirm
-) => {
-  const user = await getUserByEmail(emailAddress);
-  if (!user) throw AppError(UserErrors.UserNotFound, 404);
-  if (userId !== user.id) throw AppError(UserErrors.UserNotAllowed, 403);
-  if (newPassword !== newPasswordConfirm) {
-    throw AppError(UserErrors.PasswordsMismatch, 400);
-  }
-  user.password = await bcrypt.hash(newPassword, 10);
-  user.reset_token = null;
-  user.reset_expires = null;
-  user.password_last_updated = new Date();
-  const found = userRepo.updateUser(user);
-  if (found) userRepo.clearRefreshTokens(userId);
-  return found;
+const updatePassword = async (userId : number, newPassword : string ,newPasswordConfirm : string) => {
+  if (newPassword !== newPasswordConfirm) throw AppError(UserErrors.PasswordsMismatch, 400);
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  const updatedUser = userRepo.updateUserPassword(userId, hashedPassword).catch(err => { throw err  })
+  if (updatedUser) userRepo.clearRefreshTokens(userId).catch(err => { throw err });
+  return true;
 };
 
 const verifyUser = async (token: string) => {
-  try {
     if (!token) throw new Error(UserErrors.VerificationTokenRequired);
     const user: User = await getUserByVerificationToken(token);
 
     user.is_verified = true;
     user.verify_token = '';
-    return userRepo.updateUser(user);
-  } catch (e) {
-    throw e;
-  }
+    userRepo.updateUser(user).catch(err => {throw err});
+    return true
+
 };
 
 const deleteUser = async (userId: number) => {
-  try {
-    const user = await getUserById(userId);
+    const user : User = await getUserById(userId);
 
     user.deleted_date = new Date();
-    return await userRepo.updateUser(user);
-  } catch (e) {
-    throw e;
-  }
+    await userRepo.updateUser(user).catch( err => {throw err});
+    return true
 };
 
 const storeRefreshToken = async (userId: number, refreshToken: string) => {
@@ -145,6 +99,7 @@ const findRefreshToken = async (refreshToken: string) => {
 const deleteRefreshToken = async(token) => {
   return await userRepo.deleteRefreshToken(token)
 }
+
 const _validate_user_profile_completeness = (user) => {
   if (!user.email_address) throw new AppError(UserErrors.EmailAddressRequired, 400);
   if (!user.password) throw new AppError(UserErrors.PasswordRequired, 400);

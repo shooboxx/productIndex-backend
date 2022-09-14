@@ -17,6 +17,9 @@ const addUser = async (user: User) => {
     state: user.state,
     date_of_birth: user.dob,
     primary_phone_contact: user.primary_phone,
+    active: true,
+    is_verified: user.is_verified,
+    verify_expires: user.verify_expires
   }).catch(() => null)
   return dataValues;
 };
@@ -105,6 +108,27 @@ const deleteRefreshToken = async (token) => {
   }).catch((e)=> {throw e});
 };
 
+const updateUserPassword = async (userId : number, hashedPassword : string) => {
+  await db.Users.update({
+    password: hashedPassword
+  },
+  {  
+    where: {
+    id: userId
+    }
+  })
+}
+const updateUserResetToken = async (userId : number, resetToken : string, resetTokenExpiry : Date | null) => {
+  await db.Users.update({
+    reset_token: resetToken,
+    reset_expires: resetTokenExpiry
+  }, {
+    where: {
+      id: userId
+    }
+  })
+}
+
 
 
 //TODO: Update user password
@@ -120,5 +144,7 @@ module.exports = {
   storeRefreshToken,
   findRefreshToken,
   clearRefreshTokens,
-  deleteRefreshToken
+  deleteRefreshToken,
+  updateUserPassword,
+  updateUserResetToken
 };

@@ -4,7 +4,7 @@ import AppError from '../../utils/appError.js'
 
 const getBusinessById = async (businessId: number) => {
   try {
-    if (!businessId) throw Error(BusinessErrors.BusinessIdRequired);
+    if (!businessId) throw AppError(BusinessErrors.BusinessIdRequired, 400);
     
     const business = await BusinessRepo.findBusinessById(businessId);
     if (!business) {
