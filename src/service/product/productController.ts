@@ -12,7 +12,7 @@ router.get("/business/:businessId/products", async (req, res,) => {
       
     }
     catch (e: any) {
-        res.status(e.statusCode || 400).json({ "error": e.message })
+        res.status(e.statusCode).json({ "error": e.message })
     }
 });
 

@@ -14,5 +14,6 @@ export const UserErrors = {
    FirstNameRequired: 'first_name is required',
    LastNameRequired: 'last_name is required',
    GenderRequired: 'gender is required',
-   DOBRequired: 'dob is required'
+   DOBRequired: 'dob is required',
+   AgeMinimumRequirement: "You must be at least 15 years old."
 }

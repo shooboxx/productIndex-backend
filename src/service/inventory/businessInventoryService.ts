@@ -11,7 +11,7 @@ const getAllStoreItems = async (storeId : number) : Promise<InventoryItem[]> => 
         return await InventoryRepo.findStoreInventoryItems(storeId)
     }
     catch (e : any) {
-        throw new AppError(e.message, e.statusCode || 400)
+        throw new AppError(e.message, e.statusCode)
     }
 
 };
@@ -22,7 +22,7 @@ const getInventoryItemById = async (itemId : number) : Promise<InventoryItem> =>
         return await InventoryRepo.findInventoryItem(itemId)
     }
     catch (e : any) {
-        throw new AppError(e.message, e.statusCode || 400)
+        throw new AppError(e.message, e.statusCode)
     }
 
 };

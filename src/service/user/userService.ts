@@ -3,6 +3,7 @@ import AppError from "../../utils/appError.js";
 const bcrypt = require("bcrypt");
 const userRepo = require("./userRepo");
 import { UserErrors } from "./userConst";
+import getCurrentAge from "../../utils/getCurrentAge"
 
 const getUserByEmail = async (emailAddress: string) => {
   if (!emailAddress) throw new AppError(UserErrors.EmailAddressRequired, 400);
@@ -14,14 +15,14 @@ const getUserByEmail = async (emailAddress: string) => {
 const getUserById = async (userId: number) => {
   if (!userId)  throw AppError(UserErrors.UserIdRequired, 400);
   return await userRepo.findUser(userId, null)
-    .catch(err => {throw new AppError(err.message, err.statusCode || 400) })
+    .catch(err => {throw new AppError(err.message, err.statusCode) })
 };
 
 // Returns user
 const getUserByVerificationToken = async (token: string) => {
   if (!token) throw new AppError(UserErrors.VerificationTokenRequired, 400);
   const foundUser = await userRepo.findUserByVerificationToken(token)
-    .catch(err => {throw new AppError(err.message, err.statusCode || 400);})
+    .catch(err => {throw new AppError(err.message, err.statusCode);})
   if (!foundUser) throw new AppError(UserErrors.InvalidVerificationToken, 400);
   if (foundUser.is_verified) throw new AppError(UserErrors.UserVerified, 304)
   return foundUser
@@ -107,6 +108,7 @@ const _validate_user_profile_completeness = (user) => {
   if (!user.last_name) throw new AppError(UserErrors.LastNameRequired, 400)
   if (!user.gender) throw new AppError(UserErrors.GenderRequired, 400)
   if (!user.dob) throw new AppError(UserErrors.DOBRequired, 400)
+  if (getCurrentAge(user.dob) < 15) throw new AppError(UserErrors.AgeMinimumRequirement, 400) //TODO: Test this new feature
 
   return true
 }
