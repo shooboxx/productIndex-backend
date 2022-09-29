@@ -11,9 +11,9 @@ const getBusinessProducts = async (businessId : number) : Promise<Product[]> => 
     }
 }
 
-const getProducts = async (productId : number, productKey : string) : Promise<Product> => {
+const getProducts = async (productId : number) : Promise<Product> => {
     try {
-        return await ProductRepo.findProducts(productId, productKey)
+        return await ProductRepo.findProducts(productId)
     }
     catch (e: any) {
         throw AppError(e.message, e.statusCode)
