@@ -19,7 +19,7 @@ const findProducts = async (productId, productKey) : Promise<Product> => {
     return await db.Product.findAll({
         where: {
             //TODO: Add a like in here for product_key
-                [Op.or]: [{id: productId}, { product_key: productKey}]
+                [Op.or]: [{id: productId}, { sku: productKey}]
         }, 
         attributes: {
             exclude: ['deleted_date', 'insert_date', 'update_date']
