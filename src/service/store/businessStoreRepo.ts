@@ -1,4 +1,5 @@
 import { BusinessStore } from "./storeTypes";
+
 const { Op } = require("sequelize");
 
 import db from "../../models";
@@ -16,6 +17,16 @@ const findStore = async (storeId : number, storeName : string ) : Promise<Busine
   }).catch(e => {throw new Error(e.message)})
 } 
 
+const reportStore = async (userId : number, storeId : number, reason : string) => {
+  const {dataValues} = await db.ReportedStore.create({
+    store_id: storeId,
+    reported_by: userId,
+    reported_reason: reason
+  })
+  return dataValues
+}
+
 export const StoreRepo = {
-  findStore
+  findStore,
+  reportStore
 }
