@@ -10,8 +10,11 @@ router.get('/users', async (req, res) => {
     try {
         if (id) user = await userService.getUserById(id)
         if (email) user = await userService.getUserByEmail(email)
-        user['password'] = undefined
-        user['deleted_date'] = undefined
+        if (user) {
+            user['password'] = undefined
+            user['deleted_date'] = undefined
+        }
+
         return res.status(200).json(user)
     }
     catch (e : any) {

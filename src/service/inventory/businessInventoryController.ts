@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/store/:storeId/inventory', async (req, res) => {
     try {
         const storeId = req.params.storeId 
-        const inventory_items = await InventoryService.getAllStoreItems(storeId)
+        const inventory_items = await InventoryService.getAllStoreItems(storeId, req.query.page, req.query.pageSize)
         return res.status(200).json(inventory_items)
     }
     catch (e : any) {

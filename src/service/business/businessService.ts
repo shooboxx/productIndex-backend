@@ -13,7 +13,7 @@ const getBusinessById = async (businessId: number) => {
     return business;
   } 
   catch (e : any) {
-    throw new AppError(e.message, e.statusCode || 400)
+    throw new AppError(e.message, e.statusCode)
   }
 };
 

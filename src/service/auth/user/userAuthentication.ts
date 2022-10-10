@@ -40,19 +40,20 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
         await userService.storeRefreshToken(user.id, user.hashed_refresh_token).catch((e)=> {throw e})
         res.cookie("access_token", user.access_token, {
             httpOnly: true,
-            Secure: true
+            secure: true, //TODO: Check why secure cookies doesn't work in Postman
+            sameSite: 'None',
         })
         res.cookie("refresh_token", user.refresh_token, {
             httpOnly: true,
-            Secure: true
+            secure: true, //TODO: Check why secure cookies doesn't work in Postman
+            sameSite: 'None',
         })
-        res.cookie("isLoggedIn", true)
         res.setHeader('Access-Control-Allow-Credentials', true);   
         
         return res.status(200).json({ "success" : true })
     }
     catch (e: any) {
-        return res.status(200).json({ "error": e.message })
+        return res.status(e.statusCode).json({ "error": e.message })
     }
 })
 
@@ -60,7 +61,6 @@ router.delete('/auth/logout', async (req: any, res: any) => {
     await UserAuthentication.logout(req.cookies.refresh_token)
     res.clearCookie("access_token");
     res.clearCookie("refresh_token");
-    res.clearCookie("isLoggedIn")
     return res.status(204).json({"success": true})
 });
 
@@ -99,7 +99,7 @@ router.post('/auth/token', async (req, res) => {
     }
     res.cookie("access_token", accessToken, {
         httpOnly: true,
-        Secure: true
+        secure: true
     })
     return res.status(204).json({ success: true })
 })

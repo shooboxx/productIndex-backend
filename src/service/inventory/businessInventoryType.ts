@@ -6,7 +6,8 @@ export interface InventoryItem {
    product_id: number,
    price?: number,
    quantity: number,
-   currently_available: boolean,
+   public: boolean,
+   discounted_price: number;
    show_price?: boolean,
    Product: Product
 }

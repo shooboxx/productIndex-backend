@@ -12,7 +12,7 @@ const getReviewsByStoreId = async (storeId: number) => {
         return await ReviewRepo.findReviewsByStoreId(storeId)
     }
     catch (e : any) {
-        throw new AppError(e.message, e.statusCode || 400)
+        throw new AppError(e.message, e.statusCode)
     }
 
 }
@@ -22,7 +22,7 @@ const getUserStoreReview = async (userId: number, store_id: number) => {
         return await ReviewRepo.findUserStoreReview(userId, store_id)
     }
     catch (e : any) {
-        throw new AppError(e.message, e.statusCode || 400)
+        throw new AppError(e.message, e.statusCode)
     }
 }
 const createReview = async (newReview: Review) => {
@@ -38,7 +38,7 @@ const createReview = async (newReview: Review) => {
         return createdReview
     }
     catch (e : any) {
-        throw new AppError(e.message, e.statusCode || 400)
+        throw new AppError(e.message, e.statusCode)
     }
 }
 const updateReview = async (updatedReview: Review) => {
@@ -47,7 +47,7 @@ const updateReview = async (updatedReview: Review) => {
         return await ReviewRepo.updateReview(updatedReview)
     }
     catch (e : any) {
-        throw new AppError(e.message, e.statusCode || 400)
+        throw new AppError(e.message, e.statusCode)
     }
 }
 
@@ -61,7 +61,7 @@ const markReviewAsInappropriate = async (reportedReview : ReportedReview) => {
         return await ReviewRepo.markReviewAsInappropriate(reportedReview)
     }
     catch (e : any) {
-        throw new AppError(e.message, e.statusCode || 400)
+        throw new AppError(e.message, e.statusCode)
     }
 
 }
@@ -71,7 +71,7 @@ const deleteReview = async (userId: number, storeId: number) => {
         return await ReviewRepo.deleteReview(storeId, userId)
     }
     catch (e : any) {
-        throw new AppError(e.message, e.statusCode || 400)
+        throw new AppError(e.message, e.statusCode)
     }
 }
 

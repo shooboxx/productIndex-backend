@@ -2,21 +2,21 @@ import { Product } from './productType'
 import AppError from '../../utils/appError.js'
 import { ProductRepo } from './productRepo'
 
-const getBusinessProducts = async (businessId : number) : Promise<Product[]> => {
+const getBusinessProducts = async (businessId : number, page : number, pageSize : number) : Promise<Product[]> => {
     try {
-        return await ProductRepo.findBusinessProducts(businessId)
+        return await ProductRepo.findBusinessProducts(businessId, page, pageSize)
     }
     catch (e : any) {
-        throw AppError(e.message, e.statusCode || 400)
+        throw AppError(e.message, e.statusCode)
     }
 }
 
-const getProducts = async (productId : number, productKey : string) : Promise<Product> => {
+const getProducts = async (productId : number) : Promise<Product> => {
     try {
-        return await ProductRepo.findProducts(productId, productKey)
+        return await ProductRepo.findProducts(productId)
     }
     catch (e: any) {
-        throw AppError(e.message, e.statusCode || 400)
+        throw AppError(e.message, e.statusCode)
     }
 } 
 

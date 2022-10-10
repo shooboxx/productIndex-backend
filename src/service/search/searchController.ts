@@ -15,8 +15,10 @@ router.get("/search", async (req: any, res: any) => {
         .status(200)
         .json(await searchService.productFuzzySearch(search, type, location));
       }
-    } catch (e) {
-      throw e;
+    } catch (e : any) {
+      return res
+      .status(400)
+      .json({error: e.message});
     }
   });
 
