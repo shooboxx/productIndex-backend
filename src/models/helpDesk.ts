@@ -1,19 +1,16 @@
 "use strict";
 
-import { TicketStatus } from "service/help-desk/ticketStatus";
-
 const { Model } = require("sequelize");
 
 export interface HelpDeskAttributes {
     id: number;
     user_id: number;
-    business_id: number;
-    product_id: number;
+    subject: string;
     message: string;
     status: string;
+    priority_level: string,
     insert_date: Date;
     update_date?: Date;
-    deleted_date?: Date;
 }
 
 module.exports = (sequelize, DataTypes) => {
@@ -23,20 +20,18 @@ module.exports = (sequelize, DataTypes) => {
     {
         id!: number;
         user_id!: number;
-        business_id!: number;
-        product_id!: number;
         message!: string;
+        subject!: string;
         status!: string;
+        priority_level!: string;
         insert_date!: Date;
         update_date?: Date;
-        deleted_date?: Date;
 
         static associate(models) {
             HelpDesk.hasMany(models.Users, { foreignKey: "user_id" });
-            HelpDesk.hasMany(models.Business, { foreignKey: "business_id" });
-            HelpDesk.hasMany(models.Product, { foreignKey: "product_id" });
         }
     }
+
     HelpDesk.init(
         {
             id: {
@@ -53,28 +48,20 @@ module.exports = (sequelize, DataTypes) => {
                     key: "id",
                 },
             },
-            business_id: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                references: {
-                    model: "business",
-                    key: "id",
-                },
-            },
-            product_id: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                references: {
-                    model: "product",
-                    key: "id",
-                },
+            subject: {
+                type: DataTypes.STRING(100),
+                allowNull: false
             },
             message: {
-                type: DataTypes.STRING,
-                allowNull: false,
+                type: DataTypes.STRING(255),
+                allowNull: false
             },
             status: {
-                type: DataTypes.ENUM(TicketStatus.Open, TicketStatus.Closed),
+                type: DataTypes.STRING(50),
+                allowNull: false
+            },
+            priority_level: {
+                type: DataTypes.STRING(50),
                 allowNull: false,
             },
             insert_date: {
@@ -82,10 +69,6 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
             },
             update_date: {
-                type: DataTypes.DATE,
-                allowNull: true,
-            },
-            deleted_date: {
                 type: DataTypes.DATE,
                 allowNull: true,
             },
