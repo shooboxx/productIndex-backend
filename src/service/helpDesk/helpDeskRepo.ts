@@ -17,6 +17,12 @@ const getTicketById = async (ticketId: number) => {
         where: {
             id: ticketId,
         },
+        include: [
+            {
+                model: db.Users, attributes: ['first_name', 'last_name', 'email'],
+                required: true
+            }
+        ]
     })
 }
 
