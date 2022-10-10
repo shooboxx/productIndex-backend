@@ -1,13 +1,14 @@
-import AppError from '../../utils/appError.js'
-import { HelpDeskRepo } from './helpDeskRepo.js'
-import { HelpDeskErrors } from './helpDeskErrors.js'
+import AppError from '../../utils/appError'
+import { HelpDeskRepo } from './helpDeskRepo'
+import { HelpDeskErrors } from './helpDeskErrors'
+import { ICreateHelpDeskTicket } from './helpDeskType'
 
-const createTicket = async (userId: number, businessId: number, productId: number, message: string) => {
-    userIdIsPresent(userId)
-    businessIdIsPresent(businessId)
-    productIdIsPresent(productId)
-    messageIsPresent(message)
-    return await HelpDeskRepo.createTicket(userId, businessId, productId, message)
+const createTicket = async (ticket: ICreateHelpDeskTicket) => {
+    userIdIsPresent(ticket.userId)
+    subjectIsPresent(ticket.subject)
+    messageIsPresent(ticket.message)
+    priorityLevelIsPresent(ticket.priorityLevel)
+    return await HelpDeskRepo.createTicket(ticket)
 }
 
 const getTicketById = async (ticketId: number) => {
@@ -21,12 +22,12 @@ const userIdIsPresent = (userId: number) => {
     if (!userId) throw new AppError(HelpDeskErrors.UserIdRequired)
 }
 
-const businessIdIsPresent = (businessId: number) => {
-    if (!businessId) throw new AppError(HelpDeskErrors.BusinessIdRequired)
+const subjectIsPresent = (subject: string) => {
+    if (!subject) throw new AppError(HelpDeskErrors.SubjectRequired)
 }
 
-const productIdIsPresent = (productId: number) => {
-    if (!productId) throw new AppError(HelpDeskErrors.ProductIdRequired)
+const priorityLevelIsPresent = (priority: string) => {
+    if (!priority) throw new AppError(HelpDeskErrors.PriorityLevelRequired)
 }
 
 const messageIsPresent = (message: string) => {
