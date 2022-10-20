@@ -41,12 +41,12 @@ router.post('/auth/login', checkNotAuthenticated, async (req, res) => {
         res.cookie("access_token", user.access_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV == 'production' ? true : false,
-            sameSite: 'None',
+            sameSite: process.env.NODE_ENV == 'production' && 'None',
         })
         res.cookie("refresh_token", user.refresh_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV == 'production' ? true : false,
-            sameSite: 'None',
+            sameSite: process.env.NODE_ENV == 'production' && 'None',
         })
         res.setHeader('Access-Control-Allow-Credentials', true);   
         
@@ -99,7 +99,8 @@ router.post('/auth/token', async (req, res) => {
     }
     res.cookie("access_token", accessToken, {
         httpOnly: true,
-        secure: true
+        secure: process.env.NODE_ENV == 'production' ? true : false,
+        sameSite: process.env.NODE_ENV == 'production' && 'None',
     })
     return res.status(204).json({ success: true })
 })
