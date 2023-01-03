@@ -11,8 +11,6 @@ const cors = require('cors')
 const cookieParser = require('cookie-parser')
 // Initialize the app
 const app = express();
-const bodyParser = require('body-parser')
-const passport = require('passport')
 const methodOverride = require('method-override')
 const hpp = require('hpp')
 const xss = require('xss')
