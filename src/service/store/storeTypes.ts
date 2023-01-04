@@ -12,7 +12,6 @@ export interface BusinessStore {
     phone_3?: string,
     address_line_1: string,
     address_line_2?: string,
-    country: string,
     city: string,
     postal_code: string,
     is_primary?: Boolean,

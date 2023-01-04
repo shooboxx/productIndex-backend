@@ -9,7 +9,6 @@ export interface BusinessStoreAttributes {
   address_line_2?: string;
   latitude?: number;
   longitude?: number;
-  country?: string;
   city?: string;
   state?: string;
   postal_code?: string;
@@ -35,7 +34,6 @@ module.exports = (sequelize, DataTypes) => {
     address_line_2?: string;
     latitude?: number;
     longitude?: number;
-    country?: string;
     city!: string;
     state!: string;
     postal_code?: string;
@@ -92,10 +90,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       longitude: {
         type: DataTypes.REAL,
-        allowNull: true,
-      },
-      country: {
-        type: DataTypes.STRING(255),
         allowNull: true,
       },
       city: {

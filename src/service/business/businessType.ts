@@ -5,6 +5,7 @@ export interface Business {
     profile_pic_url?: string,
     active?: boolean,
     category: string,
+    registered_country: string;
     deleted_date?: Date,
     insert_date?: Date,
     update_date?: Date,
