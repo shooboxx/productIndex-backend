@@ -10,7 +10,7 @@ router.get("/stores", async (req, res) => {
       const {storeId, storeName} = req.query
       if (storeId) return res.status(200).json(await StoreService.getStore(storeId, ''))
       if (storeName) return res.status(200).json(await StoreService.getStore(0, storeName))
-      return res.status(400).json({})
+      return res.status(400).json(null)
   } catch (e : any) {
       res.status(e.statusCode).json({error: e.message})
   }
